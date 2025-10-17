@@ -22,15 +22,15 @@ interface Booking {
   apartment: {
     apartment_number: string;
     address: string;
-  };
+  } | null;
   guest: {
     name: string;
     email: string;
     phone: string;
-  };
+  } | null;
   channel: {
     name: string;
-  };
+  } | null;
 }
 
 export default function BookingManagement() {
@@ -78,9 +78,9 @@ export default function BookingManagement() {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(b => 
         b.booking_reference.toLowerCase().includes(query) ||
-        b.guest.name.toLowerCase().includes(query) ||
-        b.apartment.apartment_number.toLowerCase().includes(query) ||
-        b.channel.name.toLowerCase().includes(query)
+        (b.guest?.name || '').toLowerCase().includes(query) ||
+        (b.apartment?.apartment_number || '').toLowerCase().includes(query) ||
+        (b.channel?.name || '').toLowerCase().includes(query)
       );
     }
 
@@ -175,7 +175,7 @@ export default function BookingManagement() {
 
   const handleDelete = async (booking: Booking) => {
     // Only allow deletion for Direct bookings
-    if (booking.channel.name !== 'Direct') {
+    if (booking.channel?.name !== 'Direct') {
       setMessage({ 
         type: 'error', 
         text: 'Only Direct bookings can be deleted. Other bookings should be cancelled instead.' 
@@ -362,14 +362,14 @@ export default function BookingManagement() {
                     <div className="flex items-center space-x-2">
                       <Home className="w-4 h-4 text-blue-400" />
                       <span className="text-sm text-white">
-                        {booking.apartment.apartment_number}
+                        {booking.apartment?.apartment_number || 'N/A'}
                       </span>
                     </div>
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
                     <div className="flex items-center space-x-2">
                       <User className="w-4 h-4 text-purple-400" />
-                      <span className="text-sm text-white">{booking.guest.name}</span>
+                      <span className="text-sm text-white">{booking.guest?.name || 'N/A'}</span>
                     </div>
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
@@ -395,7 +395,7 @@ export default function BookingManagement() {
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
                     <span className="text-sm text-gray-300">
-                      {booking.channel.name}
+                      {booking.channel?.name || 'N/A'}
                     </span>
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
@@ -427,7 +427,7 @@ export default function BookingManagement() {
                       >
                         <Edit2 className="w-5 h-5" />
                       </button>
-                      {booking.channel.name === 'Direct' && (
+                      {booking.channel?.name === 'Direct' && (
                         <button
                           onClick={() => handleDelete(booking)}
                           className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
@@ -485,15 +485,15 @@ export default function BookingManagement() {
                 <div className="grid md:grid-cols-2 gap-3 text-sm">
                   <div>
                     <span className="text-gray-400">Name:</span>
-                    <p className="text-white font-medium">{selectedBooking.guest.name}</p>
+                    <p className="text-white font-medium">{selectedBooking.guest?.name || 'N/A'}</p>
                   </div>
                   <div>
                     <span className="text-gray-400">Email:</span>
-                    <p className="text-white">{selectedBooking.guest.email || 'N/A'}</p>
+                    <p className="text-white">{selectedBooking.guest?.email || 'N/A'}</p>
                   </div>
                   <div>
                     <span className="text-gray-400">Phone:</span>
-                    <p className="text-white">{selectedBooking.guest.phone || 'N/A'}</p>
+                    <p className="text-white">{selectedBooking.guest?.phone || 'N/A'}</p>
                   </div>
                 </div>
               </div>
@@ -507,11 +507,11 @@ export default function BookingManagement() {
                 <div className="space-y-2 text-sm">
                   <div>
                     <span className="text-gray-400">Property:</span>
-                    <p className="text-white font-medium">{selectedBooking.apartment.apartment_number}</p>
+                    <p className="text-white font-medium">{selectedBooking.apartment?.apartment_number || 'N/A'}</p>
                   </div>
                   <div>
                     <span className="text-gray-400">Address:</span>
-                    <p className="text-white">{selectedBooking.apartment.address || 'N/A'}</p>
+                    <p className="text-white">{selectedBooking.apartment?.address || 'N/A'}</p>
                   </div>
                 </div>
               </div>
@@ -537,7 +537,7 @@ export default function BookingManagement() {
                   </div>
                   <div>
                     <span className="text-gray-400">Channel:</span>
-                    <p className="text-white font-medium">{selectedBooking.channel.name}</p>
+                    <p className="text-white font-medium">{selectedBooking.channel?.name || 'N/A'}</p>
                   </div>
                   <div>
                     <span className="text-gray-400">Booking Date:</span>
