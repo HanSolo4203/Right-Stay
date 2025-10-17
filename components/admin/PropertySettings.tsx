@@ -36,13 +36,28 @@ export default function PropertySettings() {
 
   const fetchProperties = async () => {
     try {
+      console.log('Fetching properties from API...');
       const response = await fetch('/api/admin/properties');
+      console.log('Response status:', response.status);
+      
       if (response.ok) {
         const data = await response.json();
+        console.log('Properties data:', data);
         setProperties(data);
+      } else {
+        const errorData = await response.json();
+        console.error('API Error:', errorData);
+        setMessage({ 
+          type: 'error', 
+          text: `Failed to fetch properties: ${errorData.error || 'Unknown error'}` 
+        });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching properties:', error);
+      setMessage({ 
+        type: 'error', 
+        text: `Network error: ${error.message}` 
+      });
     } finally {
       setLoading(false);
     }

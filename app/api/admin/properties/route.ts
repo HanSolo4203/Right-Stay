@@ -7,18 +7,31 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function GET() {
   try {
+    console.log('Fetching properties from database...');
+    console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'MISSING');
+    console.log('Service Key:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SET' : 'MISSING');
+
     const { data, error } = await supabase
       .from('apartments')
       .select('*')
       .order('apartment_number', { ascending: true });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase error:', error);
+      throw error;
+    }
 
+    console.log('Properties fetched successfully:', data?.length || 0, 'properties');
     return NextResponse.json(data || []);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching properties:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch properties' },
+      { 
+        error: 'Failed to fetch properties',
+        details: error.message,
+        supabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+        serviceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY
+      },
       { status: 500 }
     );
   }
