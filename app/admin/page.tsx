@@ -1,7 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { Settings, Building2, Map, Menu, X, Calendar, Link } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Settings, Building2, Map, Menu, X, Calendar, Link, LogOut, Loader2 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
 import SiteSettings from '@/components/admin/SiteSettings';
 import PropertySettings from '@/components/admin/PropertySettings';
 import TourPackageSettings from '@/components/admin/TourPackageSettings';
@@ -11,8 +13,51 @@ import PropertyMapping from '@/components/admin/PropertyMapping';
 type TabType = 'site' | 'properties' | 'tours' | 'bookings' | 'mapping';
 
 export default function AdminDashboard() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>('site');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  // Check authentication
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        router.push('/admin/login');
+      } else {
+        setUserEmail(session.user.email || null);
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        router.push('/admin/login');
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [router]);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.push('/admin/login');
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+      </div>
+    );
+  }
 
   const tabs = [
     { id: 'site' as TabType, name: 'Site Settings', icon: Settings },
@@ -36,6 +81,21 @@ export default function AdminDashboard() {
                 <h1 className="text-xl font-bold text-white">Admin Dashboard</h1>
                 <p className="text-xs text-gray-400">Right Stay Africa</p>
               </div>
+            </div>
+
+            {/* User info and sign out - Desktop */}
+            <div className="hidden lg:flex items-center space-x-4">
+              <div className="text-right">
+                <p className="text-sm text-white">{userEmail}</p>
+                <p className="text-xs text-gray-400">Administrator</p>
+              </div>
+              <button
+                onClick={handleSignOut}
+                className="flex items-center space-x-2 px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white rounded-lg transition-all"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Sign Out</span>
+              </button>
             </div>
             
             {/* Mobile menu button */}
@@ -91,6 +151,21 @@ export default function AdminDashboard() {
                   </button>
                 );
               })}
+              
+              {/* Mobile user info and sign out */}
+              <div className="pt-4 border-t border-white/10">
+                <div className="px-4 py-2 mb-2">
+                  <p className="text-sm text-white">{userEmail}</p>
+                  <p className="text-xs text-gray-400">Administrator</p>
+                </div>
+                <button
+                  onClick={handleSignOut}
+                  className="flex items-center space-x-2 w-full px-4 py-3 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white rounded-lg transition-all"
+                >
+                  <LogOut className="w-5 h-5" />
+                  <span>Sign Out</span>
+                </button>
+              </div>
             </nav>
           )}
         </div>
