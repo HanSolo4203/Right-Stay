@@ -53,6 +53,33 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const { booking_status, payment_status, payment_date, payment_method, payment_notes } = body;
 
+    // Normalize payment_date to ISO (handles formats like DD/MM/YYYY or YYYY-MM-DD)
+    const normalizeDateToISO = (input: string | null | undefined): string | null => {
+      if (!input) return null;
+      const trimmed = String(input).trim();
+      if (!trimmed) return null;
+
+      // If it's already ISO-like (YYYY-MM-DD or full ISO), attempt Date parse
+      if (/^\d{4}-\d{2}-\d{2}/.test(trimmed)) {
+        const d = new Date(trimmed);
+        if (!isNaN(d.getTime())) return d.toISOString();
+      }
+
+      // Handle DD/MM/YYYY
+      const ddmmyyyy = trimmed.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      if (ddmmyyyy) {
+        const day = parseInt(ddmmyyyy[1], 10);
+        const month = parseInt(ddmmyyyy[2], 10) - 1; // JS months 0-based
+        const year = parseInt(ddmmyyyy[3], 10);
+        const d = new Date(Date.UTC(year, month, day, 0, 0, 0));
+        if (!isNaN(d.getTime())) return d.toISOString();
+      }
+
+      // Fallback: attempt Date parse
+      const d = new Date(trimmed);
+      return isNaN(d.getTime()) ? null : d.toISOString();
+    };
+
     // Only allow status update to confirmed if payment is received
     if (booking_status === 'confirmed' && payment_status !== 'paid') {
       return NextResponse.json(
@@ -65,7 +92,11 @@ export async function PUT(request: NextRequest) {
     
     if (booking_status !== undefined) updateData.booking_status = booking_status;
     if (payment_status !== undefined) updateData.payment_status = payment_status;
-    if (payment_date !== undefined) updateData.payment_date = payment_date;
+    if (payment_date !== undefined) {
+      const iso = normalizeDateToISO(payment_date);
+      // If parsing fails, set null to avoid invalid format errors
+      updateData.payment_date = iso;
+    }
     if (payment_method !== undefined) updateData.payment_method = payment_method;
     if (payment_notes !== undefined) updateData.payment_notes = payment_notes;
 
