@@ -1,5 +1,24 @@
 import { NextResponse } from 'next/server';
-import { supabaseServer } from '@/lib/supabase-server';
+import { createClient } from '@supabase/supabase-js';
+
+// Create Supabase client with better error handling
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.error('Missing Supabase environment variables:', {
+    url: !!supabaseUrl,
+    serviceKey: !!supabaseServiceKey,
+    anonKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  });
+}
+
+const supabase = createClient(supabaseUrl || '', supabaseServiceKey || '', {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  }
+});
 
 interface BookingRequest {
   propertyId: string;
@@ -21,6 +40,19 @@ interface BookingRequest {
 
 export async function POST(request: Request) {
   try {
+    // Check environment variables first
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('Supabase configuration error:', {
+        url: supabaseUrl ? 'SET' : 'MISSING',
+        serviceKey: supabaseServiceKey ? 'SET' : 'MISSING',
+        anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'SET' : 'MISSING'
+      });
+      return NextResponse.json(
+        { error: 'Server configuration error. Please contact support.' },
+        { status: 500 }
+      );
+    }
+
     const body: BookingRequest = await request.json();
     
     // Debug logging
@@ -50,7 +82,7 @@ export async function POST(request: Request) {
     let guestId;
     
     // Check if guest already exists
-    const { data: existingGuest, error: guestSearchError } = await supabaseServer
+    const { data: existingGuest, error: guestSearchError } = await supabase
       .from('guests')
       .select('id')
       .eq('email', guestEmail)
@@ -68,7 +100,7 @@ export async function POST(request: Request) {
       guestId = existingGuest.id;
       
       // Update guest information if needed
-      const { error: updateError } = await supabaseServer
+      const { error: updateError } = await supabase
         .from('guests')
         .update({
           name: guestName,
@@ -81,7 +113,7 @@ export async function POST(request: Request) {
       }
     } else {
       // Create new guest
-      const { data: newGuest, error: guestCreateError } = await supabaseServer
+      const { data: newGuest, error: guestCreateError } = await supabase
         .from('guests')
         .insert({
           name: guestName,
@@ -110,7 +142,7 @@ export async function POST(request: Request) {
     
     if (isUUID) {
       // This is a direct apartment ID
-      const { data: directApartment, error: directError } = await supabaseServer
+      const { data: directApartment, error: directError } = await supabase
         .from('apartments')
         .select('id, apartment_number')
         .eq('id', propertyId)
@@ -126,7 +158,7 @@ export async function POST(request: Request) {
       apartment = directApartment;
     } else {
       // This is an Uplisting property ID - look up in property mapping table
-      const { data: mapping, error: mappingError } = await supabaseServer
+      const { data: mapping, error: mappingError } = await supabase
         .from('property_mapping')
         .select(`
           apartment_id,
@@ -156,7 +188,7 @@ export async function POST(request: Request) {
 
     // Get or create a "Direct" booking channel
     let channelId;
-    const { data: channel, error: channelError } = await supabaseServer
+    const { data: channel, error: channelError } = await supabase
       .from('booking_channels')
       .select('id')
       .eq('name', 'Direct')
@@ -174,7 +206,7 @@ export async function POST(request: Request) {
       channelId = channel.id;
     } else {
       // Create Direct channel if it doesn't exist
-      const { data: newChannel, error: createChannelError } = await supabaseServer
+      const { data: newChannel, error: createChannelError } = await supabase
         .from('booking_channels')
         .insert({
           name: 'Direct',
@@ -223,7 +255,7 @@ export async function POST(request: Request) {
     });
 
     // Create the booking with pending status and payment tracking
-    const { data: booking, error: bookingError } = await supabaseServer
+    const { data: booking, error: bookingError } = await supabase
       .from('bookings')
       .insert({
         booking_reference: bookingReference,
