@@ -59,6 +59,7 @@ export async function GET(request: Request) {
         check_in_date,
         check_out_date,
         booking_status,
+        updated_at,
         apartments!inner (
           id,
           apartment_number,
@@ -91,6 +92,8 @@ export async function GET(request: Request) {
       );
     }
 
+    const httpNow = new Date().toUTCString();
+
     if (!bookings || bookings.length === 0) {
       // Return empty calendar if no bookings
       const emptyCalendar = [
@@ -108,8 +111,11 @@ export async function GET(request: Request) {
         status: 200,
         headers: {
           'Content-Type': 'text/calendar; charset=utf-8',
-          'Content-Disposition': 'inline; filename="bookings.ics"',
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Content-Disposition': 'attachment; filename="bookings.ics"',
+          'Cache-Control': 'no-store, max-age=0',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+          'Last-Modified': httpNow,
         },
       });
     }
@@ -142,13 +148,25 @@ export async function GET(request: Request) {
         `Property: ${apartment.apartment_number}`
       );
       
-      // Create timestamp for when this event was created/modified
+      // Create timestamp for when this feed was generated
       const dtstamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+
+      // Event last modified derived from booking.updated_at if available
+      const lastMod = (booking as any).updated_at
+        ? new Date((booking as any).updated_at).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'
+        : dtstamp;
+
+      // Simple SEQUENCE derived from updated_at epoch seconds (falls back to 0)
+      const sequence = (booking as any).updated_at
+        ? Math.floor(new Date((booking as any).updated_at).getTime() / 1000)
+        : 0;
 
       icalLines.push(
         'BEGIN:VEVENT',
         `UID:${uid}`,
         `DTSTAMP:${dtstamp}`,
+        `LAST-MODIFIED:${lastMod}`,
+        `SEQUENCE:${sequence}`,
         `DTSTART;VALUE=DATE:${dtstart}`,
         `DTEND;VALUE=DATE:${dtend}`,
         `SUMMARY:${summary}`,
@@ -168,8 +186,11 @@ export async function GET(request: Request) {
       status: 200,
       headers: {
         'Content-Type': 'text/calendar; charset=utf-8',
-        'Content-Disposition': 'inline; filename="bookings.ics"',
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Content-Disposition': 'attachment; filename="bookings.ics"',
+        'Cache-Control': 'no-store, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'Last-Modified': httpNow,
       },
     });
 
