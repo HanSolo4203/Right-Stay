@@ -59,6 +59,7 @@ export async function GET(request: Request) {
         check_in_date,
         check_out_date,
         booking_status,
+        notes,
         updated_at,
         apartments!inner (
           id,
@@ -141,12 +142,18 @@ export async function GET(request: Request) {
       const dtend = formatICalDate(booking.check_out_date);
       const uid = generateUID(booking.id);
       const summary = 'Booked'; // Simple summary that Airbnb will understand
-      const description = escapeICalText(
+      // Build description and include internal notes for Direct bookings
+      let descriptionText =
         `Booking: ${booking.booking_reference}\n` +
         `Guest: ${guest.name}\n` +
         `Channel: ${channel.name}\n` +
-        `Property: ${apartment.apartment_number}`
-      );
+        `Property: ${apartment.apartment_number}`;
+      if ((channel?.name === 'Direct') && (booking as any).notes) {
+        const rawNotes = String((booking as any).notes);
+        const truncated = rawNotes.length > 800 ? rawNotes.slice(0, 800) + '…' : rawNotes;
+        descriptionText += `\nNotes: ${truncated}`;
+      }
+      const description = escapeICalText(descriptionText);
       
       // Create timestamp for when this feed was generated
       const dtstamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
