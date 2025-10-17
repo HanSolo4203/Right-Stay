@@ -167,19 +167,19 @@ export default function AccommodationCards() {
 
   if (loading) {
     return (
-      <section className="isolate py-24 relative bg-gray-50">
-        <div className="relative z-10 mx-auto max-w-7xl px-6 md:px-8">
+      <section className="isolate py-16 sm:py-20 lg:py-24 relative bg-gray-50">
+        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
           <div className="text-center">
             <div className="animate-pulse">
-              <div className="h-12 bg-gray-200 rounded-lg w-3/4 mx-auto mb-6"></div>
-              <div className="h-6 bg-gray-200 rounded-lg w-1/2 mx-auto"></div>
+              <div className="h-8 sm:h-10 bg-gray-200 rounded-lg w-3/4 mx-auto mb-4 sm:mb-6"></div>
+              <div className="h-4 sm:h-5 bg-gray-200 rounded-lg w-1/2 mx-auto"></div>
             </div>
-            <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 lg:gap-8 mt-16">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mt-8 sm:mt-12 lg:mt-16">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="animate-pulse">
-                  <div className="h-64 bg-gray-200 rounded-3xl mb-4"></div>
-                  <div className="h-8 bg-gray-200 rounded-lg mb-2"></div>
-                  <div className="h-4 bg-gray-200 rounded-lg w-3/4"></div>
+                  <div className="h-32 sm:h-48 lg:h-64 bg-gray-200 rounded-3xl mb-3 sm:mb-4"></div>
+                  <div className="h-6 sm:h-7 bg-gray-200 rounded-lg mb-2"></div>
+                  <div className="h-3 sm:h-4 bg-gray-200 rounded-lg w-3/4"></div>
                 </div>
               ))}
             </div>
@@ -197,17 +197,17 @@ export default function AccommodationCards() {
   });
 
   return (
-    <section className="isolate py-24 relative bg-gray-50">
-      <div className="relative z-10 mx-auto max-w-7xl px-6 md:px-8">
-        <div className="text-center mb-16">
+    <section className="isolate py-16 sm:py-20 lg:py-24 relative bg-gray-50">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
+        <div className="text-center mb-8 sm:mb-12 lg:mb-16">
           <h2 
-            className="sm:text-5xl lg:text-6xl text-4xl font-medium text-gray-900 tracking-tight"
+            className="text-2xl sm:text-4xl lg:text-5xl font-medium text-gray-900 tracking-tight"
             style={{ fontFamily: 'Manrope, sans-serif' }}
           >
             Premium Accommodations
           </h2>
           <p 
-            className="sm:text-xl text-lg leading-relaxed text-gray-600 max-w-3xl mx-auto mt-6"
+            className="text-sm sm:text-base leading-relaxed text-gray-600 max-w-3xl mx-auto mt-4 sm:mt-6"
           >
             {properties.length > 0 
               ? `Browse our ${properties.length} curated properties from our Uplisting collection.` 
@@ -215,15 +215,14 @@ export default function AccommodationCards() {
           </p>
         </div>
 
-
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 lg:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {accommodations.map((accommodation, index) => (
             <div
               key={accommodation.id}
               className="group rounded-3xl border border-gray-200 bg-white shadow-[0_2.8px_2.2px_rgba(0,_0,_0,_0.034),_0_6.7px_5.3px_rgba(0,_0,_0,_0.048),_0_12.5px_10px_rgba(0,_0,_0,_0.06),_0_22.3px_17.9px_rgba(0,_0,_0,_0.072),_0_41.8px_33.4px_rgba(0,_0,_0,_0.086),_0_100px_80px_rgba(0,_0,_0,_0.12)] hover:shadow-[0_4px_6px_rgba(0,_0,_0,_0.1),_0_10px_15px_rgba(0,_0,_0,_0.1)] transition-all duration-300"
             >
               {/* Image */}
-              <div className="relative h-64 overflow-hidden">
+              <div className="relative h-32 sm:h-48 lg:h-64 overflow-hidden">
                 <Image
                   src={accommodation.image}
                   alt={accommodation.title}
@@ -246,24 +245,24 @@ export default function AccommodationCards() {
               </div>
 
               {/* Content */}
-              <div className="p-6">
+              <div className="p-3 sm:p-5 lg:p-6">
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
                       {accommodation.title}
                     </h3>
                     <div className="flex items-center gap-1 text-gray-600">
                       <MapPin className="h-4 w-4" />
-                      <span className="text-sm">{accommodation.location}</span>
+                      <span className="text-xs sm:text-sm">{accommodation.location}</span>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-2xl font-bold text-gray-900">{accommodation.price}</div>
-                    <div className="text-sm text-gray-600">{accommodation.priceUnit}</div>
+                    <div className="text-xl sm:text-2xl font-bold text-gray-900">{accommodation.price}</div>
+                    <div className="text-xs sm:text-sm text-gray-600">{accommodation.priceUnit}</div>
                   </div>
                 </div>
 
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                <p className="text-gray-600 text-sm sm:text-base mb-3 sm:mb-4 line-clamp-2">
                   {accommodation.description}
                 </p>
 
@@ -295,12 +294,12 @@ export default function AccommodationCards() {
 
                 {/* Reviews */}
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1">
                     <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                    <span className="text-sm font-medium text-gray-900">{accommodation.rating}</span>
-                    <span className="text-sm text-gray-600">({accommodation.reviews} reviews)</span>
+                  <span className="text-xs sm:text-sm font-medium text-gray-900">{accommodation.rating}</span>
+                  <span className="text-xs sm:text-sm text-gray-600">({accommodation.reviews} reviews)</span>
                   </div>
-                  <div className="text-sm text-gray-600">
+                <div className="text-xs sm:text-sm text-gray-600">
                     {accommodation.bedrooms} bed • {accommodation.bathrooms} bath
                   </div>
                 </div>
@@ -308,7 +307,7 @@ export default function AccommodationCards() {
                 {/* Book Button */}
                 <Link
                   href={`/accommodations/${accommodation.id}/book`}
-                  className="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-2xl hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center gap-2"
+                className="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-2xl hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center gap-2 min-h-11"
                 >
                   <Calendar className="h-4 w-4" />
                   Book Now
@@ -319,10 +318,10 @@ export default function AccommodationCards() {
         </div>
 
         {/* View All Button */}
-        <div className="text-center mt-12">
+        <div className="text-center mt-8 sm:mt-10 lg:mt-12">
           <Link
             href="/accommodations"
-            className="inline-flex items-center gap-2 bg-gray-900 text-white font-semibold py-4 px-8 rounded-2xl hover:bg-gray-800 transition-colors duration-200"
+            className="inline-flex items-center gap-2 bg-gray-900 text-white font-semibold py-3 px-6 sm:py-4 sm:px-8 rounded-2xl hover:bg-gray-800 transition-colors duration-200 min-h-11"
           >
             View All Accommodations
             <Calendar className="h-5 w-5" />

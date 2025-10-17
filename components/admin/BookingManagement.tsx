@@ -232,7 +232,7 @@ export default function BookingManagement() {
   }
 
   return (
-    <div className="p-6 lg:p-8">
+    <div className="p-3 sm:p-4 lg:p-8">
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-white mb-2">Booking Management</h2>
         <p className="text-gray-400">View and manage all property bookings</p>
@@ -255,7 +255,7 @@ export default function BookingManagement() {
       )}
 
       {/* Filters */}
-      <div className="mb-6 flex flex-col sm:flex-row gap-4">
+      <div className="mb-6 flex flex-col sm:flex-row gap-3 sm:gap-4">
         {/* Search */}
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -287,24 +287,24 @@ export default function BookingManagement() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6">
+        <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/10">
           <p className="text-gray-400 text-sm mb-1">Total Bookings</p>
           <p className="text-2xl font-bold text-white">{bookings.length}</p>
         </div>
-        <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+        <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/10">
           <p className="text-gray-400 text-sm mb-1">Confirmed</p>
           <p className="text-2xl font-bold text-green-400">
             {bookings.filter(b => b.booking_status === 'confirmed').length}
           </p>
         </div>
-        <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+        <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/10">
           <p className="text-gray-400 text-sm mb-1">Pending</p>
           <p className="text-2xl font-bold text-yellow-400">
             {bookings.filter(b => b.booking_status === 'pending').length}
           </p>
         </div>
-        <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+        <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/10">
           <p className="text-gray-400 text-sm mb-1">Total Revenue</p>
           <p className="text-2xl font-bold text-blue-400">
             {formatCurrency(bookings.reduce((sum, b) => sum + (b.total_payout || 0), 0))}
@@ -318,34 +318,34 @@ export default function BookingManagement() {
           <table className="w-full">
             <thead className="bg-white/5 border-b border-white/10">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Reference
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Property
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Guest
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Check-in
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Check-out
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Nights
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Channel
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Total
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -353,12 +353,12 @@ export default function BookingManagement() {
             <tbody className="divide-y divide-white/10">
               {filteredBookings.map((booking) => (
                 <tr key={booking.id} className="hover:bg-white/5 transition-colors">
-                  <td className="px-4 py-4 whitespace-nowrap">
+                  <td className="px-3 sm:px-4 py-3 sm:py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-white">
                       {booking.booking_reference}
                     </div>
                   </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
+                  <td className="px-3 sm:px-4 py-3 sm:py-4 whitespace-nowrap">
                     <div className="flex items-center space-x-2">
                       <Home className="w-4 h-4 text-blue-400" />
                       <span className="text-sm text-white">
@@ -366,13 +366,13 @@ export default function BookingManagement() {
                       </span>
                     </div>
                   </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
+                  <td className="px-3 sm:px-4 py-3 sm:py-4 whitespace-nowrap">
                     <div className="flex items-center space-x-2">
                       <User className="w-4 h-4 text-purple-400" />
                       <span className="text-sm text-white">{booking.guest?.name || 'N/A'}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
+                  <td className="px-3 sm:px-4 py-3 sm:py-4 whitespace-nowrap">
                     <div className="flex items-center space-x-2">
                       <Calendar className="w-4 h-4 text-green-400" />
                       <span className="text-sm text-white">
@@ -380,7 +380,7 @@ export default function BookingManagement() {
                       </span>
                     </div>
                   </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
+                  <td className="px-3 sm:px-4 py-3 sm:py-4 whitespace-nowrap">
                     <div className="flex items-center space-x-2">
                       <Calendar className="w-4 h-4 text-red-400" />
                       <span className="text-sm text-white">
@@ -388,22 +388,22 @@ export default function BookingManagement() {
                       </span>
                     </div>
                   </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
+                  <td className="px-3 sm:px-4 py-3 sm:py-4 whitespace-nowrap">
                     <span className="text-sm text-white font-medium">
                       {booking.nights}
                     </span>
                   </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
+                  <td className="px-3 sm:px-4 py-3 sm:py-4 whitespace-nowrap">
                     <span className="text-sm text-gray-300">
                       {booking.channel?.name || 'N/A'}
                     </span>
                   </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
+                  <td className="px-3 sm:px-4 py-3 sm:py-4 whitespace-nowrap">
                     <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getStatusBadgeColor(booking.booking_status)}`}>
                       {booking.booking_status}
                     </span>
                   </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
+                  <td className="px-3 sm:px-4 py-3 sm:py-4 whitespace-nowrap">
                     <div className="flex items-center space-x-2">
                       <DollarSign className="w-4 h-4 text-yellow-400" />
                       <span className="text-sm font-semibold text-white">
@@ -411,18 +411,18 @@ export default function BookingManagement() {
                       </span>
                     </div>
                   </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    <div className="flex space-x-2">
+                  <td className="px-3 sm:px-4 py-3 sm:py-4 whitespace-nowrap">
+                    <div className="flex space-x-1 sm:space-x-2">
                       <button
                         onClick={() => handleViewDetails(booking)}
-                        className="p-2 text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
+                        className="p-2 text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors min-h-11"
                         title="View Details"
                       >
                         <Eye className="w-5 h-5" />
                       </button>
                       <button
                         onClick={() => handleEdit(booking)}
-                        className="p-2 text-green-400 hover:bg-green-500/10 rounded-lg transition-colors"
+                        className="p-2 text-green-400 hover:bg-green-500/10 rounded-lg transition-colors min-h-11"
                         title="Edit Status"
                       >
                         <Edit2 className="w-5 h-5" />
@@ -430,7 +430,7 @@ export default function BookingManagement() {
                       {booking.channel?.name === 'Direct' && (
                         <button
                           onClick={() => handleDelete(booking)}
-                          className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                          className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors min-h-11"
                           title="Delete Booking"
                         >
                           <Trash2 className="w-5 h-5" />
