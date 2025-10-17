@@ -46,7 +46,7 @@ npm run dev
 
 ### 6. Test the Connection
 
-Visit: http://localhost:3000/api/test-uplisting
+Visit: 
 
 You should see:
 ```json
