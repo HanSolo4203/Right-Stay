@@ -1,17 +1,38 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Loader2, CheckCircle, AlertCircle, X, Save } from 'lucide-react';
+import { Plus, Edit2, Trash2, Loader2, CheckCircle, AlertCircle, X, Save, Upload, Image as ImageIcon, Star } from 'lucide-react';
+import Image from 'next/image';
 
 interface Property {
   id: string;
-  apartment_number: string;
-  owner_name: string;
-  owner_email: string;
-  address: string;
-  cleaner_payout: number;
-  welcome_pack_fee: number;
+  uplisting_id: string;
+  name: string;
+  type: string;
+  bedrooms: number | null;
+  bathrooms: number | null;
+  beds: number | null;
+  maximum_capacity: number | null;
+  currency: string;
+  description: string;
+  check_in_time: number | null;
+  check_out_time: number | null;
+  ical_url: string | null;
+  last_synced: string | null;
   created_at: string;
+  updated_at: string;
+}
+
+interface PropertyPhoto {
+  id: string;
+  property_id: string;
+  photo_id: string;
+  url: string;
+  caption: string | null;
+  position: number;
+  is_primary: boolean;
+  width: number | null;
+  height: number | null;
 }
 
 export default function PropertySettings() {
@@ -20,14 +41,23 @@ export default function PropertySettings() {
   const [showModal, setShowModal] = useState(false);
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [photos, setPhotos] = useState<PropertyPhoto[]>([]);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [uploadingPhotoId, setUploadingPhotoId] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
-    apartment_number: '',
-    owner_name: '',
-    owner_email: '',
-    address: '',
-    cleaner_payout: '',
-    welcome_pack_fee: '',
+    uplisting_id: '',
+    name: '',
+    type: '',
+    bedrooms: '',
+    bathrooms: '',
+    beds: '',
+    maximum_capacity: '',
+    currency: 'ZAR',
+    description: '',
+    check_in_time: '15',
+    check_out_time: '11',
+    ical_url: '',
   });
 
   useEffect(() => {
@@ -63,42 +93,163 @@ export default function PropertySettings() {
     }
   };
 
-  const handleOpenModal = (property?: Property) => {
+  const handleOpenModal = async (property?: Property) => {
     if (property) {
       setEditingProperty(property);
       setFormData({
-        apartment_number: property.apartment_number || '',
-        owner_name: property.owner_name || '',
-        owner_email: property.owner_email || '',
-        address: property.address || '',
-        cleaner_payout: property.cleaner_payout !== null ? property.cleaner_payout.toString() : '',
-        welcome_pack_fee: property.welcome_pack_fee !== null ? property.welcome_pack_fee.toString() : '',
+        uplisting_id: property.uplisting_id || '',
+        name: property.name || '',
+        type: property.type || '',
+        bedrooms: property.bedrooms !== null ? property.bedrooms.toString() : '',
+        bathrooms: property.bathrooms !== null ? property.bathrooms.toString() : '',
+        beds: property.beds !== null ? property.beds.toString() : '',
+        maximum_capacity: property.maximum_capacity !== null ? property.maximum_capacity.toString() : '',
+        currency: property.currency || 'ZAR',
+        description: property.description || '',
+        check_in_time: property.check_in_time !== null ? property.check_in_time.toString() : '15',
+        check_out_time: property.check_out_time !== null ? property.check_out_time.toString() : '11',
+        ical_url: property.ical_url || '',
       });
+      // Fetch photos for this property
+      await fetchPhotos(property.uplisting_id);
     } else {
       setEditingProperty(null);
       setFormData({
-        apartment_number: '',
-        owner_name: '',
-        owner_email: '',
-        address: '',
-        cleaner_payout: '',
-        welcome_pack_fee: '',
+        uplisting_id: '',
+        name: '',
+        type: '',
+        bedrooms: '',
+        bathrooms: '',
+        beds: '',
+        maximum_capacity: '',
+        currency: 'ZAR',
+        description: '',
+        check_in_time: '15',
+        check_out_time: '11',
+        ical_url: '',
       });
+      setPhotos([]);
     }
     setShowModal(true);
+  };
+
+  const fetchPhotos = async (propertyId: string) => {
+    try {
+      const response = await fetch(`/api/admin/properties/photos?propertyId=${propertyId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setPhotos(data.photos || []);
+      }
+    } catch (error) {
+      console.error('Error fetching photos:', error);
+    }
   };
 
   const handleCloseModal = () => {
     setShowModal(false);
     setEditingProperty(null);
+    setPhotos([]);
     setFormData({
-      apartment_number: '',
-      owner_name: '',
-      owner_email: '',
-      address: '',
-      cleaner_payout: '',
-      welcome_pack_fee: '',
+      uplisting_id: '',
+      name: '',
+      type: '',
+      bedrooms: '',
+      bathrooms: '',
+      beds: '',
+      maximum_capacity: '',
+      currency: 'ZAR',
+      description: '',
+      check_in_time: '15',
+      check_out_time: '11',
+      ical_url: '',
     });
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !editingProperty) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setMessage({ type: 'error', text: 'Please upload an image file' });
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setMessage({ type: 'error', text: 'Image size must be less than 5MB' });
+      return;
+    }
+
+    setUploadingPhoto(true);
+    setUploadingPhotoId(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('propertyId', editingProperty.uplisting_id);
+      formData.append('isPrimary', photos.length === 0 ? 'true' : 'false');
+
+      const response = await fetch('/api/admin/properties/upload-photo', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        await fetchPhotos(editingProperty.uplisting_id);
+        setMessage({ type: 'success', text: 'Photo uploaded successfully!' });
+        setTimeout(() => setMessage(null), 3000);
+      } else {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to upload photo');
+      }
+    } catch (error: any) {
+      setMessage({ type: 'error', text: error.message || 'Failed to upload photo' });
+    } finally {
+      setUploadingPhoto(false);
+      e.target.value = ''; // Reset input
+    }
+  };
+
+  const handleDeletePhoto = async (photoId: string) => {
+    if (!confirm('Are you sure you want to delete this photo?')) return;
+
+    try {
+      const response = await fetch(`/api/admin/properties/photos?id=${photoId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok && editingProperty) {
+        await fetchPhotos(editingProperty.uplisting_id);
+        setMessage({ type: 'success', text: 'Photo deleted successfully!' });
+        setTimeout(() => setMessage(null), 3000);
+      } else {
+        throw new Error('Failed to delete photo');
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Error deleting photo. Please try again.' });
+    }
+  };
+
+  const handleSetPrimary = async (photoId: string) => {
+    try {
+      const response = await fetch(`/api/admin/properties/photos?id=${photoId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_primary: true }),
+      });
+
+      if (response.ok && editingProperty) {
+        await fetchPhotos(editingProperty.uplisting_id);
+        setMessage({ type: 'success', text: 'Primary photo updated!' });
+        setTimeout(() => setMessage(null), 3000);
+      } else {
+        throw new Error('Failed to update primary photo');
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Error updating primary photo. Please try again.' });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -208,31 +359,51 @@ export default function PropertySettings() {
               <div className="flex-1">
                 <div className="flex items-center space-x-3 mb-3">
                   <h3 className="text-xl font-semibold text-white">
-                    {property.apartment_number}
+                    {property.name}
                   </h3>
+                  <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                    {property.type}
+                  </span>
+                  <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-500/10 text-gray-400 border border-gray-500/20">
+                    ID: {property.uplisting_id}
+                  </span>
                 </div>
                 
-                <div className="grid md:grid-cols-2 gap-4 text-sm">
+                {property.description && (
+                  <p className="text-gray-400 mb-4 text-sm line-clamp-2">{property.description}</p>
+                )}
+                
+                <div className="grid md:grid-cols-3 gap-4 text-sm">
                   <div>
-                    <span className="text-gray-400">Owner:</span>
-                    <p className="text-white">{property.owner_name}</p>
+                    <span className="text-gray-400">Bedrooms:</span>
+                    <p className="text-white">{property.bedrooms || 'N/A'}</p>
                   </div>
                   <div>
-                    <span className="text-gray-400">Email:</span>
-                    <p className="text-white">{property.owner_email}</p>
+                    <span className="text-gray-400">Bathrooms:</span>
+                    <p className="text-white">{property.bathrooms || 'N/A'}</p>
                   </div>
                   <div>
-                    <span className="text-gray-400">Address:</span>
-                    <p className="text-white">{property.address}</p>
+                    <span className="text-gray-400">Max Capacity:</span>
+                    <p className="text-white">{property.maximum_capacity || 'N/A'} guests</p>
                   </div>
                   <div>
-                    <span className="text-gray-400">Cleaner Payout:</span>
-                    <p className="text-white">R{property.cleaner_payout || 0}</p>
+                    <span className="text-gray-400">Check-in:</span>
+                    <p className="text-white">{property.check_in_time ? `${property.check_in_time}:00` : 'N/A'}</p>
                   </div>
                   <div>
-                    <span className="text-gray-400">Welcome Pack Fee:</span>
-                    <p className="text-white">R{property.welcome_pack_fee || 0}</p>
+                    <span className="text-gray-400">Check-out:</span>
+                    <p className="text-white">{property.check_out_time ? `${property.check_out_time}:00` : 'N/A'}</p>
                   </div>
+                  <div>
+                    <span className="text-gray-400">Currency:</span>
+                    <p className="text-white">{property.currency}</p>
+                  </div>
+                  {property.ical_url && (
+                    <div className="md:col-span-3">
+                      <span className="text-gray-400">iCal URL:</span>
+                      <p className="text-white text-xs break-all">{property.ical_url}</p>
+                    </div>
+                  )}
                 </div>
               </div>
               
@@ -278,95 +449,268 @@ export default function PropertySettings() {
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Apartment Number *
-                </label>
-                <input
-                  type="text"
-                  name="apartment_number"
-                  value={formData.apartment_number}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
-                  placeholder="e.g., APT-101"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Owner Name *
-                </label>
-                <input
-                  type="text"
-                  name="owner_name"
-                  value={formData.owner_name}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
-                  placeholder="Property owner name"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Owner Email
-                </label>
-                <input
-                  type="email"
-                  name="owner_email"
-                  value={formData.owner_email}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
-                  placeholder="owner@example.com"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Address
-                </label>
-                <textarea
-                  name="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  rows={3}
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors resize-none"
-                  placeholder="Full property address"
-                />
-              </div>
-
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Cleaner Payout (ZAR)
+                    Uplisting ID *
                   </label>
                   <input
-                    type="number"
-                    step="0.01"
-                    name="cleaner_payout"
-                    value={formData.cleaner_payout}
+                    type="text"
+                    name="uplisting_id"
+                    value={formData.uplisting_id}
                     onChange={handleChange}
+                    required
                     className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
-                    placeholder="0.00"
+                    placeholder="e.g., 135133"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Welcome Pack Fee (ZAR)
+                    Property Type *
                   </label>
                   <input
-                    type="number"
-                    step="0.01"
-                    name="welcome_pack_fee"
-                    value={formData.welcome_pack_fee}
+                    type="text"
+                    name="type"
+                    value={formData.type}
                     onChange={handleChange}
+                    required
                     className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
-                    placeholder="0.00"
+                    placeholder="e.g., Villa, Apartment, Lodge"
                   />
                 </div>
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Property Name *
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                  placeholder="e.g., Cape Town Luxury Villa"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Description
+                </label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  rows={4}
+                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors resize-none"
+                  placeholder="Property description..."
+                />
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Bedrooms
+                  </label>
+                  <input
+                    type="number"
+                    name="bedrooms"
+                    value={formData.bedrooms}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                    placeholder="0"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Bathrooms
+                  </label>
+                  <input
+                    type="number"
+                    name="bathrooms"
+                    value={formData.bathrooms}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                    placeholder="0"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Max Capacity
+                  </label>
+                  <input
+                    type="number"
+                    name="maximum_capacity"
+                    value={formData.maximum_capacity}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Currency
+                  </label>
+                  <select
+                    name="currency"
+                    value={formData.currency}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors"
+                  >
+                    <option value="ZAR">ZAR (South African Rand)</option>
+                    <option value="USD">USD (US Dollar)</option>
+                    <option value="EUR">EUR (Euro)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Check-in Time
+                  </label>
+                  <input
+                    type="number"
+                    name="check_in_time"
+                    value={formData.check_in_time}
+                    onChange={handleChange}
+                    min="0"
+                    max="23"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                    placeholder="15"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Check-out Time
+                  </label>
+                  <input
+                    type="number"
+                    name="check_out_time"
+                    value={formData.check_out_time}
+                    onChange={handleChange}
+                    min="0"
+                    max="23"
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                    placeholder="11"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  iCal URL (for availability sync)
+                </label>
+                <input
+                  type="url"
+                  name="ical_url"
+                  value={formData.ical_url}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                  placeholder="https://..."
+                />
+              </div>
+
+              {/* Photo Management Section */}
+              {editingProperty && (
+                <div className="border-t border-white/10 pt-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-lg font-semibold text-white flex items-center gap-2">
+                      <ImageIcon className="w-5 h-5" />
+                      Property Photos
+                    </h4>
+                    <label className="flex items-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 rounded-lg cursor-pointer transition-colors">
+                      <Upload className="w-4 h-4" />
+                      <span className="text-sm text-blue-400">Upload Photo</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhotoUpload}
+                        disabled={uploadingPhoto}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+
+                  {uploadingPhoto && (
+                    <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin text-blue-400" />
+                      <span className="text-sm text-blue-400">Uploading photo...</span>
+                    </div>
+                  )}
+
+                  {photos.length > 0 ? (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {photos.map((photo) => (
+                        <div
+                          key={photo.id}
+                          className="relative group bg-white/5 rounded-lg overflow-hidden border border-white/10"
+                        >
+                          <div className="aspect-video relative">
+                            <Image
+                              src={photo.url}
+                              alt={photo.caption || 'Property photo'}
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 768px) 50vw, 33vw"
+                            />
+                            {photo.is_primary && (
+                              <div className="absolute top-2 left-2 bg-yellow-500 text-white px-2 py-1 rounded text-xs font-semibold flex items-center gap-1">
+                                <Star className="w-3 h-3 fill-current" />
+                                Primary
+                              </div>
+                            )}
+                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                              {!photo.is_primary && (
+                                <button
+                                  onClick={() => handleSetPrimary(photo.id)}
+                                  className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded transition-colors"
+                                  title="Set as primary"
+                                >
+                                  <Star className="w-4 h-4" />
+                                </button>
+                              )}
+                              <button
+                                onClick={() => handleDeletePhoto(photo.id)}
+                                className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-xs rounded transition-colors"
+                                title="Delete photo"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                          {photo.caption && (
+                            <p className="p-2 text-xs text-gray-400 truncate">{photo.caption}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 border border-dashed border-white/10 rounded-lg">
+                      <ImageIcon className="w-12 h-12 text-gray-500 mx-auto mb-3" />
+                      <p className="text-sm text-gray-400 mb-4">No photos uploaded yet</p>
+                      <label className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 rounded-lg cursor-pointer transition-colors">
+                        <Upload className="w-4 h-4" />
+                        <span className="text-sm text-blue-400">Upload First Photo</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handlePhotoUpload}
+                          disabled={uploadingPhoto}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="flex justify-end space-x-3 pt-4">
                 <button

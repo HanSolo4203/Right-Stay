@@ -11,18 +11,46 @@ export async function GET() {
     console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'MISSING');
     console.log('Service Key:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SET' : 'MISSING');
 
+    // Fetch from cached_properties table
     const { data, error } = await supabase
-      .from('apartments')
+      .from('cached_properties')
       .select('*')
-      .order('apartment_number', { ascending: true });
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Supabase error:', error);
       throw error;
     }
 
-    console.log('Properties fetched successfully:', data?.length || 0, 'properties');
-    return NextResponse.json(data || []);
+    // Transform the data to include extracted attributes for easier display
+    const transformedData = (data || []).map((property: any) => {
+      const attributes = property.data?.attributes || {};
+      return {
+        id: property.id,
+        uplisting_id: property.uplisting_id,
+        name: attributes.name || attributes.nickname || 'Unnamed Property',
+        type: attributes.type || 'Property',
+        bedrooms: attributes.bedrooms || null,
+        bathrooms: attributes.bathrooms || null,
+        beds: attributes.beds || null,
+        maximum_capacity: attributes.maximum_capacity || null,
+        currency: attributes.currency || 'ZAR',
+        description: attributes.description || '',
+        check_in_time: attributes.check_in_time || null,
+        check_out_time: attributes.check_out_time || null,
+        property_slug: attributes.property_slug || null,
+        time_zone: attributes.time_zone || null,
+        ical_url: property.ical_url || null,
+        last_synced: property.last_synced,
+        created_at: property.created_at,
+        updated_at: property.updated_at,
+        // Keep full data for reference
+        data: property.data
+      };
+    });
+
+    console.log('Properties fetched successfully:', transformedData?.length || 0, 'properties');
+    return NextResponse.json(transformedData || []);
   } catch (error: any) {
     console.error('Error fetching properties:', error);
     return NextResponse.json(
@@ -41,24 +69,51 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
+    // Create property data structure for cached_properties
     const propertyData = {
-      apartment_number: body.apartment_number,
-      owner_name: body.owner_name,
-      owner_email: body.owner_email || null,
-      address: body.address || null,
-      cleaner_payout: parseFloat(body.cleaner_payout) || 0,
-      welcome_pack_fee: parseFloat(body.welcome_pack_fee) || 0,
+      uplisting_id: body.uplisting_id || `prop-${Date.now()}`,
+      data: {
+        attributes: {
+          name: body.name || 'New Property',
+          nickname: body.nickname || body.name || 'New Property',
+          type: body.type || 'Property',
+          bedrooms: body.bedrooms ? parseInt(body.bedrooms) : null,
+          bathrooms: body.bathrooms ? parseInt(body.bathrooms) : null,
+          beds: body.beds ? parseInt(body.beds) : null,
+          maximum_capacity: body.maximum_capacity ? parseInt(body.maximum_capacity) : null,
+          currency: body.currency || 'ZAR',
+          description: body.description || '',
+          check_in_time: body.check_in_time ? parseInt(body.check_in_time) : 15,
+          check_out_time: body.check_out_time ? parseInt(body.check_out_time) : 11,
+          property_slug: body.property_slug || null,
+          time_zone: body.time_zone || 'Africa/Johannesburg'
+        }
+      },
+      ical_url: body.ical_url || null
     };
 
     const { data, error } = await supabase
-      .from('apartments')
+      .from('cached_properties')
       .insert([propertyData])
       .select()
       .single();
 
     if (error) throw error;
 
-    return NextResponse.json(data);
+    // Transform response
+    const attributes = data.data?.attributes || {};
+    return NextResponse.json({
+      id: data.id,
+      uplisting_id: data.uplisting_id,
+      name: attributes.name || attributes.nickname || 'Unnamed Property',
+      type: attributes.type || 'Property',
+      bedrooms: attributes.bedrooms,
+      bathrooms: attributes.bathrooms,
+      maximum_capacity: attributes.maximum_capacity,
+      description: attributes.description,
+      ical_url: data.ical_url,
+      created_at: data.created_at
+    });
   } catch (error) {
     console.error('Error creating property:', error);
     return NextResponse.json(
@@ -82,25 +137,67 @@ export async function PUT(request: NextRequest) {
 
     const body = await request.json();
 
-    const propertyData = {
-      apartment_number: body.apartment_number,
-      owner_name: body.owner_name,
-      owner_email: body.owner_email || null,
-      address: body.address || null,
-      cleaner_payout: parseFloat(body.cleaner_payout) || 0,
-      welcome_pack_fee: parseFloat(body.welcome_pack_fee) || 0,
+    // First get the existing property to preserve data structure
+    const { data: existing, error: fetchError } = await supabase
+      .from('cached_properties')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    // Update the data JSONB field
+    const updatedData = {
+      ...existing.data,
+      attributes: {
+        ...existing.data?.attributes,
+        name: body.name !== undefined ? body.name : existing.data?.attributes?.name,
+        nickname: body.nickname !== undefined ? body.nickname : body.name || existing.data?.attributes?.nickname,
+        type: body.type !== undefined ? body.type : existing.data?.attributes?.type,
+        bedrooms: body.bedrooms !== undefined ? parseInt(body.bedrooms) : existing.data?.attributes?.bedrooms,
+        bathrooms: body.bathrooms !== undefined ? parseInt(body.bathrooms) : existing.data?.attributes?.bathrooms,
+        beds: body.beds !== undefined ? parseInt(body.beds) : existing.data?.attributes?.beds,
+        maximum_capacity: body.maximum_capacity !== undefined ? parseInt(body.maximum_capacity) : existing.data?.attributes?.maximum_capacity,
+        currency: body.currency !== undefined ? body.currency : existing.data?.attributes?.currency || 'ZAR',
+        description: body.description !== undefined ? body.description : existing.data?.attributes?.description,
+        check_in_time: body.check_in_time !== undefined ? parseInt(body.check_in_time) : existing.data?.attributes?.check_in_time,
+        check_out_time: body.check_out_time !== undefined ? parseInt(body.check_out_time) : existing.data?.attributes?.check_out_time,
+        property_slug: body.property_slug !== undefined ? body.property_slug : existing.data?.attributes?.property_slug,
+        time_zone: body.time_zone !== undefined ? body.time_zone : existing.data?.attributes?.time_zone || 'Africa/Johannesburg'
+      }
     };
 
+    const updateData: any = {
+      data: updatedData
+    };
+
+    if (body.ical_url !== undefined) {
+      updateData.ical_url = body.ical_url;
+    }
+
     const { data, error } = await supabase
-      .from('apartments')
-      .update(propertyData)
+      .from('cached_properties')
+      .update(updateData)
       .eq('id', id)
       .select()
       .single();
 
     if (error) throw error;
 
-    return NextResponse.json(data);
+    // Transform response
+    const attributes = data.data?.attributes || {};
+    return NextResponse.json({
+      id: data.id,
+      uplisting_id: data.uplisting_id,
+      name: attributes.name || attributes.nickname || 'Unnamed Property',
+      type: attributes.type || 'Property',
+      bedrooms: attributes.bedrooms,
+      bathrooms: attributes.bathrooms,
+      maximum_capacity: attributes.maximum_capacity,
+      description: attributes.description,
+      ical_url: data.ical_url,
+      updated_at: data.updated_at
+    });
   } catch (error) {
     console.error('Error updating property:', error);
     return NextResponse.json(
@@ -123,7 +220,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     const { error } = await supabase
-      .from('apartments')
+      .from('cached_properties')
       .delete()
       .eq('id', id);
 

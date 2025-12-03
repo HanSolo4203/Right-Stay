@@ -27,17 +27,18 @@ export default function AvailabilityCalendar({
   const [loading, setLoading] = useState(true);
   const [selectingCheckOut, setSelectingCheckOut] = useState(false);
 
-  // Fetch blocked dates for the current month and next 3 months
+  // Fetch blocked dates for a wider range (6 months) to support navigation
   useEffect(() => {
     async function fetchAvailability() {
       setLoading(true);
       try {
-        // Get date range for current month through 3 months ahead
+        // Get date range: 1 month before current to 6 months ahead
         const startDate = new Date(currentMonth);
+        startDate.setMonth(startDate.getMonth() - 1);
         startDate.setDate(1);
         
         const endDate = new Date(currentMonth);
-        endDate.setMonth(endDate.getMonth() + 3);
+        endDate.setMonth(endDate.getMonth() + 6);
         endDate.setDate(0); // Last day of the month
         
         const response = await fetch(
@@ -122,7 +123,13 @@ export default function AvailabilityCalendar({
 
         if (hasBlockedInRange) {
           // Restart selection if there's a blocked date in range
-          alert('The selected range contains unavailable dates. Please select a different range.');
+          const blockedDatesInRange: string[] = [];
+          for (let d = new Date(checkIn); d < checkOut; d.setDate(d.getDate() + 1)) {
+            if (isDateBlocked(d)) {
+              blockedDatesInRange.push(formatDate(d));
+            }
+          }
+          alert(`The selected range contains unavailable dates:\n${blockedDatesInRange.slice(0, 5).join(', ')}${blockedDatesInRange.length > 5 ? '...' : ''}\n\nPlease select a different range.`);
           onDateSelect(dateStr, null);
           setSelectingCheckOut(true);
         } else {
@@ -172,16 +179,18 @@ export default function AvailabilityCalendar({
       const isInRange = isDateInRange(date);
       const isSelectable = isDateSelectable(date);
 
-      let className = "h-12 md:h-14 flex items-center justify-center rounded-lg cursor-pointer transition-all text-sm md:text-base font-medium ";
+      let className = "h-10 md:h-12 lg:h-14 flex items-center justify-center rounded-lg cursor-pointer transition-all text-sm md:text-base font-medium relative ";
 
       if (isCheckIn || isCheckOut) {
-        className += "bg-blue-600 text-white shadow-md hover:bg-blue-700 ";
+        className += "bg-blue-600 text-white shadow-md hover:bg-blue-700 font-semibold ";
+        if (isCheckIn) className += "rounded-r-none ";
+        if (isCheckOut) className += "rounded-l-none ";
       } else if (isInRange) {
-        className += "bg-blue-100 text-blue-900 ";
+        className += "bg-blue-100 text-blue-900 hover:bg-blue-200 ";
       } else if (!isSelectable) {
         className += "bg-gray-100 text-gray-400 cursor-not-allowed line-through ";
       } else {
-        className += "hover:bg-blue-50 text-gray-900 border border-transparent hover:border-blue-200 ";
+        className += "hover:bg-blue-50 text-gray-900 border border-gray-200 hover:border-blue-300 hover:shadow-sm ";
       }
 
       days.push(
@@ -226,12 +235,13 @@ export default function AvailabilityCalendar({
           type="button"
           onClick={previousMonth}
           disabled={!canGoPrevious() || loading}
-          className="p-2 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="p-2 md:p-3 rounded-lg hover:bg-gray-100 active:bg-gray-200 transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent flex items-center justify-center"
+          aria-label="Previous month"
         >
-          <ChevronLeft className="h-5 w-5" />
+          <ChevronLeft className="h-5 w-5 md:h-6 md:w-6 text-gray-700" />
         </button>
         
-        <h3 className="text-lg md:text-xl font-semibold text-gray-900">
+        <h3 className="text-lg md:text-xl lg:text-2xl font-semibold text-gray-900 px-4">
           {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
         </h3>
         
@@ -239,21 +249,22 @@ export default function AvailabilityCalendar({
           type="button"
           onClick={nextMonth}
           disabled={loading}
-          className="p-2 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="p-2 md:p-3 rounded-lg hover:bg-gray-100 active:bg-gray-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent flex items-center justify-center"
+          aria-label="Next month"
         >
-          <ChevronRight className="h-5 w-5" />
+          <ChevronRight className="h-5 w-5 md:h-6 md:w-6 text-gray-700" />
         </button>
       </div>
 
       {/* Selection Instructions */}
-      <div className="mb-4 p-3 bg-blue-50 rounded-lg">
-        <p className="text-sm text-blue-900">
+      <div className="mb-4 p-3 md:p-4 bg-blue-50 rounded-lg border border-blue-100">
+        <p className="text-sm md:text-base font-medium text-blue-900">
           {!selectedCheckIn ? (
-            "Select your check-in date"
+            "👆 Step 1: Select your check-in date"
           ) : !selectedCheckOut ? (
-            "Now select your check-out date"
+            "👆 Step 2: Select your check-out date"
           ) : (
-            `${selectedCheckIn} to ${selectedCheckOut}`
+            `✓ Selected: ${new Date(selectedCheckIn).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(selectedCheckOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
           )}
         </p>
       </div>

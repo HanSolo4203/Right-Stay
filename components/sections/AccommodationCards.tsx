@@ -66,6 +66,21 @@ export default function AccommodationCards() {
     async function fetchProperties() {
       try {
         const response = await fetch('/api/properties');
+        
+        // Check if response is ok
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        // Check if response is JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          console.warn('Response is not JSON, content-type:', contentType);
+          // If not JSON, likely an error page, so use fallback data
+          setProperties([]);
+          return;
+        }
+        
         const result = await response.json();
         
         console.log('API Response:', result);
@@ -73,9 +88,13 @@ export default function AccommodationCards() {
         if (result.properties) {
           console.log('Properties found:', result.properties.length);
           setProperties(result.properties);
+        } else if (result.error) {
+          console.error('API returned error:', result.error);
+          setProperties([]);
         }
       } catch (error) {
         console.error('Error fetching properties:', error);
+        setProperties([]);
       } finally {
         setLoading(false);
       }

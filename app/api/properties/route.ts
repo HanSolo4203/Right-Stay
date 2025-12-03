@@ -3,6 +3,15 @@ import { supabaseServer } from '@/lib/supabase-server';
 
 export async function GET(request: Request) {
   try {
+    // Check if Supabase is configured
+    if (!supabaseServer) {
+      console.warn('Supabase environment variables not configured');
+      return NextResponse.json({ 
+        error: 'Database not configured', 
+        properties: [] 
+      }, { status: 200 });
+    }
+
     const { searchParams } = new URL(request.url);
     const propertyId = searchParams.get('id');
 

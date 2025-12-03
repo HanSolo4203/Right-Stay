@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "migrate:supabase-data": "node scripts/migrate-supabase-data.mjs",
+    "sync:ical": "node scripts/sync-ical.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.75.0",

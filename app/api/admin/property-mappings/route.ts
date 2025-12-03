@@ -7,6 +7,18 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function GET() {
   try {
+    // Check if property_mapping table exists
+    const { data: tableCheck, error: tableError } = await supabase
+      .from('property_mapping')
+      .select('id')
+      .limit(1);
+
+    // If table doesn't exist, return empty array
+    if (tableError && tableError.message?.includes('does not exist')) {
+      console.log('Property mapping table does not exist, returning empty array');
+      return NextResponse.json([]);
+    }
+
     const { data, error } = await supabase
       .from('property_mapping')
       .select(`
@@ -18,15 +30,25 @@ export async function GET() {
       `)
       .order('uplisting_property_id', { ascending: true });
 
-    if (error) throw error;
+    if (error) {
+      // If apartments table doesn't exist, try simpler query
+      if (error.message?.includes('does not exist')) {
+        const { data: simpleData, error: simpleError } = await supabase
+          .from('property_mapping')
+          .select('*')
+          .order('uplisting_property_id', { ascending: true });
+        
+        if (simpleError) throw simpleError;
+        return NextResponse.json(simpleData || []);
+      }
+      throw error;
+    }
 
     return NextResponse.json(data || []);
   } catch (error) {
     console.error('Error fetching property mappings:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch property mappings' },
-      { status: 500 }
-    );
+    // Return empty array instead of error to prevent dashboard from breaking
+    return NextResponse.json([]);
   }
 }
 

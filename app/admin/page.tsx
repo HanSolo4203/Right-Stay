@@ -22,15 +22,37 @@ export default function AdminDashboard() {
   // Check authentication
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        router.push('/admin/login');
-      } else {
-        setUserEmail(session.user.email || null);
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Auth error:', error);
+          setLoading(false);
+          router.push('/admin/login');
+          return;
+        }
+        
+        if (!session) {
+          router.push('/admin/login');
+        } else {
+          setUserEmail(session.user.email || null);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Error checking auth:', error);
         setLoading(false);
+        router.push('/admin/login');
       }
     };
+
+    // Set a timeout to prevent infinite loading
+    const timeout = setTimeout(() => {
+      if (loading) {
+        console.warn('Auth check timeout, redirecting to login');
+        setLoading(false);
+        router.push('/admin/login');
+      }
+    }, 5000);
 
     checkAuth();
 
@@ -38,13 +60,17 @@ export default function AdminDashboard() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT' || !session) {
         router.push('/admin/login');
+      } else if (session) {
+        setUserEmail(session.user.email || null);
+        setLoading(false);
       }
     });
 
     return () => {
+      clearTimeout(timeout);
       subscription.unsubscribe();
     };
-  }, [router]);
+  }, [router, loading]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();

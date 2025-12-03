@@ -128,6 +128,43 @@ const { data, error } = await supabaseServer
 
 ---
 
+## Migrating the live property data
+
+When you start a brand-new Supabase project, you only need the tables/rows that back the public site (`cached_properties` + `property_photos`). Follow these steps so the UI continues displaying the same curated listings without cloning every legacy table.
+
+1. Apply the SQL files in `supabase/migrations/` to the new project (`supabase db push` or run each `.sql` in the SQL editor). That will recreate the schema (UUID extension, tables, indexes, triggers).
+2. Set the following environment variables (you can load them with `export` or `dotenv`):
+
+   ```env
+   SUPABASE_SOURCE_URL=<old-project-url>
+   SUPABASE_SOURCE_SERVICE_ROLE_KEY=<old-project-service-role>
+   SUPABASE_TARGET_URL=<new-project-url>
+   SUPABASE_TARGET_SERVICE_ROLE_KEY=<new-project-service-role>
+   SUPABASE_PROPERTY_IDS=135133,135134     # optional, comma-separated. Omit to copy everything.
+   ```
+
+3. Run the migration helper:
+   ```bash
+   npm run migrate:supabase-data
+   ```
+   The script in `scripts/migrate-supabase-data.mjs` copies the filtered `cached_properties` rows and their matching `property_photos` into your fresh database.
+
+4. Inspect the new Supabase dashboard for `cached_properties` + `property_photos` to confirm the listings/photos are present. Adjust `SUPABASE_PROPERTY_IDS` if you only need specific properties for the marketing site.
+
+---
+
+## Resetting and reseeding a fresh database
+
+If you want to wipe the old schema/data and start from the minimal dataset that the marketing site actually uses, run the SQL file `supabase/migrations/000_reset_seed_data.sql`. It:
+
+1. Drops the legacy tables (bookings, guests, availability views, etc.).
+2. Recreates `cached_properties`, `property_photos`, and `tour_packages` with the indexes/triggers that the app expects.
+3. Seeds three live listings and their photos plus the six tour packages shown on `/tours`.
+
+You can execute the file directly from Supabase Studio → SQL Editor (`Run`), or use the Supabase CLI with `supabase db query < supabase/migrations/000_reset_seed_data.sql`. This is a one-time script before you point the app at a new project.
+
+---
+
 **Need Help?**
 - [Supabase Documentation](https://supabase.com/docs)
 - [MCP Documentation](https://modelcontextprotocol.io/)

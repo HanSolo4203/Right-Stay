@@ -56,10 +56,14 @@ export default function BookingManagement() {
       const response = await fetch('/api/admin/bookings');
       if (response.ok) {
         const data = await response.json();
-        setBookings(data);
+        setBookings(Array.isArray(data) ? data : []);
+      } else {
+        // If API fails, set empty array to prevent errors
+        setBookings([]);
       }
     } catch (error) {
       console.error('Error fetching bookings:', error);
+      setBookings([]);
     } finally {
       setLoading(false);
     }

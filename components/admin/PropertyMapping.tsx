@@ -46,15 +46,31 @@ export default function PropertyMapping() {
 
       if (mappingsResponse.ok) {
         const mappingsData = await mappingsResponse.json();
-        setMappings(mappingsData);
+        setMappings(Array.isArray(mappingsData) ? mappingsData : []);
+      } else {
+        setMappings([]);
       }
 
       if (apartmentsResponse.ok) {
         const apartmentsData = await apartmentsResponse.json();
-        setApartments(apartmentsData);
+        // Transform cached_properties to apartments format if needed
+        if (Array.isArray(apartmentsData)) {
+          const transformedApartments = apartmentsData.map((prop: any) => ({
+            id: prop.id,
+            apartment_number: prop.uplisting_id,
+            address: prop.name || 'N/A'
+          }));
+          setApartments(transformedApartments);
+        } else {
+          setApartments([]);
+        }
+      } else {
+        setApartments([]);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
+      setMappings([]);
+      setApartments([]);
     } finally {
       setLoading(false);
     }
