@@ -37,3 +37,4 @@ COMMENT ON COLUMN cached_availability.blocked_reason IS 'Reason for unavailabili
 COMMENT ON COLUMN cached_availability.last_synced IS 'When this record was last synced from the iCal feed';
 
 
+

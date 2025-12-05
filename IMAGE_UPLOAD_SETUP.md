@@ -160,3 +160,4 @@ property_photos             │
 - Deleting a property will cascade delete its photos (via foreign key)
 
 
+

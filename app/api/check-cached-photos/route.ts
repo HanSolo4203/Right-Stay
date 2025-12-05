@@ -6,6 +6,13 @@ import { supabaseServer } from '@/lib/supabase-server';
  */
 export async function GET() {
   try {
+    if (!supabaseServer) {
+      return NextResponse.json(
+        { error: 'Supabase client not initialized. Check environment variables.' },
+        { status: 500 }
+      );
+    }
+
     const { data: properties, error } = await supabaseServer
       .from('cached_properties')
       .select('uplisting_id, data')

@@ -12,6 +12,13 @@ import { supabaseServer } from '@/lib/supabase-server';
  */
 export async function GET(request: Request) {
   try {
+    if (!supabaseServer) {
+      return NextResponse.json(
+        { error: 'Supabase client not initialized. Check environment variables.' },
+        { status: 500 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const propertyId = searchParams.get('propertyId');
     const startDate = searchParams.get('startDate');

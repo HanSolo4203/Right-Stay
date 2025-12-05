@@ -8,6 +8,13 @@ import { parseIcalFeed } from '@/lib/ical-parser';
  */
 export async function POST(request: Request) {
   try {
+    if (!supabaseServer) {
+      return NextResponse.json(
+        { error: 'Supabase client not initialized. Check environment variables.' },
+        { status: 500 }
+      );
+    }
+
     const { propertyId } = await request.json();
 
     if (!propertyId) {
@@ -99,6 +106,13 @@ export async function POST(request: Request) {
  */
 export async function GET() {
   try {
+    if (!supabaseServer) {
+      return NextResponse.json(
+        { error: 'Supabase client not initialized. Check environment variables.' },
+        { status: 500 }
+      );
+    }
+
     console.log('Starting sync for all properties with iCal URLs...');
 
     const { data: properties, error } = await supabaseServer

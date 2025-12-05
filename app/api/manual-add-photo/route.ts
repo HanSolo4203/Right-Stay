@@ -8,6 +8,13 @@ import { supabaseServer } from '@/lib/supabase-server';
  */
 export async function POST(request: Request) {
   try {
+    if (!supabaseServer) {
+      return NextResponse.json(
+        { error: 'Supabase client not initialized. Check environment variables.' },
+        { status: 500 }
+      );
+    }
+
     const body = await request.json();
     const { property_id, photos } = body;
 

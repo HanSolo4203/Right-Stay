@@ -9,6 +9,13 @@ import { FALLBACK_PROPERTY_PHOTOS, getPropertySearchQuery } from '@/lib/unsplash
  */
 export async function GET(request: Request) {
   try {
+    if (!supabaseServer) {
+      return NextResponse.json(
+        { error: 'Supabase client not initialized. Check environment variables.' },
+        { status: 500 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const specificPropertyId = searchParams.get('property_id');
     const photosPerProperty = parseInt(searchParams.get('count') || '5', 10);
