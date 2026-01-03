@@ -19,11 +19,13 @@ export default function SiteSettings() {
     payment_processing_fee: '',
     default_cleaning_fee: '',
     default_welcome_pack_fee: '',
+    ical_sync_schedule: '0 1 * * *',
   });
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [customCronExpression, setCustomCronExpression] = useState('');
 
   useEffect(() => {
     fetchSettings();
@@ -45,6 +47,13 @@ export default function SiteSettings() {
         });
         
         setSettings(prevSettings => ({ ...prevSettings, ...settingsObj }));
+        
+        // Check if ical_sync_schedule is a custom value (not in predefined list)
+        const predefinedSchedules = ['0 1 * * *', '0 */6 * * *', '0 * * * *', '*/30 * * * *', '*/10 * * * *'];
+        if (settingsObj.ical_sync_schedule && !predefinedSchedules.includes(settingsObj.ical_sync_schedule)) {
+          setCustomCronExpression(settingsObj.ical_sync_schedule);
+          settingsObj.ical_sync_schedule = 'custom';
+        }
       }
     } catch (error) {
       console.error('Error fetching settings:', error);
@@ -59,10 +68,16 @@ export default function SiteSettings() {
     setMessage(null);
 
     try {
+      // Prepare settings for submission
+      const settingsToSubmit = { ...settings };
+      if (settings.ical_sync_schedule === 'custom') {
+        settingsToSubmit.ical_sync_schedule = customCronExpression || '0 1 * * *';
+      }
+      
       const response = await fetch('/api/admin/site-settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(settings),
+        body: JSON.stringify(settingsToSubmit),
       });
 
       if (response.ok) {
@@ -78,7 +93,7 @@ export default function SiteSettings() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setSettings(prev => ({
       ...prev,
       [e.target.name]: e.target.value,
@@ -241,6 +256,47 @@ export default function SiteSettings() {
                 placeholder="0.00"
               />
             </div>
+          </div>
+        </div>
+
+        {/* Calendar Sync Settings */}
+        <div className="bg-white/5 rounded-xl p-6 space-y-4">
+          <h3 className="text-lg font-semibold text-white mb-4">Calendar Sync Settings</h3>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              iCal Sync Frequency
+            </label>
+            <select
+              name="ical_sync_schedule"
+              value={settings.ical_sync_schedule}
+              onChange={handleChange}
+              className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors"
+            >
+              <option value="0 1 * * *">Once per day (1 AM UTC)</option>
+              <option value="0 */6 * * *">Every 6 hours</option>
+              <option value="0 * * * *">Every hour</option>
+              <option value="*/30 * * * *">Every 30 minutes</option>
+              <option value="*/10 * * * *">Every 10 minutes</option>
+              <option value="custom">Custom cron expression</option>
+            </select>
+            {settings.ical_sync_schedule === 'custom' && (
+              <div className="mt-3">
+                <input
+                  type="text"
+                  value={customCronExpression}
+                  onChange={(e) => setCustomCronExpression(e.target.value)}
+                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors font-mono text-sm"
+                  placeholder="0 1 * * *"
+                />
+                <p className="mt-2 text-xs text-gray-400">
+                  Format: minute hour day month weekday (e.g., &quot;0 1 * * *&quot; for daily at 1 AM)
+                </p>
+              </div>
+            )}
+            <p className="mt-2 text-xs text-gray-400">
+              <span className="text-yellow-400">Note:</span> Schedule changes require updating vercel.json and redeploying the application. This setting is for documentation purposes.
+            </p>
           </div>
         </div>
 

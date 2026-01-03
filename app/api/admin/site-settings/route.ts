@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     const settingsToUpsert = [];
 
     // Text-based settings
-    const textSettings = ['site_name', 'site_email', 'site_phone', 'site_address'];
+    const textSettings = ['site_name', 'site_email', 'site_phone', 'site_address', 'ical_sync_schedule'];
     for (const key of textSettings) {
       if (body[key] !== undefined) {
         settingsToUpsert.push({
