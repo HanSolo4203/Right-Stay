@@ -6,6 +6,8 @@ export async function GET(request: Request) {
     // Check if Supabase is configured
     if (!supabaseServer) {
       console.warn('Supabase environment variables not configured');
+      console.warn('NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Set' : 'Missing');
+      console.warn('SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'Set' : 'Missing');
       return NextResponse.json({ 
         error: 'Database not configured', 
         properties: [] 
@@ -26,8 +28,12 @@ export async function GET(request: Request) {
         .single();
 
       if (propertyError) {
-        console.error('Supabase error:', propertyError);
-        return NextResponse.json({ error: propertyError.message }, { status: 500 });
+        console.error('Supabase error fetching property:', propertyError);
+        console.error('Error details:', JSON.stringify(propertyError, null, 2));
+        return NextResponse.json({ 
+          error: propertyError.message,
+          details: propertyError 
+        }, { status: 500 });
       }
 
       if (!property) {
@@ -62,8 +68,17 @@ export async function GET(request: Request) {
       .order('created_at', { ascending: false });
 
     if (propertiesError) {
-      console.error('Supabase error:', propertiesError);
-      return NextResponse.json({ error: propertiesError.message }, { status: 500 });
+      console.error('Supabase error fetching properties:', propertiesError);
+      console.error('Error details:', JSON.stringify(propertiesError, null, 2));
+      console.error('Error code:', propertiesError.code);
+      console.error('Error hint:', propertiesError.hint);
+      
+      // Return a more helpful error message
+      return NextResponse.json({ 
+        error: propertiesError.message || 'Failed to fetch properties',
+        code: propertiesError.code,
+        details: propertiesError.hint || propertiesError.details
+      }, { status: 500 });
     }
 
     console.log('API: Found', properties?.length || 0, 'properties');
@@ -82,8 +97,10 @@ export async function GET(request: Request) {
 
     if (photosError) {
       console.warn('Error fetching photos:', photosError);
-      // Continue without photos if there's an error
-      return NextResponse.json({ properties });
+      // Continue without photos if there's an error - return properties without photos
+      return NextResponse.json({ 
+        properties: properties.map(p => ({ ...p, photos: [] }))
+      });
     }
 
     // Group photos by property_id
@@ -106,8 +123,14 @@ export async function GET(request: Request) {
     console.log('API: Attached photos to properties');
     return NextResponse.json({ properties: propertiesWithPhotos });
   } catch (error) {
-    console.error('Error fetching properties:', error);
-    return NextResponse.json({ error: 'Failed to fetch properties' }, { status: 500 });
+    console.error('Unexpected error fetching properties:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    console.error('Error stack:', errorStack);
+    return NextResponse.json({ 
+      error: 'Failed to fetch properties',
+      message: errorMessage
+    }, { status: 500 });
   }
 }
 

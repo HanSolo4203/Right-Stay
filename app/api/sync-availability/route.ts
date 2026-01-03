@@ -84,12 +84,24 @@ export async function POST(request: Request) {
       console.log('No blocked dates found in iCal feed');
     }
 
+    // Update last_synced timestamp in cached_properties table
+    const now = new Date().toISOString();
+    const { error: updateError } = await supabaseServer
+      .from('cached_properties')
+      .update({ last_synced: now })
+      .eq('uplisting_id', propertyId);
+
+    if (updateError) {
+      console.error('Error updating last_synced timestamp:', updateError);
+      // Don't fail the request if timestamp update fails, but log it
+    }
+
     return NextResponse.json({
       success: true,
       propertyId,
       blockedDates: blockedDates.length,
       message: `Synced ${blockedDates.length} blocked dates for property ${propertyId}`,
-      lastSynced: new Date().toISOString()
+      lastSynced: now
     });
   } catch (error) {
     console.error('Error syncing availability:', error);
@@ -161,11 +173,18 @@ export async function GET() {
             .insert(availabilityRecords);
         }
 
+        // Update last_synced timestamp in cached_properties table
+        const now = new Date().toISOString();
+        await supabaseServer
+          .from('cached_properties')
+          .update({ last_synced: now })
+          .eq('uplisting_id', property.uplisting_id);
+
         results.push({
           propertyId: property.uplisting_id,
           blockedDates: blockedDates.length,
           success: true,
-          lastSynced: new Date().toISOString()
+          lastSynced: now
         });
 
         console.log(`✓ Synced ${blockedDates.length} dates for ${property.uplisting_id}`);

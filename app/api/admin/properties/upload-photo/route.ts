@@ -45,7 +45,10 @@ export async function POST(request: NextRequest) {
     // Generate unique filename
     const fileExt = file.name.split('.').pop();
     const fileName = `${propertyId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-    const filePath = `property-photos/${fileName}`;
+    // File path should be relative to bucket root, not include bucket name
+    const filePath = fileName;
+
+    console.log('Uploading file to path:', filePath, 'Size:', buffer.length, 'Type:', file.type);
 
     // Upload to Supabase Storage
     const { data: uploadData, error: uploadError } = await supabase.storage
@@ -80,6 +83,8 @@ export async function POST(request: NextRequest) {
     const { data: { publicUrl } } = supabase.storage
       .from('property-photos')
       .getPublicUrl(filePath);
+    
+    console.log('File uploaded successfully. Public URL:', publicUrl);
 
     // If this is primary, unset other primary photos
     if (isPrimary) {
