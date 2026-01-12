@@ -107,7 +107,7 @@ npm run build
 echo ""
 
 echo -e "${YELLOW}Step 7: Setting up PM2...${NC}"
-# Create ecosystem.config.js
+# Create ecosystem.config.js with increased memory for image processing
 cat > $PROJECT_DIR/ecosystem.config.js << EOF
 module.exports = {
   apps: [{
@@ -118,10 +118,11 @@ module.exports = {
     instances: 1,
     autorestart: true,
     watch: false,
-    max_memory_restart: '1G',
+    max_memory_restart: '2G',
     env: {
       NODE_ENV: 'production',
-      PORT: 3000
+      PORT: 3000,
+      NODE_OPTIONS: '--max-old-space-size=2048'
     }
   }]
 }
@@ -133,11 +134,21 @@ pm2 save
 echo ""
 
 echo -e "${YELLOW}Step 8: Configuring Nginx...${NC}"
-# Create Nginx configuration
+# Create Nginx configuration with proper timeouts for image optimization
 cat > /etc/nginx/sites-available/${NGINX_SITE_NAME} << EOF
 server {
     listen 80;
     server_name ${DOMAIN} rightstayafrica.com;
+
+    # Increase buffer sizes for large images
+    client_max_body_size 50M;
+    client_body_buffer_size 128k;
+
+    # Increase timeouts for image optimization (5 minutes)
+    proxy_connect_timeout 300s;
+    proxy_send_timeout 300s;
+    proxy_read_timeout 300s;
+    send_timeout 300s;
 
     location / {
         proxy_pass http://localhost:3000;
@@ -149,6 +160,29 @@ server {
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;
+        
+        # Additional timeout settings for this location
+        proxy_connect_timeout 300s;
+        proxy_send_timeout 300s;
+        proxy_read_timeout 300s;
+    }
+
+    # Special handling for Next.js image optimization endpoint
+    location /_next/image {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        
+        # Extended timeouts for image processing
+        proxy_connect_timeout 300s;
+        proxy_send_timeout 300s;
+        proxy_read_timeout 300s;
+        
+        # Don't buffer responses for images
+        proxy_buffering off;
     }
 }
 EOF
