@@ -19,7 +19,7 @@ export default function Header() {
           <Link className="hover:text-white/90 text-sm text-white/80 transition" href="/host-with-us">
             Host With Us
           </Link>
-          <Link className="hover:text-white/90 text-sm text-white/80 transition" href="/accommodations">
+          <Link className="hover:text-white/90 text-sm text-white/80 transition" href="/stay-with-us">
             Stay With Us
           </Link>
           <Link className="hover:text-white/90 text-sm text-white/80 transition" href="/tours">
@@ -58,7 +58,7 @@ export default function Header() {
           <Link className="hover:bg-white/5 text-sm text-white/85 rounded-md pt-2 pr-3 pb-2 pl-3 transition" href="/host-with-us">
             Host With Us
           </Link>
-          <Link className="hover:bg-white/5 text-sm text-white/85 rounded-md pt-2 pr-3 pb-2 pl-3 transition" href="/accommodations">
+          <Link className="hover:bg-white/5 text-sm text-white/85 rounded-md pt-2 pr-3 pb-2 pl-3 transition" href="/stay-with-us">
             Stay With Us
           </Link>
           <Link className="hover:bg-white/5 text-sm text-white/85 rounded-md pt-2 pr-3 pb-2 pl-3 transition" href="/tours">
