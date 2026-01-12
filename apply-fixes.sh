@@ -10,7 +10,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-PROJECT_DIR="/var/www/rightstayafrica"
+PROJECT_DIR="/home/richard/app"
 NGINX_SITE_NAME="rightstayafrica"
 DOMAIN="www.rightstayafrica.com"
 
@@ -29,7 +29,12 @@ fi
 
 # Step 1: Pull latest code
 echo -e "${YELLOW}Step 1: Pulling latest code from GitHub...${NC}"
-cd $PROJECT_DIR
+echo "Using project directory: $PROJECT_DIR"
+if [ ! -d "$PROJECT_DIR" ]; then
+    echo -e "${RED}Error: Project directory does not exist: $PROJECT_DIR${NC}"
+    exit 1
+fi
+cd "$PROJECT_DIR"
 git pull origin main
 echo -e "${GREEN}✓ Code updated${NC}"
 echo ""
