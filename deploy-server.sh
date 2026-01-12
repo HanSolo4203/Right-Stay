@@ -16,7 +16,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Configuration
-PROJECT_DIR="/var/www/rightstayafrica"
+PROJECT_DIR="/home/richard/app"
 GITHUB_REPO="https://github.com/HanSolo4203/Right-Stay.git"
 PM2_APP_NAME="rightstayafrica"
 NGINX_SITE_NAME="rightstayafrica"
@@ -53,7 +53,7 @@ pm2 delete all || true
 echo ""
 
 echo -e "${YELLOW}Step 3: Setting up Right-Stay project...${NC}"
-cd /var/www
+cd /home/richard
 
 # Remove old directory if it exists and is wrong
 if [ -d "$PROJECT_DIR" ] && [ ! -d "$PROJECT_DIR/.git" ]; then

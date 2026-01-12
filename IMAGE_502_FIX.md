@@ -99,7 +99,7 @@ sudo systemctl reload nginx
 
 Update your PM2 configuration to allow more memory for image processing:
 
-**Edit `/var/www/rightstayafrica/ecosystem.config.js`:**
+**Edit `/home/richard/app/ecosystem.config.js`:**
 
 ```javascript
 module.exports = {
@@ -107,7 +107,7 @@ module.exports = {
     name: 'rightstayafrica',
     script: 'npm',
     args: 'start',
-    cwd: '/var/www/rightstayafrica',
+    cwd: '/home/richard/app',
     instances: 1,
     autorestart: true,
     watch: false,
@@ -166,7 +166,7 @@ images: {
 
 Then rebuild and restart:
 ```bash
-cd /var/www/rightstayafrica
+cd /home/richard/app
 npm run build
 pm2 restart rightstayafrica
 ```
