@@ -52,6 +52,19 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Right Stay brand green (from logo: #337E2F)
+        "right-stay": {
+          50: "#f0f7ef",
+          100: "#d9ead7",
+          200: "#b8d6b5",
+          300: "#8fbc8b",
+          400: "#6ba066",
+          500: "#337e2f", // Primary brand green from logo
+          600: "#2a6527",
+          700: "#235020",
+          800: "#1f411d",
+          900: "#1a3618",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

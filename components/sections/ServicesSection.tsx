@@ -90,7 +90,7 @@ export default function ServicesSection() {
                 </p>
                 <Link
                   href={service.link}
-                  className="inline-flex items-center gap-2 text-blue-600 font-semibold hover:gap-3 transition-all duration-200"
+                  className="inline-flex items-center gap-2 text-right-stay-500 font-semibold hover:gap-3 transition-all duration-200"
                 >
                   {service.linkText}
                   <ArrowRight className="h-4 w-4" strokeWidth={2} />

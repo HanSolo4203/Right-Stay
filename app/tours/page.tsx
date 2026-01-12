@@ -135,7 +135,7 @@ export default function ToursPage() {
                 <div className="p-6">
                   <div className="flex items-start justify-between mb-3">
                     <div>
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-right-stay-500 transition-colors">
                         {tour.title}
                       </h3>
                       <div className="flex items-center gap-1 text-gray-600 mb-2">

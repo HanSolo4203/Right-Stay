@@ -16,8 +16,11 @@ export default function Header() {
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">
+          <Link className="hover:text-white/90 text-sm text-white/80 transition" href="/host-with-us">
+            Host With Us
+          </Link>
           <Link className="hover:text-white/90 text-sm text-white/80 transition" href="/accommodations">
-            Accommodations
+            Stay With Us
           </Link>
           <Link className="hover:text-white/90 text-sm text-white/80 transition" href="/tours">
             Tours
@@ -52,8 +55,11 @@ export default function Header() {
         }`}
       >
         <div className="flex flex-col gap-4">
+          <Link className="hover:bg-white/5 text-sm text-white/85 rounded-md pt-2 pr-3 pb-2 pl-3 transition" href="/host-with-us">
+            Host With Us
+          </Link>
           <Link className="hover:bg-white/5 text-sm text-white/85 rounded-md pt-2 pr-3 pb-2 pl-3 transition" href="/accommodations">
-            Accommodations
+            Stay With Us
           </Link>
           <Link className="hover:bg-white/5 text-sm text-white/85 rounded-md pt-2 pr-3 pb-2 pl-3 transition" href="/tours">
             Tours

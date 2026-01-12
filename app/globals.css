@@ -72,6 +72,18 @@
   }
 }
 
+/* Subtle cloud animation for hero image */
+@keyframes cloudDrift {
+  0% {
+    transform: scale(1.06) translate(-1%, -0.5%);
+    filter: brightness(0.95) contrast(0.98);
+  }
+  100% {
+    transform: scale(1) translate(0, 0);
+    filter: brightness(1) contrast(1);
+  }
+}
+
 /* Scroll animation control */
 .animate-on-scroll {
   animation-play-state: paused !important;
@@ -79,5 +91,28 @@
 
 .animate-on-scroll.animate {
   animation-play-state: running !important;
+}
+
+/* Text selection highlight - Right Stay green with transparency */
+/* Placed outside @layer to ensure it overrides Tailwind classes */
+*::selection {
+  background-color: rgba(51, 126, 47, 0.3) !important; /* Right Stay brand green (#337E2F) with 30% opacity */
+  color: inherit !important;
+}
+
+*::-moz-selection {
+  background-color: rgba(51, 126, 47, 0.3) !important; /* Right Stay brand green (#337E2F) with 30% opacity */
+  color: inherit !important;
+}
+
+/* Hide number input spinners */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
 }
 

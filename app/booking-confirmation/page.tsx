@@ -8,7 +8,7 @@ import { CheckCircle, Calendar, Mail, Home, ArrowRight } from 'lucide-react';
 export default function BookingConfirmationPage() {
   return (
     <>
-      <section className="isolate min-h-screen overflow-hidden relative bg-gradient-to-br from-blue-600 to-blue-800">
+      <section className="isolate min-h-screen overflow-hidden relative bg-gradient-to-br from-right-stay-500 to-right-stay-600">
         <Header />
         
         <div className="relative z-10 mx-auto max-w-4xl px-6 md:px-8 py-24">
@@ -36,8 +36,8 @@ export default function BookingConfirmationPage() {
               <div className="space-y-6">
                 <div className="flex gap-4">
                   <div className="flex-shrink-0">
-                    <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-full">
-                      <Mail className="h-5 w-5 text-blue-600" />
+                    <div className="flex items-center justify-center w-10 h-10 bg-right-stay-100 rounded-full">
+                      <Mail className="h-5 w-5 text-right-stay-500" />
                     </div>
                   </div>
                   <div>
@@ -52,8 +52,8 @@ export default function BookingConfirmationPage() {
 
                 <div className="flex gap-4">
                   <div className="flex-shrink-0">
-                    <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-full">
-                      <Calendar className="h-5 w-5 text-blue-600" />
+                    <div className="flex items-center justify-center w-10 h-10 bg-right-stay-100 rounded-full">
+                      <Calendar className="h-5 w-5 text-right-stay-500" />
                     </div>
                   </div>
                   <div>
@@ -68,8 +68,8 @@ export default function BookingConfirmationPage() {
 
                 <div className="flex gap-4">
                   <div className="flex-shrink-0">
-                    <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-full">
-                      <CheckCircle className="h-5 w-5 text-blue-600" />
+                    <div className="flex items-center justify-center w-10 h-10 bg-right-stay-100 rounded-full">
+                      <CheckCircle className="h-5 w-5 text-right-stay-500" />
                     </div>
                   </div>
                   <div>
@@ -85,22 +85,22 @@ export default function BookingConfirmationPage() {
             </div>
 
             {/* Important Information */}
-            <div className="bg-blue-50 rounded-2xl p-6 mt-8">
+            <div className="bg-right-stay-50 rounded-2xl p-6 mt-8">
               <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <Home className="h-5 w-5 text-blue-600" />
+                <Home className="h-5 w-5 text-right-stay-500" />
                 Important Information
               </h3>
               <ul className="space-y-2 text-sm text-gray-700">
                 <li className="flex items-start gap-2">
-                  <span className="text-blue-600 mt-1">•</span>
+                  <span className="text-right-stay-500 mt-1">•</span>
                   <span>Check your email inbox (and spam folder) for booking confirmation</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-blue-600 mt-1">•</span>
+                  <span className="text-right-stay-500 mt-1">•</span>
                   <span>Free cancellation up to 48 hours before check-in</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-blue-600 mt-1">•</span>
+                  <span className="text-right-stay-500 mt-1">•</span>
                   <span>If you have questions, contact us at info@rightstayafrica.com</span>
                 </li>
               </ul>
@@ -116,7 +116,7 @@ export default function BookingConfirmationPage() {
               </Link>
               <Link
                 href="/"
-                className="flex-1 bg-blue-600 text-white font-semibold py-4 px-6 rounded-2xl hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center gap-2"
+                className="flex-1 bg-right-stay-500 text-white font-semibold py-4 px-6 rounded-2xl hover:bg-right-stay-600 transition-colors duration-200 flex items-center justify-center gap-2"
               >
                 Return to Home
                 <ArrowRight className="h-5 w-5" />

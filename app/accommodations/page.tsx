@@ -7,7 +7,7 @@ import { ArrowLeft } from 'lucide-react';
 export default function AccommodationsPage() {
   return (
     <>
-      <section className="isolate min-h-[400px] overflow-hidden relative bg-gradient-to-br from-blue-600 to-blue-800">
+      <section className="isolate min-h-[400px] overflow-hidden relative bg-gradient-to-br from-right-stay-500 to-right-stay-600">
         <Header />
         <div className="relative z-10 mx-auto max-w-7xl px-6 md:px-8 py-24">
           <Link

@@ -47,6 +47,7 @@ export default function Footer() {
                   { name: 'Accommodations', href: '/accommodations' },
                   { name: 'Tours', href: '/tours' },
                   { name: 'Asset Management', href: '/asset-management' },
+                  { name: 'Host With Us', href: '/host-with-us' },
                   { name: 'About Us', href: '/about' },
                   { name: 'Contact', href: '/contact' },
                   { name: 'Privacy Policy', href: '/privacy' }

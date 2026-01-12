@@ -54,8 +54,8 @@ export default function TrustSection() {
                   style={{ animation: `fadeSlideIn 1s ease-out ${0.4 + index * 0.1}s both` }}
                 >
                   <div className="flex-shrink-0">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
-                      <feature.icon className="h-5 w-5 text-blue-600" strokeWidth={1.5} />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-right-stay-100">
+                      <feature.icon className="h-5 w-5 text-right-stay-500" strokeWidth={1.5} />
                     </div>
                   </div>
                   <div>

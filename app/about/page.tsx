@@ -130,8 +130,8 @@ export default function AboutPage() {
                 key={value.title}
                 className="rounded-2xl border border-gray-200 bg-white p-8 hover:shadow-lg transition-all duration-300"
               >
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-100 mb-6">
-                  <value.icon className="h-7 w-7 text-blue-600" strokeWidth={1.5} />
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-right-stay-100 mb-6">
+                  <value.icon className="h-7 w-7 text-right-stay-500" strokeWidth={1.5} />
                 </div>
                 <h3 className="text-2xl font-semibold text-gray-900 mb-4">
                   {value.title}
@@ -166,15 +166,15 @@ export default function AboutPage() {
                 key={member.name}
                 className="text-center"
               >
-                <div className="relative h-64 w-64 mx-auto mb-6 rounded-2xl overflow-hidden bg-gradient-to-br from-blue-100 to-blue-200">
+                <div className="relative h-64 w-64 mx-auto mb-6 rounded-2xl overflow-hidden bg-gradient-to-br from-right-stay-100 to-right-stay-200">
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <Users className="h-24 w-24 text-blue-400" strokeWidth={1} />
+                    <Users className="h-24 w-24 text-right-stay-300" strokeWidth={1} />
                   </div>
                 </div>
                 <h3 className="text-2xl font-semibold text-gray-900 mb-2">
                   {member.name}
                 </h3>
-                <p className="text-blue-600 font-medium mb-3">
+                <p className="text-right-stay-500 font-medium mb-3">
                   {member.role}
                 </p>
                 <p className="text-gray-600 text-base">
@@ -187,7 +187,7 @@ export default function AboutPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="isolate overflow-hidden py-24 relative bg-gradient-to-br from-blue-600 to-blue-800">
+      <section className="isolate overflow-hidden py-24 relative bg-gradient-to-br from-right-stay-500 to-right-stay-600">
         <div className="relative z-10 mx-auto max-w-7xl px-6 md:px-8 text-center">
           <h2 
             className="sm:text-5xl lg:text-6xl text-4xl font-medium text-white tracking-tight"
@@ -201,7 +201,7 @@ export default function AboutPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/accommodations"
-              className="inline-flex items-center justify-center gap-2 bg-white text-blue-600 font-semibold py-4 px-8 rounded-2xl hover:bg-gray-100 transition-colors duration-200"
+              className="inline-flex items-center justify-center gap-2 bg-white text-right-stay-500 font-semibold py-4 px-8 rounded-2xl hover:bg-gray-100 transition-colors duration-200"
             >
               Browse Properties
               <ArrowRight className="h-5 w-5" />

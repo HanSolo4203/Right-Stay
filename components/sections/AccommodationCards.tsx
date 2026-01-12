@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-import { Star, MapPin, Users, Calendar, Wifi, Car, Coffee, Shield } from 'lucide-react';
+import { Star, MapPin, Users, Calendar, Wifi, Car, Coffee, Shield, Eye } from 'lucide-react';
+import QuickViewModal from '@/components/QuickViewModal';
 
 interface PropertyData {
   id?: string;
@@ -61,6 +62,7 @@ export default function AccommodationCards() {
   useScrollAnimation();
   const [properties, setProperties] = useState<CachedProperty[]>([]);
   const [loading, setLoading] = useState(true);
+  const [quickViewProperty, setQuickViewProperty] = useState<any | null>(null);
 
   useEffect(() => {
     async function fetchProperties() {
@@ -117,8 +119,10 @@ export default function AccommodationCards() {
       bedrooms: 3,
       bathrooms: 2,
       image: "/images/993d5154-c104-4507-8c0a-55364d2a948c_800w_1.jpg",
+      photos: [{ id: '1', url: "/images/993d5154-c104-4507-8c0a-55364d2a948c_800w_1.jpg", is_primary: true }],
       amenities: ["WiFi", "Parking", "Pool", "Ocean View"],
-      description: "Stunning oceanfront villa with panoramic views of the Atlantic Ocean. Perfect for families and groups seeking luxury and comfort."
+      description: "Stunning oceanfront villa with panoramic views of the Atlantic Ocean. Perfect for families and groups seeking luxury and comfort. This beautifully designed property features spacious living areas, modern amenities, and direct access to pristine beaches. Wake up to breathtaking sunrises and enjoy world-class dining just steps away.",
+      shortDescription: "Stunning oceanfront villa with panoramic views of the Atlantic Ocean. Perfect for families and groups seeking luxury and comfort..."
     },
     {
       id: 2,
@@ -132,8 +136,10 @@ export default function AccommodationCards() {
       bedrooms: 2,
       bathrooms: 2,
       image: "/images/6d30fe29-43aa-4fc2-a513-6aa41d38a7d0_3840w_1.jpg",
+      photos: [{ id: '2', url: "/images/6d30fe29-43aa-4fc2-a513-6aa41d38a7d0_3840w_1.jpg", is_primary: true }],
       amenities: ["WiFi", "Parking", "Safari", "Game Drives"],
-      description: "Authentic safari experience with luxury accommodations. Wake up to the sounds of the African bush and spot the Big Five."
+      description: "Authentic safari experience with luxury accommodations. Wake up to the sounds of the African bush and spot the Big Five. Our professionally guided game drives offer unforgettable wildlife encounters. Experience traditional African hospitality in a modern, comfortable setting with gourmet meals and premium amenities.",
+      shortDescription: "Authentic safari experience with luxury accommodations. Wake up to the sounds of the African bush and spot the Big Five..."
     },
     {
       id: 3,
@@ -147,8 +153,10 @@ export default function AccommodationCards() {
       bedrooms: 4,
       bathrooms: 3,
       image: "/images/d953ad7f-2dd7-42f7-8f74-593d55181036_3840w_1.jpg",
+      photos: [{ id: '3', url: "/images/d953ad7f-2dd7-42f7-8f74-593d55181036_3840w_1.jpg", is_primary: true }],
       amenities: ["WiFi", "Parking", "Wine Tasting", "Vineyard Views"],
-      description: "Elegant villa on a working wine estate. Enjoy wine tastings, vineyard tours, and breathtaking mountain views."
+      description: "Elegant villa on a working wine estate. Enjoy wine tastings, vineyard tours, and breathtaking mountain views. This historic property combines old-world charm with contemporary luxury. Indulge in award-winning wines, farm-to-table cuisine, and explore one of South Africa's most beautiful wine regions.",
+      shortDescription: "Elegant villa on a working wine estate. Enjoy wine tastings, vineyard tours, and breathtaking mountain views..."
     }
   ];
 
@@ -166,6 +174,8 @@ export default function AccommodationCards() {
         // Generate a price range since base price isn't directly available
         const price = attributes.currency === 'USD' ? 'From $85' : 'From R1,500';
         
+        const fullDescription = attributes.description || `${attributes.type || 'Beautiful property'} in Cape Town. Perfect for your African getaway.`;
+        
         return {
           id: property.uplisting_id,
           title: attributes.name || attributes.nickname || "Luxury Property",
@@ -178,8 +188,10 @@ export default function AccommodationCards() {
           bedrooms: attributes.bedrooms || 1,
           bathrooms: attributes.bathrooms || 1,
           image: firstImage,
+          photos: photos.length > 0 ? photos : [{ id: property.uplisting_id, url: firstImage, is_primary: true }], // Include all photos or fallback to single image
           amenities: ["WiFi", "Parking", "Air Conditioning", "Kitchen"],
-          description: attributes.description?.substring(0, 150) + "..." || `${attributes.type || 'Beautiful property'} in Cape Town. Perfect for your African getaway.`
+          description: fullDescription, // Full description for modal
+          shortDescription: fullDescription.substring(0, 150) + "..." // Truncated for card
         };
       })
     : fallbackAccommodations;
@@ -238,10 +250,13 @@ export default function AccommodationCards() {
           {accommodations.map((accommodation, index) => (
             <div
               key={accommodation.id}
-              className="group rounded-3xl border border-gray-200 bg-white shadow-[0_2.8px_2.2px_rgba(0,_0,_0,_0.034),_0_6.7px_5.3px_rgba(0,_0,_0,_0.048),_0_12.5px_10px_rgba(0,_0,_0,_0.06),_0_22.3px_17.9px_rgba(0,_0,_0,_0.072),_0_41.8px_33.4px_rgba(0,_0,_0,_0.086),_0_100px_80px_rgba(0,_0,_0,_0.12)] hover:shadow-[0_4px_6px_rgba(0,_0,_0,_0.1),_0_10px_15px_rgba(0,_0,_0,_0.1)] transition-all duration-300"
+              className="group rounded-3xl border border-gray-200 bg-white shadow-[0_2.8px_2.2px_rgba(0,_0,_0,_0.034),_0_6.7px_5.3px_rgba(0,_0,_0,_0.048),_0_12.5px_10px_rgba(0,_0,_0,_0.06),_0_22.3px_17.9px_rgba(0,_0,_0,_0.072),_0_41.8px_33.4px_rgba(0,_0,_0,_0.086),_0_100px_80px_rgba(0,_0,_0,_0.12)] hover:shadow-[0_4px_6px_rgba(0,_0,_0,_0.1),_0_10px_15px_rgba(0,_0,_0,_0.1)] transition-all duration-300 flex flex-col h-full overflow-hidden"
             >
               {/* Image */}
-              <div className="relative h-32 sm:h-48 lg:h-64 overflow-hidden">
+              <div 
+                className="relative h-32 sm:h-48 lg:h-64 overflow-hidden cursor-pointer rounded-t-3xl"
+                onClick={() => setQuickViewProperty(accommodation)}
+              >
                 <Image
                   src={accommodation.image}
                   alt={accommodation.title}
@@ -264,10 +279,10 @@ export default function AccommodationCards() {
               </div>
 
               {/* Content */}
-              <div className="p-3 sm:p-5 lg:p-6">
+              <div className="p-3 sm:p-5 lg:p-6 flex flex-col flex-1">
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-1 group-hover:text-right-stay-500 transition-colors">
                       {accommodation.title}
                     </h3>
                     <div className="flex items-center gap-1 text-gray-600">
@@ -282,7 +297,7 @@ export default function AccommodationCards() {
                 </div>
 
                 <p className="text-gray-600 text-sm sm:text-base mb-3 sm:mb-4 line-clamp-2">
-                  {accommodation.description}
+                  {accommodation.shortDescription || accommodation.description}
                 </p>
 
                 {/* Amenities */}
@@ -323,14 +338,23 @@ export default function AccommodationCards() {
                   </div>
                 </div>
 
-                {/* Book Button */}
-                <Link
-                  href={`/accommodations/${accommodation.id}/book`}
-                className="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-2xl hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center gap-2 min-h-11"
-                >
-                  <Calendar className="h-4 w-4" />
-                  Book Now
-                </Link>
+                {/* Action Buttons - pushed to bottom */}
+                <div className="mt-auto space-y-2">
+                  <button
+                    onClick={() => setQuickViewProperty(accommodation)}
+                    className="w-full border-2 border-gray-300 text-gray-700 font-semibold py-3 px-4 rounded-2xl hover:border-right-stay-500 hover:text-right-stay-500 hover:bg-right-stay-50 transition-all duration-200 flex items-center justify-center gap-2 min-h-11"
+                  >
+                    <Eye className="h-4 w-4" />
+                    Quick View
+                  </button>
+                  <Link
+                    href={`/accommodations/${accommodation.id}/book`}
+                    className="w-full bg-right-stay-500 text-white font-semibold py-3 px-4 rounded-2xl hover:bg-right-stay-600 transition-colors duration-200 flex items-center justify-center gap-2 min-h-11"
+                  >
+                    <Calendar className="h-4 w-4" />
+                    Book Now
+                  </Link>
+                </div>
               </div>
             </div>
           ))}
@@ -347,6 +371,15 @@ export default function AccommodationCards() {
           </Link>
         </div>
       </div>
+
+      {/* Quick View Modal */}
+      {quickViewProperty && (
+        <QuickViewModal
+          isOpen={!!quickViewProperty}
+          onClose={() => setQuickViewProperty(null)}
+          property={quickViewProperty}
+        />
+      )}
     </section>
   );
 }

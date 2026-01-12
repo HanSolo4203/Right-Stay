@@ -57,16 +57,16 @@ export default function HowItWorksSection() {
             >
               {/* Connector line for desktop */}
               {index < steps.length - 1 && (
-                <div className="hidden lg:block absolute top-16 left-1/2 w-full h-0.5 bg-gradient-to-r from-blue-200 via-blue-300 to-transparent"></div>
+                <div className="hidden lg:block absolute top-16 left-1/2 w-full h-0.5 bg-gradient-to-r from-right-stay-200 via-right-stay-300 to-transparent"></div>
               )}
               
               <div className="relative z-10">
                 <div className="flex items-center justify-center mb-6">
-                  <div className="flex h-32 w-32 items-center justify-center rounded-full bg-white border-2 border-blue-200 shadow-lg">
+                  <div className="flex h-32 w-32 items-center justify-center rounded-full bg-white border-2 border-right-stay-200 shadow-lg">
                     <span className="text-6xl">{step.emoji}</span>
                   </div>
                 </div>
-                <div className="text-sm font-semibold text-blue-600 tracking-wider mb-3">
+                <div className="text-sm font-semibold text-right-stay-500 tracking-wider mb-3">
                   {step.number}
                 </div>
                 <h3 className="text-2xl font-semibold text-gray-900 mb-4">

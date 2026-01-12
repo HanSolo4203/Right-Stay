@@ -1,41 +1,41 @@
 "use client";
 
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-import { ShieldCheck, Star, Headphones, MapPin, DollarSign, Zap } from 'lucide-react';
+import { TrendingUp, Zap, ShieldCheck, BarChart3, Headphones, Clock } from 'lucide-react';
 
-export default function WhyChooseSection() {
+export default function HostWhyPartner() {
   useScrollAnimation();
 
   const features = [
     {
-      icon: ShieldCheck,
-      title: "Verified & Secure",
-      description: "Every property is personally inspected and verified. Your safety and security are our top priorities."
-    },
-    {
-      icon: Star,
-      title: "Premium Quality",
-      description: "Handpicked accommodations that meet our high standards for comfort, cleanliness, and style."
-    },
-    {
-      icon: Headphones,
-      title: "24/7 Support",
-      description: "Round-the-clock guest support in multiple languages. We're here whenever you need us."
-    },
-    {
-      icon: MapPin,
-      title: "Prime Locations",
-      description: "Properties strategically located in the heart of Africa's most vibrant and sought-after destinations."
-    },
-    {
-      icon: DollarSign,
-      title: "Best Value",
-      description: "Competitive pricing with transparent fees. No hidden charges, just exceptional value for money."
+      icon: TrendingUp,
+      title: "Maximize Revenue",
+      description: "Access to multiple booking channels increases your property's visibility and booking potential, driving higher occupancy rates and revenue."
     },
     {
       icon: Zap,
-      title: "Instant Booking",
-      description: "Seamless booking process with instant confirmation. Start planning your African adventure today."
+      title: "Dynamic Pricing",
+      description: "AI-powered pricing optimization adjusts rates in real-time based on demand, seasonality, and market conditions to maximize your earnings."
+    },
+    {
+      icon: ShieldCheck,
+      title: "Trusted Platform",
+      description: "We handle all the complexities of multi-channel distribution, payment processing, and guest communication with complete transparency."
+    },
+    {
+      icon: BarChart3,
+      title: "Performance Analytics",
+      description: "Comprehensive reporting and analytics give you insights into your property's performance, occupancy trends, and revenue optimization opportunities."
+    },
+    {
+      icon: Headphones,
+      title: "Dedicated Support",
+      description: "Our team provides 24/7 guest support, handles inquiries, manages bookings, and ensures smooth operations so you can focus on what matters."
+    },
+    {
+      icon: Clock,
+      title: "Save Time",
+      description: "Automated calendar synchronization, pricing updates, and guest communication save you hours every week while increasing your bookings."
     }
   ];
 
@@ -47,13 +47,13 @@ export default function WhyChooseSection() {
             className="sm:text-5xl lg:text-6xl text-4xl font-medium text-gray-900 tracking-tight animate-on-scroll"
             style={{ animation: 'fadeSlideIn 1s ease-out 0.1s both', fontFamily: 'Manrope, sans-serif' }}
           >
-            Why Choose Right Stay Africa?
+            Why Partner With Right Stay Africa?
           </h2>
           <p 
             className="sm:text-xl text-lg leading-relaxed text-gray-600 max-w-3xl mx-auto mt-6 animate-on-scroll"
             style={{ animation: 'fadeSlideIn 1s ease-out 0.2s both' }}
           >
-            We&apos;re not just another accommodation provider. We&apos;re your trusted partner for exceptional African experiences.
+            Join property owners across Africa who trust us to maximize their rental income while providing exceptional guest experiences.
           </p>
         </div>
 
@@ -80,4 +80,3 @@ export default function WhyChooseSection() {
     </section>
   );
 }
-

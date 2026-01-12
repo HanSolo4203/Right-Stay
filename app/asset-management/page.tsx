@@ -103,8 +103,8 @@ export default function AssetManagementPage() {
                 key={service.title}
                 className="rounded-2xl border border-gray-200 bg-gray-50 p-8 hover:bg-white hover:shadow-lg transition-all duration-300"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 mb-5">
-                  <service.icon className="h-6 w-6 text-blue-600" strokeWidth={1.5} />
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-right-stay-100 mb-5">
+                  <service.icon className="h-6 w-6 text-right-stay-500" strokeWidth={1.5} />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">
                   {service.title}
@@ -151,8 +151,8 @@ export default function AssetManagementPage() {
                 {benefits.map((benefit, index) => (
                   <div key={index} className="flex items-start gap-3">
                     <div className="flex-shrink-0 mt-1">
-                      <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100">
-                        <svg className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <div className="flex h-6 w-6 items-center justify-center rounded-full bg-right-stay-100">
+                        <svg className="h-4 w-4 text-right-stay-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                       </div>
@@ -164,7 +164,7 @@ export default function AssetManagementPage() {
 
               <Link
                 href="/contact"
-                className="inline-flex items-center gap-2 mt-10 bg-blue-600 text-white font-semibold py-4 px-8 rounded-2xl hover:bg-blue-700 transition-colors duration-200"
+                className="inline-flex items-center gap-2 mt-10 bg-right-stay-500 text-white font-semibold py-4 px-8 rounded-2xl hover:bg-right-stay-600 transition-colors duration-200"
               >
                 Get Started
                 <ArrowRight className="h-5 w-5" />
@@ -175,7 +175,7 @@ export default function AssetManagementPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="isolate overflow-hidden py-24 relative bg-gradient-to-br from-blue-600 to-blue-800">
+      <section className="isolate overflow-hidden py-24 relative bg-gradient-to-br from-right-stay-500 to-right-stay-600">
         <div className="relative z-10 mx-auto max-w-7xl px-6 md:px-8 text-center">
           <h2 
             className="sm:text-5xl lg:text-5xl text-4xl font-medium text-white tracking-tight mb-16"

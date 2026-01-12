@@ -15,7 +15,8 @@ export default function HeroSection() {
         className="pointer-events-none object-cover"
         style={{ 
           maskImage: 'linear-gradient(to bottom, black 85%, transparent)',
-          WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent)'
+          WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent)',
+          animation: 'cloudDrift 5s ease-out forwards'
         }}
         priority
       />
@@ -35,12 +36,12 @@ export default function HeroSection() {
             </div>
 
             <h1
-              className="sm:text-6xl lg:font-normal lg:text-8xl text-5xl font-medium text-white tracking-tighter drop-shadow-xl"
+              className="sm:text-4xl lg:font-normal lg:text-5xl text-3xl font-medium text-white tracking-tighter drop-shadow-xl"
               style={{ animation: 'fadeSlideIn 1s ease-out 0.2s both', fontFamily: 'Manrope, sans-serif' }}
             >
-              TURN LEFT AND COME RIGHT
+              "Turn left and come right
               <br className="hidden sm:block" />
-              WITH
+              with"
             </h1>
 
             <p
