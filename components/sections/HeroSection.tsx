@@ -39,9 +39,9 @@ export default function HeroSection() {
               className="sm:text-4xl lg:font-normal lg:text-5xl text-3xl font-medium text-white tracking-tighter drop-shadow-xl"
               style={{ animation: 'fadeSlideIn 1s ease-out 0.2s both', fontFamily: 'Manrope, sans-serif' }}
             >
-              "Turn left and come right
+              &ldquo;Turn left and come right
               <br className="hidden sm:block" />
-              with"
+              with&rdquo;
             </h1>
 
             <p

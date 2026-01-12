@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import { X, ChevronLeft, ChevronRight, Grid, Wifi, Car, Coffee, Shield, MapPin, Star, Users } from 'lucide-react';
 import Link from 'next/link';
@@ -40,7 +40,8 @@ export default function QuickViewModal({ isOpen, onClose, property }: QuickViewM
   const [showPhotoModal, setShowPhotoModal] = useState(false);
 
   // Get photos array - handle both array format and single image
-  const photos = property.photos || [];
+  // Use useMemo to prevent dependency changes on every render
+  const photos = useMemo(() => property.photos || [], [property.photos]);
   const hasMultiplePhotos = photos.length > 1;
   
   // Get first 5 photos for the gallery grid
