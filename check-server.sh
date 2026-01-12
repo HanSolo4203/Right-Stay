@@ -32,21 +32,21 @@ else
 fi
 echo ""
 
-echo "5. Checking /home/richard directory:"
-echo "-------------------------------------"
-ls -la /home/richard/ 2>/dev/null || echo "Cannot access /home/richard"
+echo "5. Checking /var/www directory:"
+echo "-------------------------------"
+ls -la /var/www/
 echo ""
 
-echo "6. Checking if app directory exists:"
-echo "-------------------------------------"
-if [ -d "/home/richard/app" ]; then
+echo "6. Checking if rightstayafrica directory exists:"
+echo "-------------------------------------------------"
+if [ -d "/var/www/rightstayafrica" ]; then
     echo "Directory exists:"
-    ls -la /home/richard/app/ | head -20
+    ls -la /var/www/rightstayafrica/ | head -20
     echo ""
     echo "Checking if it's a git repo:"
-    if [ -d "/home/richard/app/.git" ]; then
+    if [ -d "/var/www/rightstayafrica/.git" ]; then
         echo "Git repo found. Current remote:"
-        cd /home/richard/app && git remote -v
+        cd /var/www/rightstayafrica && git remote -v
     else
         echo "Not a git repository"
     fi

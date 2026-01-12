@@ -6,7 +6,7 @@ module.exports = {
     name: 'rightstayafrica',
     script: 'npm',
     args: 'start',
-    cwd: '/home/richard/app',
+    cwd: '/var/www/rightstayafrica',
     instances: 1,
     autorestart: true,
     watch: false,

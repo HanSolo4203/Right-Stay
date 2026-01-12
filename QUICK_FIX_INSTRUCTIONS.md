@@ -9,7 +9,7 @@ Just pulling the code from GitHub is **not enough**. You need to apply the fixes
 SSH into your Digital Ocean server and run:
 
 ```bash
-cd /home/richard/app
+cd /var/www/rightstayafrica
 git pull origin main
 sudo bash apply-fixes.sh
 ```
@@ -85,7 +85,7 @@ sudo systemctl reload nginx
 ### 2. Rebuild and Restart
 
 ```bash
-cd /home/richard/app
+cd /var/www/rightstayafrica
 npm run build
 pm2 restart rightstayafrica
 ```
@@ -93,7 +93,7 @@ pm2 restart rightstayafrica
 ### 3. Check if Image File Exists
 
 ```bash
-ls -la /home/richard/app/public/cpt-lions-head-1.jpg
+ls -la /var/www/rightstayafrica/public/cpt-lions-head-1.jpg
 ```
 
 If it doesn't exist, you may need to copy it from your local machine or re-upload it.
@@ -132,15 +132,15 @@ sudo bash apply-fixes.sh
 ### Issue: PM2 process not found
 **Fix:** Start it manually:
 ```bash
-cd /home/richard/app
+cd /var/www/rightstayafrica
 pm2 start ecosystem.config.js
 pm2 save
 ```
 
 ### Issue: Image file missing
-**Fix:** The file should be in `/home/richard/app/public/cpt-lions-head-1.jpg`. If missing:
+**Fix:** The file should be in `/var/www/rightstayafrica/public/cpt-lions-head-1.jpg`. If missing:
 - Check if it exists in your local repo
-- Copy it to the server: `scp public/cpt-lions-head-1.jpg user@server:/home/richard/app/public/`
+- Copy it to the server: `scp public/cpt-lions-head-1.jpg user@server:/var/www/rightstayafrica/public/`
 
 ### Issue: Still getting 502 after all fixes
 **Check:**
