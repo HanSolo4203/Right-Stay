@@ -10,7 +10,17 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-PROJECT_DIR="/home/richard/app"
+# Detect project directory - use current directory if script is run from project root, otherwise use /home/richard/app
+if [ -d "/home/richard/app" ]; then
+    PROJECT_DIR="/home/richard/app"
+elif [ -d "/var/www/rightstayafrica" ]; then
+    PROJECT_DIR="/var/www/rightstayafrica"
+elif [ -f "$(pwd)/package.json" ]; then
+    PROJECT_DIR="$(pwd)"
+else
+    echo "Error: Could not find project directory. Please run this script from the project root or set PROJECT_DIR manually."
+    exit 1
+fi
 NGINX_SITE_NAME="rightstayafrica"
 DOMAIN="www.rightstayafrica.com"
 
