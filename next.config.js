@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    unoptimized: false,
+    unoptimized: true, // TEMPORARY: Disables optimization to fix 502 errors - images will load directly from Supabase
     // Increase image optimization cache TTL
     minimumCacheTTL: 60,
     // Add device sizes for better optimization
