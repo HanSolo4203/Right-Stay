@@ -7,19 +7,21 @@ import { ArrowRight, Play, ChevronRight, Search, Calendar, Users, MapPin } from 
 export default function HeroSection() {
   return (
     <>
-      <Image
-        src="/cpt-lions-head-1.jpg"
-        alt=""
-        fill
-        sizes="100vw"
-        className="pointer-events-none object-cover"
-        style={{ 
-          maskImage: 'linear-gradient(to bottom, black 85%, transparent)',
-          WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent)',
-          animation: 'cloudDrift 5s ease-out forwards'
-        }}
-        priority
-      />
+      <div className="absolute inset-0">
+        <Image
+          src="/cpt-lions-head-1.jpg"
+          alt=""
+          fill
+          sizes="100vw"
+          className="pointer-events-none object-cover"
+          style={{ 
+            maskImage: 'linear-gradient(to bottom, black 85%, transparent)',
+            WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent)',
+            animation: 'cloudDrift 5s ease-out forwards'
+          }}
+          priority
+        />
+      </div>
 
       <div className="z-10 relative">
         <div className="grid grid-cols-1 grid-rows-[minmax(0,1fr)] gap-12 md:px-8 md:pb-24 md:pt-16 lg:grid-cols-12 lg:gap-8 lg:pb-28 lg:pt-20 min-h-[calc(100vh-96px)] max-w-7xl mr-auto ml-auto pt-8 pr-6 pb-16 pl-6 gap-x-12 gap-y-12 items-center">

@@ -14,7 +14,7 @@ import Footer from '@/components/sections/Footer';
 export default function Home() {
   return (
     <>
-      <section className="isolate min-h-[800px] overflow-hidden relative">
+      <section className="isolate h-screen overflow-hidden relative">
         <Header />
         <HeroSection />
       </section>
