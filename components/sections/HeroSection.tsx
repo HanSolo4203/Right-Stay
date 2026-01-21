@@ -25,8 +25,17 @@ export default function HeroSection() {
 
       <div className="z-10 relative">
         <div className="grid grid-cols-1 grid-rows-[minmax(0,1fr)] gap-12 md:px-8 md:pb-24 md:pt-16 lg:grid-cols-12 lg:gap-8 lg:pb-28 lg:pt-20 min-h-[calc(100vh-96px)] max-w-7xl mr-auto ml-auto pt-8 pr-6 pb-16 pl-6 gap-x-12 gap-y-12 items-center">
-          <div className="col-span-7 flex flex-col justify-center" style={{ animation: 'fadeSlideIn 1.2s ease-out forwards' }}>
-            <div className="mb-8" style={{ animation: 'fadeSlideIn 1s ease-out 0.1s both' }}>
+          <div className="col-span-7 flex flex-col justify-center items-start lg:items-center text-left lg:text-center" style={{ animation: 'fadeSlideIn 1.2s ease-out forwards' }}>
+            <h1
+              className="sm:text-4xl lg:font-normal lg:text-5xl text-3xl font-medium text-white tracking-tighter drop-shadow-xl"
+              style={{ animation: 'fadeSlideIn 1s ease-out 0.2s both', fontFamily: 'Manrope, sans-serif' }}
+            >
+              Turn left and come right
+              <br className="hidden sm:block" />
+              with
+            </h1>
+
+            <div className="mt-8" style={{ animation: 'fadeSlideIn 1s ease-out 0.4s both' }}>
               <Image
                 src="/rsa-logo-white.png"
                 alt="RSA Logo"
@@ -36,22 +45,6 @@ export default function HeroSection() {
                 priority
               />
             </div>
-
-            <h1
-              className="sm:text-4xl lg:font-normal lg:text-5xl text-3xl font-medium text-white tracking-tighter drop-shadow-xl"
-              style={{ animation: 'fadeSlideIn 1s ease-out 0.2s both', fontFamily: 'Manrope, sans-serif' }}
-            >
-              &ldquo;Turn left and come right
-              <br className="hidden sm:block" />
-              with&rdquo;
-            </h1>
-
-            <p
-              className="leading-relaxed text-2xl text-white/90 max-w-2xl mt-6 font-medium"
-              style={{ animation: 'fadeSlideIn 1s ease-out 0.4s both' }}
-            >
-              Right Stay Africa
-            </p>
 
             <div className="flex flex-col sm:flex-row sm:items-center mt-10 gap-x-4 gap-y-4" style={{ animation: 'fadeSlideIn 1s ease-out 0.8s both' }}>
               <Link

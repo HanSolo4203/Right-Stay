@@ -20,14 +20,21 @@ export default function SecondHero() {
             className="sm:text-xl text-lg leading-relaxed text-gray-700 max-w-4xl mx-auto mt-8 animate-on-scroll"
             style={{ animation: 'fadeSlideIn 1s ease-out 0.3s both' }}
           >
-            Why choose ordinary when you can choose the extraordinary? At Right Stay Africa, we believe in elevating every detail.
+            More punch, less fluff
           </p>
           
           <p 
             className="sm:text-xl text-lg leading-relaxed text-gray-700 max-w-4xl mx-auto mt-6 animate-on-scroll"
             style={{ animation: 'fadeSlideIn 1s ease-out 0.5s both' }}
           >
-            We&apos;re not just another service; we&apos;re the only name you need for an exclusive, personal touch. Come to the people who redefine what premium truly means.
+            End-to-end asset management, premium stays and destination experiences engineered for performance and guest satisfaction.
+          </p>
+
+          <p 
+            className="sm:text-xl text-lg leading-relaxed text-gray-700 max-w-4xl mx-auto mt-6 animate-on-scroll"
+            style={{ animation: 'fadeSlideIn 1s ease-out 0.7s both' }}
+          >
+            Built right. Managed right. Experienced right.
           </p>
         </div>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-import { ShieldCheck, Star, Headphones, MapPin, DollarSign, Zap } from 'lucide-react';
+import { ShieldCheck, Star, MapPin, DollarSign, Zap } from 'lucide-react';
 
 export default function WhyChooseSection() {
   useScrollAnimation();
@@ -16,11 +16,6 @@ export default function WhyChooseSection() {
       icon: Star,
       title: "Premium Quality",
       description: "Handpicked accommodations that meet our high standards for comfort, cleanliness, and style."
-    },
-    {
-      icon: Headphones,
-      title: "24/7 Support",
-      description: "Round-the-clock guest support in multiple languages. We're here whenever you need us."
     },
     {
       icon: MapPin,
@@ -57,11 +52,11 @@ export default function WhyChooseSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+        <div className="flex flex-wrap justify-center gap-8">
           {features.map((feature, index) => (
             <div
               key={feature.title}
-              className="rounded-2xl border border-gray-200 bg-gray-50 p-8 hover:bg-white hover:shadow-lg transition-all duration-300 animate-on-scroll"
+              className="w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)] rounded-2xl border border-gray-200 bg-gray-50 p-8 hover:bg-white hover:shadow-lg transition-all duration-300 animate-on-scroll"
               style={{ animation: `fadeSlideIn 1s ease-out ${0.3 + index * 0.1}s both` }}
             >
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-right-stay-100 mb-5">

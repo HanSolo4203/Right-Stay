@@ -9,7 +9,7 @@ export default function StatsSection() {
   const stats = [
     {
       icon: Building2,
-      value: "14+",
+      value: "15+",
       label: "Premium Properties"
     },
     {
@@ -19,7 +19,7 @@ export default function StatsSection() {
     },
     {
       icon: MapPin,
-      value: "8+",
+      value: "2+",
       label: "African Cities"
     },
     {

@@ -108,9 +108,7 @@
 *::-moz-selection {
   background-color: rgba(51, 126, 47, 0.3) !important; /* Right Stay brand green (#337E2F) with 30% opacity */
   color: inherit !important;
-}
-
-/* Hide number input spinners */
+}/* Hide number input spinners */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
