@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Settings, Building2, Map, Menu, X, Calendar, Link, LogOut, Loader2, User } from 'lucide-react';
+import { Settings, Building2, Map, Menu, X, Calendar, Link, LogOut, Loader2, User, MessageSquare } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import SiteSettings from '@/components/admin/SiteSettings';
@@ -11,7 +11,7 @@ import BookingManagement from '@/components/admin/BookingManagement';
 import PropertyMapping from '@/components/admin/PropertyMapping';
 import MatrixBackground from '@/components/admin/MatrixBackground';
 
-type TabType = 'site' | 'properties' | 'tours' | 'bookings' | 'mapping';
+type TabType = 'site' | 'properties' | 'tours' | 'bookings' | 'mapping' | 'reviews';
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -93,6 +93,7 @@ export default function AdminDashboard() {
     { id: 'tours' as TabType, name: 'Tour Packages', icon: Map },
     { id: 'bookings' as TabType, name: 'Bookings', icon: Calendar },
     { id: 'mapping' as TabType, name: 'Property Mapping', icon: Link },
+    { id: 'reviews' as TabType, name: 'Import Reviews', icon: MessageSquare },
   ];
 
   return (
@@ -226,6 +227,23 @@ export default function AdminDashboard() {
           {activeTab === 'tours' && <TourPackageSettings />}
           {activeTab === 'bookings' && <BookingManagement />}
           {activeTab === 'mapping' && <PropertyMapping />}
+          {activeTab === 'reviews' && (
+            <div className="p-6">
+              <div className="bg-white/5 rounded-lg border border-white/10 p-8 text-center">
+                <MessageSquare className="w-12 h-12 mx-auto mb-4 text-blue-400" />
+                <h2 className="text-xl font-semibold mb-2">Import Reviews</h2>
+                <p className="text-gray-400 mb-6">
+                  Bulk import guest reviews from a markdown file
+                </p>
+                <button
+                  onClick={() => router.push('/admin/reviews/import')}
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors font-medium"
+                >
+                  Go to Import Page
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </div>

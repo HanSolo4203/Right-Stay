@@ -3,6 +3,8 @@ import { readFile } from 'fs/promises';
 import { join } from 'path';
 import { parsePriceLabsCSV, calculateBookingPricing } from '@/lib/pricing';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/get-pricing
  * Calculate pricing for a booking based on PriceLabs data

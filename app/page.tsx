@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import Header from '@/components/sections/Header';
 import HeroSection from '@/components/sections/HeroSection';
 import SecondHero from '@/components/sections/SecondHero';
@@ -24,7 +25,9 @@ export default function Home() {
       <WhyChooseSection />
       <HowItWorksSection />
       <TrustSection />
-      <AccommodationCards />
+      <Suspense fallback={<div className="py-16 text-center">Loading accommodations...</div>}>
+        <AccommodationCards />
+      </Suspense>
       <TestimonialSection />
       <CTASection />
       <Footer />

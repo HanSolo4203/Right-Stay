@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/cron/sync-calendars
  * Cron endpoint to sync all property calendars on a schedule

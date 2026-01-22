@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase-server';
 import { FALLBACK_PROPERTY_PHOTOS, getPropertySearchQuery } from '@/lib/unsplash';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Add stock photos to properties
  * GET /api/add-stock-photos - Adds stock photos to all properties

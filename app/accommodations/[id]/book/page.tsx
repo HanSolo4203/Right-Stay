@@ -345,7 +345,17 @@ export default function BookingPage() {
   }
 
   const propertyData = property?.data?.attributes;
-  const photos = property?.photos || [];
+  let photos = property?.photos || [];
+  // Sort photos so primary photo is first
+  if (photos.length > 0) {
+    photos = [...photos].sort((a, b) => {
+      // Primary photo first
+      if (a.is_primary && !b.is_primary) return -1;
+      if (!a.is_primary && b.is_primary) return 1;
+      // Then by position
+      return (a.position || 0) - (b.position || 0);
+    });
+  }
   const primaryPhoto = photos.find(p => p.is_primary) || photos[0];
   const propertyImage = primaryPhoto?.url || "/images/993d5154-c104-4507-8c0a-55364d2a948c_800w_1.jpg";
   
@@ -621,7 +631,7 @@ export default function BookingPage() {
                           onChange={(e) => {
                             setFormData(prev => ({ ...prev, checkInDate: e.target.value }));
                           }}
-                          className="w-full text-sm font-medium text-gray-900 focus:outline-none"
+                          className="w-full text-sm font-medium text-gray-900 focus:outline-none hide-native-calendar-icon"
                         />
                       </div>
                       <div className="p-4">
@@ -632,7 +642,7 @@ export default function BookingPage() {
                           onChange={(e) => {
                             setFormData(prev => ({ ...prev, checkOutDate: e.target.value }));
                           }}
-                          className="w-full text-sm font-medium text-gray-900 focus:outline-none"
+                          className="w-full text-sm font-medium text-gray-900 focus:outline-none hide-native-calendar-icon"
                         />
                       </div>
                     </div>

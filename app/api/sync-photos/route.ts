@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase-server';
 import { fetchUplistingProperty } from '@/lib/uplisting';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * API endpoint to sync property photos from Uplisting
  * 

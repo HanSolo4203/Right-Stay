@@ -23,7 +23,8 @@ export default function CTASection() {
             className="sm:text-xl text-lg leading-relaxed text-white/90 max-w-3xl mx-auto mt-6 animate-on-scroll"
             style={{ animation: 'fadeSlideIn 1s ease-out 0.2s both' }}
           >
-            Join thousands of travelers who have discovered the Right Stay Africa difference. Your perfect African adventure awaits.
+            Welcome to Africa, managed properly!
+            Experience the Right Stay Africa difference: where properties are managed proper and every stay is lekker. No shortcuts, no excuses—just genuine hospitality and accommodation done the right way.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10 animate-on-scroll" style={{ animation: 'fadeSlideIn 1s ease-out 0.3s both' }}>

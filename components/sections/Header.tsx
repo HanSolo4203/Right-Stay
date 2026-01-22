@@ -1,16 +1,56 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Menu, X } from 'lucide-react';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isScrollingDown, setIsScrollingDown] = useState(false);
+  const lastScrollY = useRef(0);
+  const ticking = useRef(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!ticking.current) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          const scrollDifference = Math.abs(currentScrollY - lastScrollY.current);
+          
+          // Only update if scroll difference is significant (reduces jitter)
+          if (scrollDifference > 5) {
+            // Show sticky header when past threshold, hide only when at top
+            // Once sticky, it stays sticky even when scrolling up
+            if (currentScrollY > 100) {
+              setIsScrollingDown(true);
+            } else {
+              setIsScrollingDown(false);
+            }
+            
+            lastScrollY.current = currentScrollY;
+          }
+          
+          ticking.current = false;
+        });
+        
+        ticking.current = true;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <header className="z-20 relative">
-      <div className="flex md:px-8 max-w-7xl mr-auto ml-auto pt-6 pr-6 pb-6 pl-6 items-center justify-between">
+    <header className={`z-20 transition-[background-color,backdrop-filter,border-color,box-shadow] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+      isScrollingDown 
+        ? 'fixed top-0 left-0 right-0 bg-black/90 backdrop-blur-md border-b border-white/10 shadow-lg' 
+        : 'relative'
+    }`}>
+      <div className={`flex md:px-8 max-w-7xl mr-auto ml-auto items-center justify-between transition-[padding] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+        isScrollingDown ? 'pt-4 pr-6 pb-4 pl-6' : 'pt-6 pr-6 pb-6 pl-6'
+      }`}>
         <Link href="/" className="flex items-center gap-3">
           <span className="text-xl tracking-tight text-white/95 font-semibold font-sans">Right Stay Africa</span>
         </Link>
