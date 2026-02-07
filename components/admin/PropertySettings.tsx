@@ -4,26 +4,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Plus, Edit2, Trash2, Loader2, CheckCircle, AlertCircle, X, Save, Upload, Image as ImageIcon, Star, RefreshCw, Download } from 'lucide-react';
 import Image from 'next/image';
 import imageCompression from 'browser-image-compression';
-
-interface Property {
-  id: string;
-  uplisting_id: string;
-  name: string;
-  type: string;
-  bedrooms: number | null;
-  bathrooms: number | null;
-  beds: number | null;
-  maximum_capacity: number | null;
-  currency: string;
-  description: string;
-  check_in_time: number | null;
-  check_out_time: number | null;
-  ical_url: string | null;
-  last_synced: string | null;
-  created_at: string;
-  updated_at: string;
-  primaryPhotoUrl?: string; // Primary photo URL for display
-}
+import type { Property, PropertyFormValues } from '@/types/property';
+import { PricingSection } from './PricingSection';
 
 interface PropertyPhoto {
   id: string;
@@ -52,8 +34,7 @@ export default function PropertySettings() {
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [propertyPrimaryPhotos, setPropertyPrimaryPhotos] = useState<Record<string, string>>({});
-  
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<PropertyFormValues>({
     uplisting_id: '',
     name: '',
     type: '',
@@ -66,7 +47,16 @@ export default function PropertySettings() {
     check_in_time: '15',
     check_out_time: '11',
     ical_url: '',
+    pricingEnabled: false,
+    minPrice: '',
+    basePrice: '',
+    maxPrice: '',
   });
+  const [pricingErrors, setPricingErrors] = useState<{
+    minPrice?: string;
+    basePrice?: string;
+    maxPrice?: string;
+  }>({});
 
   const fetchPrimaryPhotosForProperties = async (properties: Property[]) => {
     const photoMap: Record<string, string> = {};
@@ -198,7 +188,12 @@ export default function PropertySettings() {
         check_in_time: property.check_in_time !== null ? property.check_in_time.toString() : '15',
         check_out_time: property.check_out_time !== null ? property.check_out_time.toString() : '11',
         ical_url: property.ical_url || '',
+        pricingEnabled: property.pricing?.pricingEnabled ?? false,
+        minPrice: property.pricing?.minPrice != null ? property.pricing.minPrice.toString() : '',
+        basePrice: property.pricing?.basePrice != null ? property.pricing.basePrice.toString() : '',
+        maxPrice: property.pricing?.maxPrice != null ? property.pricing.maxPrice.toString() : '',
       });
+      setPricingErrors({});
       // Fetch photos for this property
       await fetchPhotos(property.uplisting_id);
     } else {
@@ -216,8 +211,13 @@ export default function PropertySettings() {
         check_in_time: '15',
         check_out_time: '11',
         ical_url: '',
+        pricingEnabled: false,
+        minPrice: '',
+        basePrice: '',
+        maxPrice: '',
       });
       setPhotos([]);
+      setPricingErrors({});
     }
     setShowModal(true);
   };
@@ -258,7 +258,12 @@ export default function PropertySettings() {
       check_in_time: '15',
       check_out_time: '11',
       ical_url: '',
+      pricingEnabled: false,
+      minPrice: '',
+      basePrice: '',
+      maxPrice: '',
     });
+    setPricingErrors({});
   };
 
   const compressImage = async (file: File): Promise<File> => {
@@ -465,10 +470,72 @@ export default function PropertySettings() {
     }
   };
 
+  const validatePricing = (values: PropertyFormValues) => {
+    const errors: { minPrice?: string; basePrice?: string; maxPrice?: string } = {};
+
+    if (!values.pricingEnabled) {
+      return errors;
+    }
+
+    const min = parseFloat(values.minPrice || '');
+    const base = parseFloat(values.basePrice || '');
+    const max = parseFloat(values.maxPrice || '');
+
+    if (Number.isNaN(min) || Number.isNaN(base) || Number.isNaN(max)) {
+      if (Number.isNaN(min)) {
+        errors.minPrice = 'Minimum price must be set';
+      }
+      if (Number.isNaN(base)) {
+        errors.basePrice = 'Base price must be set';
+      }
+      if (Number.isNaN(max)) {
+        errors.maxPrice = 'Maximum price must be set';
+      }
+      return errors;
+    }
+
+    if (!(min < base)) {
+      errors.minPrice = 'Minimum price must be less than base price';
+    }
+
+    if (!(base < max)) {
+      errors.basePrice = 'Base price must be less than maximum price';
+      errors.maxPrice = 'Maximum price must be greater than base price';
+    }
+
+    return errors;
+  };
+
+  const handlePricingChange = (
+    field: keyof Pick<PropertyFormValues, 'pricingEnabled' | 'minPrice' | 'basePrice' | 'maxPrice'>,
+    value: string | boolean
+  ) => {
+    setFormData(prev => {
+      const next: PropertyFormValues = {
+        ...prev,
+        [field]: value,
+      };
+      setPricingErrors(validatePricing(next));
+      return next;
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (savingProperty) return; // Prevent double submission
+
+    const pricingValidation = validatePricing(formData);
+    setPricingErrors(pricingValidation);
+    const hasPricingErrors = Object.values(pricingValidation).some(Boolean);
+
+    if (hasPricingErrors) {
+      setMessage({
+        type: 'error',
+        text: 'Please fix pricing errors before saving.',
+      });
+      return;
+    }
     
     setSavingProperty(true);
     
@@ -477,10 +544,18 @@ export default function PropertySettings() {
         ? `/api/admin/properties?id=${editingProperty.id}`
         : '/api/admin/properties';
       
+      const payload = {
+        ...formData,
+        minPrice: formData.minPrice ? parseFloat(formData.minPrice) : null,
+        basePrice: formData.basePrice ? parseFloat(formData.basePrice) : null,
+        maxPrice: formData.maxPrice ? parseFloat(formData.maxPrice) : null,
+        pricingEnabled: formData.pricingEnabled,
+      };
+
       const response = await fetch(url, {
         method: editingProperty ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
@@ -746,6 +821,37 @@ export default function PropertySettings() {
                     <span className="text-gray-400">Currency:</span>
                     <p className="text-white">{property.currency}</p>
                   </div>
+                  {property.pricing?.pricingEnabled && (
+                    <div className="md:col-span-3">
+                      <span className="text-gray-400">Dynamic Pricing:</span>
+                      <div className="mt-1 flex flex-wrap items-center gap-4 text-sm">
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-orange-400 font-medium">Min</span>
+                          <span className="text-gray-400">·</span>
+                          <span className="text-white">
+                            {property.currency === 'ZAR' ? 'R' : property.currency}
+                            {property.pricing.minPrice?.toFixed(2)}
+                          </span>
+                        </div>
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-yellow-400 font-medium">Base</span>
+                          <span className="text-gray-400">·</span>
+                          <span className="text-white">
+                            {property.currency === 'ZAR' ? 'R' : property.currency}
+                            {property.pricing.basePrice?.toFixed(2)}
+                          </span>
+                        </div>
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-emerald-400 font-medium">Max</span>
+                          <span className="text-gray-400">·</span>
+                          <span className="text-white">
+                            {property.currency === 'ZAR' ? 'R' : property.currency}
+                            {property.pricing.maxPrice?.toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   {property.ical_url && (
                     <div className="md:col-span-3">
                       <span className="text-gray-400">iCal URL:</span>
@@ -1016,6 +1122,18 @@ export default function PropertySettings() {
                   placeholder="https://..."
                 />
               </div>
+
+              <PricingSection
+                values={{
+                  pricingEnabled: formData.pricingEnabled,
+                  minPrice: formData.minPrice,
+                  basePrice: formData.basePrice,
+                  maxPrice: formData.maxPrice,
+                }}
+                currency={formData.currency}
+                errors={pricingErrors}
+                onChange={handlePricingChange}
+              />
 
               {/* Photo Management Section */}
               {editingProperty && (

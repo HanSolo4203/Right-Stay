@@ -4,8 +4,26 @@ import { createClient } from '@supabase/supabase-js';
 export const dynamic = 'force-dynamic';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabaseServiceKey =
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+function buildPricingObject(row: any) {
+  if (!row) {
+    return null;
+  }
+
+  return {
+    propertyId: row.property_id as string,
+    minPrice: row.min_price !== null && row.min_price !== undefined ? Number(row.min_price) : null,
+    basePrice:
+      row.base_price !== null && row.base_price !== undefined ? Number(row.base_price) : null,
+    maxPrice: row.max_price !== null && row.max_price !== undefined ? Number(row.max_price) : null,
+    pricingEnabled: !!row.pricing_enabled,
+    createdAt: row.created_at as string,
+    updatedAt: row.updated_at as string,
+  };
+}
 
 export async function GET() {
   try {
@@ -24,9 +42,35 @@ export async function GET() {
       throw error;
     }
 
+    const properties = data || [];
+
+    // Fetch pricing rows for all properties in a single query
+    const propertyIds = properties.map((p: any) => p.id).filter(Boolean);
+    let pricingByPropertyId: Record<string, any> = {};
+
+    if (propertyIds.length > 0) {
+      const { data: pricingRows, error: pricingError } = await supabase
+        .from('property_pricing')
+        .select('*')
+        .in('property_id', propertyIds);
+
+      if (pricingError) {
+        console.error('Supabase error fetching pricing:', pricingError);
+      } else {
+        pricingByPropertyId = (pricingRows || []).reduce(
+          (acc: Record<string, any>, row: any) => {
+            acc[row.property_id] = row;
+            return acc;
+          },
+          {}
+        );
+      }
+    }
+
     // Transform the data to include extracted attributes for easier display
-    const transformedData = (data || []).map((property: any) => {
+    const transformedData = properties.map((property: any) => {
       const attributes = property.data?.attributes || {};
+      const pricingRow = pricingByPropertyId[property.id];
       return {
         id: property.id,
         uplisting_id: property.uplisting_id,
@@ -46,6 +90,7 @@ export async function GET() {
         last_synced: property.last_synced,
         created_at: property.created_at,
         updated_at: property.updated_at,
+        pricing: buildPricingObject(pricingRow),
         // Keep full data for reference
         data: property.data
       };
@@ -102,6 +147,51 @@ export async function POST(request: NextRequest) {
 
     if (error) throw error;
 
+    // Optionally create a pricing row if pricing fields were provided
+    let pricing = null;
+    const hasPricingFields =
+      body.minPrice !== undefined ||
+      body.basePrice !== undefined ||
+      body.maxPrice !== undefined ||
+      body.pricingEnabled !== undefined;
+
+    if (hasPricingFields) {
+      const min_price =
+        body.minPrice !== undefined && body.minPrice !== null
+          ? Number(body.minPrice)
+          : null;
+      const base_price =
+        body.basePrice !== undefined && body.basePrice !== null
+          ? Number(body.basePrice)
+          : null;
+      const max_price =
+        body.maxPrice !== undefined && body.maxPrice !== null
+          ? Number(body.maxPrice)
+          : null;
+      const pricing_enabled = !!body.pricingEnabled;
+
+      const { data: pricingData, error: pricingError } = await supabase
+        .from('property_pricing')
+        .upsert(
+          {
+            property_id: data.id,
+            min_price,
+            base_price,
+            max_price,
+            pricing_enabled,
+          },
+          { onConflict: 'property_id' }
+        )
+        .select()
+        .single();
+
+      if (pricingError) {
+        console.error('Error creating property pricing:', pricingError);
+      } else {
+        pricing = buildPricingObject(pricingData);
+      }
+    }
+
     // Transform response
     const attributes = data.data?.attributes || {};
     return NextResponse.json({
@@ -114,7 +204,8 @@ export async function POST(request: NextRequest) {
       maximum_capacity: attributes.maximum_capacity,
       description: attributes.description,
       ical_url: data.ical_url,
-      created_at: data.created_at
+      created_at: data.created_at,
+      pricing,
     });
   } catch (error) {
     console.error('Error creating property:', error);
@@ -186,6 +277,62 @@ export async function PUT(request: NextRequest) {
 
     if (error) throw error;
 
+    // Upsert pricing if pricing fields were provided
+    let pricing = null;
+    const hasPricingFields =
+      body.minPrice !== undefined ||
+      body.basePrice !== undefined ||
+      body.maxPrice !== undefined ||
+      body.pricingEnabled !== undefined;
+
+    if (hasPricingFields) {
+      const min_price =
+        body.minPrice !== undefined && body.minPrice !== null
+          ? Number(body.minPrice)
+          : null;
+      const base_price =
+        body.basePrice !== undefined && body.basePrice !== null
+          ? Number(body.basePrice)
+          : null;
+      const max_price =
+        body.maxPrice !== undefined && body.maxPrice !== null
+          ? Number(body.maxPrice)
+          : null;
+      const pricing_enabled = !!body.pricingEnabled;
+
+      const { data: pricingData, error: pricingError } = await supabase
+        .from('property_pricing')
+        .upsert(
+          {
+            property_id: id,
+            min_price,
+            base_price,
+            max_price,
+            pricing_enabled,
+          },
+          { onConflict: 'property_id' }
+        )
+        .select()
+        .single();
+
+      if (pricingError) {
+        console.error('Error updating property pricing:', pricingError);
+      } else {
+        pricing = buildPricingObject(pricingData);
+      }
+    } else {
+      // If no pricing fields sent, fetch existing pricing (if any) to include in response
+      const { data: pricingData, error: pricingError } = await supabase
+        .from('property_pricing')
+        .select('*')
+        .eq('property_id', id)
+        .maybeSingle();
+
+      if (!pricingError && pricingData) {
+        pricing = buildPricingObject(pricingData);
+      }
+    }
+
     // Transform response
     const attributes = data.data?.attributes || {};
     return NextResponse.json({
@@ -198,7 +345,8 @@ export async function PUT(request: NextRequest) {
       maximum_capacity: attributes.maximum_capacity,
       description: attributes.description,
       ical_url: data.ical_url,
-      updated_at: data.updated_at
+      updated_at: data.updated_at,
+      pricing,
     });
   } catch (error) {
     console.error('Error updating property:', error);

@@ -57,6 +57,13 @@ interface CachedProperty {
   created_at: string;
   updated_at: string;
   photos?: PropertyPhoto[];
+  pricing?: {
+    propertyId: string;
+    minPrice: number | null;
+    basePrice: number | null;
+    maxPrice: number | null;
+    pricingEnabled: boolean;
+  } | null;
 }
 
 export default function AccommodationCards() {
@@ -269,8 +276,29 @@ export default function AccommodationCards() {
         const primaryPhoto = photos.find(p => p.is_primary) || photos[0];
         const firstImage = primaryPhoto?.url || "/images/993d5154-c104-4507-8c0a-55364d2a948c_800w_1.jpg";
         
-        // Generate a price range since base price isn't directly available
-        const price = attributes.currency === 'USD' ? 'From $85' : 'From R1,500';
+        // Determine display price
+        let pricePrefix = 'R';
+        if (attributes.currency === 'USD') {
+          pricePrefix = '$';
+        } else if (attributes.currency && attributes.currency !== 'ZAR') {
+          pricePrefix = attributes.currency;
+        }
+
+        let priceValue: string;
+
+        if (property.pricing?.pricingEnabled && property.pricing.basePrice != null) {
+          // Use dynamic pricing base price
+          const base = property.pricing.basePrice;
+          priceValue = base.toLocaleString('en-ZA', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+          });
+        } else {
+          // Fallback when no pricing configured yet
+          priceValue = attributes.currency === 'USD' ? '85' : '1,500';
+        }
+
+        const price = `From ${pricePrefix}${priceValue}`;
         
         const fullDescription = attributes.description || `${attributes.type || 'Beautiful property'} in Cape Town. Perfect for your African getaway.`;
         

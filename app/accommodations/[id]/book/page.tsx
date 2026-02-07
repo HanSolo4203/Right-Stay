@@ -64,6 +64,13 @@ interface Property {
   uplisting_id: string;
   data: PropertyData;
   photos?: PropertyPhoto[];
+  pricing?: {
+    propertyId: string;
+    minPrice: number | null;
+    basePrice: number | null;
+    maxPrice: number | null;
+    pricingEnabled: boolean;
+  } | null;
 }
 
 interface BookingFormData {
@@ -158,11 +165,42 @@ export default function BookingPage() {
     }
 
     try {
-      // Fetch pricing from API using PriceLabs data
+      const checkIn = new Date(formData.checkInDate);
+      const checkOut = new Date(formData.checkOutDate);
+      const nights = Math.ceil(
+        (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24)
+      );
+
+      // If dynamic pricing is configured for this property, use it as the single source of truth
+      if (property?.pricing?.pricingEnabled && property.pricing.basePrice != null) {
+        const nightlyBase = property.pricing.basePrice;
+        const basePrice = nightlyBase * nights;
+        const cleaningFee = 500;
+        const serviceFee = basePrice * 0.12;
+
+        setPricing({
+          numberOfNights: nights,
+          nightlyPrices: Array.from({ length: nights }).map((_, i) => ({
+            date: new Date(checkIn.getTime() + i * 24 * 60 * 60 * 1000)
+              .toISOString()
+              .split('T')[0],
+            price: nightlyBase,
+          })),
+          basePrice,
+          averagePricePerNight: nightlyBase,
+          cleaningFee,
+          serviceFee,
+          total: basePrice + cleaningFee + serviceFee,
+          usingDefaultPricing: false,
+        });
+        return;
+      }
+
+      // Otherwise fall back to existing PriceLabs-based pricing endpoint
       const response = await fetch(
         `/api/get-pricing?propertyId=${propertyId}&checkInDate=${formData.checkInDate}&checkOutDate=${formData.checkOutDate}`
       );
-      
+
       if (response.ok) {
         const pricingData = await response.json();
         setPricing({
@@ -173,36 +211,37 @@ export default function BookingPage() {
           cleaningFee: pricingData.cleaningFee,
           serviceFee: pricingData.serviceFee,
           total: pricingData.total,
-          usingDefaultPricing: pricingData.usingDefaultPricing
+          usingDefaultPricing: pricingData.usingDefaultPricing,
         });
       } else {
-        // Fallback to default pricing
-        const checkIn = new Date(formData.checkInDate);
-        const checkOut = new Date(formData.checkOutDate);
-        const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
-        const basePrice = 1500 * nights;
+        // Fallback to simple default pricing when external pricing fails
+        const nightlyBase = 1500;
+        const basePrice = nightlyBase * nights;
         const cleaningFee = 500;
         const serviceFee = basePrice * 0.12;
-        
+
         setPricing({
           numberOfNights: nights,
           basePrice,
           cleaningFee,
           serviceFee,
           total: basePrice + cleaningFee + serviceFee,
-          usingDefaultPricing: true
+          usingDefaultPricing: true,
         });
       }
     } catch (error) {
       console.error('Error fetching pricing:', error);
-      // Fallback to default pricing on error
+      // Fallback to simple default pricing on error
       const checkIn = new Date(formData.checkInDate);
       const checkOut = new Date(formData.checkOutDate);
-      const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
-      const basePrice = 1500 * nights;
+      const nights = Math.ceil(
+        (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      const nightlyBase = 1500;
+      const basePrice = nightlyBase * nights;
       const cleaningFee = 500;
       const serviceFee = basePrice * 0.12;
-      
+
       setPricing({
         numberOfNights: nights,
         basePrice,
@@ -363,6 +402,11 @@ export default function BookingPage() {
   const galleryPhotos = photos.slice(0, 5);
   const hasMorePhotos = photos.length > 5;
   const mainPhoto = photos[selectedPhotoIndex] || photos[0] || { url: propertyImage };
+
+  const nightlyBasePrice =
+    property?.pricing?.pricingEnabled && property.pricing.basePrice != null
+      ? property.pricing.basePrice
+      : 1500;
 
   return (
     <>
@@ -614,7 +658,9 @@ export default function BookingPage() {
                       </>
                     ) : (
                       <div>
-                        <div className="text-2xl font-semibold text-gray-900">R1,500</div>
+                        <div className="text-2xl font-semibold text-gray-900">
+                          R{Math.round(nightlyBasePrice).toLocaleString()}
+                        </div>
                         <div className="text-sm text-gray-600">per night</div>
                       </div>
                     )}

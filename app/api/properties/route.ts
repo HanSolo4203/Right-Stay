@@ -3,6 +3,19 @@ import { supabaseServer } from '@/lib/supabase-server';
 
 export const dynamic = 'force-dynamic';
 
+function buildPricingObject(row: any) {
+  if (!row) return null;
+
+  return {
+    propertyId: row.property_id as string,
+    minPrice: row.min_price !== null && row.min_price !== undefined ? Number(row.min_price) : null,
+    basePrice:
+      row.base_price !== null && row.base_price !== undefined ? Number(row.base_price) : null,
+    maxPrice: row.max_price !== null && row.max_price !== undefined ? Number(row.max_price) : null,
+    pricingEnabled: !!row.pricing_enabled,
+  };
+}
+
 export async function GET(request: Request) {
   try {
     // Check if Supabase is configured
@@ -53,12 +66,24 @@ export async function GET(request: Request) {
         console.warn('Error fetching photos:', photosError);
       }
 
-      const propertyWithPhotos = {
+      // Fetch pricing for this property (if any)
+      const { data: pricingRow, error: pricingError } = await supabaseServer
+        .from('property_pricing')
+        .select('*')
+        .eq('property_id', property.id)
+        .maybeSingle();
+
+      if (pricingError) {
+        console.warn('Error fetching pricing:', pricingError);
+      }
+
+      const propertyWithPhotosAndPricing = {
         ...property,
         photos: photos || [],
+        pricing: buildPricingObject(pricingRow),
       };
 
-      return NextResponse.json({ property: propertyWithPhotos });
+      return NextResponse.json({ property: propertyWithPhotosAndPricing });
     }
 
     // Otherwise fetch all properties
@@ -101,7 +126,7 @@ export async function GET(request: Request) {
       console.warn('Error fetching photos:', photosError);
       // Continue without photos if there's an error - return properties without photos
       return NextResponse.json({ 
-        properties: properties.map(p => ({ ...p, photos: [] }))
+        properties: properties.map(p => ({ ...p, photos: [], pricing: null }))
       });
     }
 
@@ -116,14 +141,34 @@ export async function GET(request: Request) {
       }
     }
 
-    // Attach photos to properties
-    const propertiesWithPhotos = properties.map(property => ({
+    // Fetch pricing for all properties
+    const cachedIds = properties.map(p => p.id);
+    let pricingByPropertyId = new Map<string, any>();
+
+    if (cachedIds.length > 0) {
+      const { data: pricingRows, error: pricingError } = await supabaseServer
+        .from('property_pricing')
+        .select('*')
+        .in('property_id', cachedIds);
+
+      if (pricingError) {
+        console.warn('Error fetching pricing for properties:', pricingError);
+      } else if (pricingRows) {
+        for (const row of pricingRows) {
+          pricingByPropertyId.set(row.property_id, row);
+        }
+      }
+    }
+
+    // Attach photos and pricing to properties
+    const propertiesWithExtras = properties.map(property => ({
       ...property,
       photos: photosByProperty.get(property.uplisting_id) || [],
+      pricing: buildPricingObject(pricingByPropertyId.get(property.id)),
     }));
 
-    console.log('API: Attached photos to properties');
-    return NextResponse.json({ properties: propertiesWithPhotos });
+    console.log('API: Attached photos and pricing to properties');
+    return NextResponse.json({ properties: propertiesWithExtras });
   } catch (error) {
     console.error('Unexpected error fetching properties:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
