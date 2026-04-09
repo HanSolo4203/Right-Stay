@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Settings, Building2, Map, Menu, X, Calendar, Link, LogOut, Loader2, User, MessageSquare } from 'lucide-react';
+import { Settings, Building2, Map, Menu, X, Calendar, Link, LogOut, Loader2, User, MessageSquare, DollarSign } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import SiteSettings from '@/components/admin/SiteSettings';
@@ -9,9 +9,10 @@ import PropertySettings from '@/components/admin/PropertySettings';
 import TourPackageSettings from '@/components/admin/TourPackageSettings';
 import BookingManagement from '@/components/admin/BookingManagement';
 import PropertyMapping from '@/components/admin/PropertyMapping';
+import PricingDashboard from '@/components/admin/PricingDashboard';
 import MatrixBackground from '@/components/admin/MatrixBackground';
 
-type TabType = 'site' | 'properties' | 'tours' | 'bookings' | 'mapping' | 'reviews';
+type TabType = 'site' | 'properties' | 'pricing' | 'tours' | 'bookings' | 'mapping' | 'reviews';
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -90,6 +91,7 @@ export default function AdminDashboard() {
   const tabs = [
     { id: 'site' as TabType, name: 'Site Settings', icon: Settings },
     { id: 'properties' as TabType, name: 'Properties', icon: Building2 },
+    { id: 'pricing' as TabType, name: 'Dynamic Pricing', icon: DollarSign },
     { id: 'tours' as TabType, name: 'Tour Packages', icon: Map },
     { id: 'bookings' as TabType, name: 'Bookings', icon: Calendar },
     { id: 'mapping' as TabType, name: 'Property Mapping', icon: Link },
@@ -224,6 +226,7 @@ export default function AdminDashboard() {
         <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden">
           {activeTab === 'site' && <SiteSettings />}
           {activeTab === 'properties' && <PropertySettings />}
+          {activeTab === 'pricing' && <PricingDashboard />}
           {activeTab === 'tours' && <TourPackageSettings />}
           {activeTab === 'bookings' && <BookingManagement />}
           {activeTab === 'mapping' && <PropertyMapping />}

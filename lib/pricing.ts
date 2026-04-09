@@ -100,6 +100,64 @@ export const getPriceForDate = (date: string, priceMap: Map<string, PriceData>):
   return priceData ? priceData.price : 1500; // Default fallback
 };
 
+/**
+ * Resolve price for a date: use daily override if present, else base price.
+ * Optionally clamp to min/max range.
+ */
+export const resolvePriceForDate = (
+  date: string,
+  dailyOverride: number | null | undefined,
+  basePrice: number,
+  minPrice?: number | null,
+  maxPrice?: number | null
+): number => {
+  let price = dailyOverride != null ? dailyOverride : basePrice;
+  if (minPrice != null && price < minPrice) price = minPrice;
+  if (maxPrice != null && price > maxPrice) price = maxPrice;
+  return price;
+};
+
+/**
+ * Calculate booking pricing from a date->price map (e.g. from DB daily overrides + base).
+ */
+export const calculateBookingPricingFromMap = (
+  checkInDate: string,
+  checkOutDate: string,
+  priceMap: Map<string, number>,
+  defaultPrice: number = 1500
+) => {
+  const checkIn = new Date(checkInDate);
+  const checkOut = new Date(checkOutDate);
+  const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
+  if (nights <= 0) return null;
+
+  const nightlyPrices: { date: string; price: number }[] = [];
+  let totalAccommodation = 0;
+  let currentDate = new Date(checkIn);
+
+  for (let i = 0; i < nights; i++) {
+    const dateStr = currentDate.toISOString().split('T')[0];
+    const price = priceMap.get(dateStr) ?? defaultPrice;
+    nightlyPrices.push({ date: dateStr, price });
+    totalAccommodation += price;
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  const cleaningFee = 500;
+  const serviceFee = totalAccommodation * 0.12;
+  const total = totalAccommodation + cleaningFee + serviceFee;
+
+  return {
+    numberOfNights: nights,
+    nightlyPrices,
+    basePrice: totalAccommodation,
+    averagePricePerNight: totalAccommodation / nights,
+    cleaningFee,
+    serviceFee,
+    total,
+  };
+};
+
 // Check minimum stay requirement
 export const getMinimumStay = (checkInDate: string, priceMap: Map<string, PriceData>): number => {
   const priceData = priceMap.get(checkInDate);
