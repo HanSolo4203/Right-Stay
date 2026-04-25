@@ -57,9 +57,16 @@
     margin: 0;
     padding: 0;
     height: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
   body {
     @apply bg-background text-foreground text-sm sm:text-base;
+  }
+
+  img {
+    image-rendering: auto;
   }
 }
 
@@ -68,23 +75,21 @@
   0% {
     opacity: 0;
     transform: translateY(30px);
-    filter: blur(8px);
   }
   100% {
     opacity: 1;
     transform: translateY(0);
-    filter: blur(0px);
   }
 }
 
 /* Subtle cloud animation for hero image */
 @keyframes cloudDrift {
   0% {
-    transform: scale(1.06) translate(-1%, -0.5%);
-    filter: brightness(0.95) contrast(0.98);
+    transform: translate(-1%, -0.5%);
+    filter: brightness(0.98) contrast(0.99);
   }
   100% {
-    transform: scale(1) translate(0, 0);
+    transform: translate(0, 0);
     filter: brightness(1) contrast(1);
   }
 }
