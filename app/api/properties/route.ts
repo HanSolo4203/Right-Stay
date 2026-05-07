@@ -13,6 +13,12 @@ function buildPricingObject(row: any) {
       row.base_price !== null && row.base_price !== undefined ? Number(row.base_price) : null,
     maxPrice: row.max_price !== null && row.max_price !== undefined ? Number(row.max_price) : null,
     pricingEnabled: !!row.pricing_enabled,
+    cleaningFee:
+      row.cleaning_fee !== null && row.cleaning_fee !== undefined ? Number(row.cleaning_fee) : null,
+    serviceFeePercent:
+      row.service_fee_percent !== null && row.service_fee_percent !== undefined
+        ? Number(row.service_fee_percent)
+        : null,
   };
 }
 

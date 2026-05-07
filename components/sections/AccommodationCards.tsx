@@ -77,6 +77,9 @@ export default function AccommodationCards() {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState<Map<string, number>>(new Map());
   const [touchStart, setTouchStart] = useState<Map<string, number>>(new Map());
   const [touchEnd, setTouchEnd] = useState<Map<string, number>>(new Map());
+  const [datePricingMap, setDatePricingMap] = useState<
+    Map<string, { total: number; nightly: number; nights: number }>
+  >(new Map());
 
   // Get search filters from URL
   const locationFilter = searchParams?.get('location') || '';
@@ -170,6 +173,50 @@ export default function AccommodationCards() {
     }
 
     checkAvailability();
+  }, [checkIn, checkOut, properties]);
+
+  useEffect(() => {
+    if (!checkIn || !checkOut || properties.length === 0) {
+      setDatePricingMap(new Map());
+      return;
+    }
+
+    let cancelled = false;
+    async function fetchDatePricing() {
+      const entries = await Promise.all(
+        properties.map(async (property) => {
+          try {
+            const response = await fetch(
+              `/api/get-pricing?propertyId=${property.uplisting_id}&checkInDate=${checkIn}&checkOutDate=${checkOut}`
+            );
+            if (!response.ok) return [property.uplisting_id, null] as const;
+            const data = await response.json();
+            return [
+              property.uplisting_id,
+              {
+                total: Number(data.total) || 0,
+                nightly: Number(data.averagePricePerNight) || Number(data.basePrice) || 0,
+                nights: Number(data.numberOfNights) || 0,
+              },
+            ] as const;
+          } catch {
+            return [property.uplisting_id, null] as const;
+          }
+        })
+      );
+
+      if (cancelled) return;
+      const next = new Map<string, { total: number; nightly: number; nights: number }>();
+      for (const [propertyId, quote] of entries) {
+        if (quote) next.set(propertyId, quote);
+      }
+      setDatePricingMap(next);
+    }
+
+    fetchDatePricing();
+    return () => {
+      cancelled = true;
+    };
   }, [checkIn, checkOut, properties]);
 
   // Fallback accommodations if no data from DB
@@ -286,7 +333,14 @@ export default function AccommodationCards() {
 
         let priceValue: string;
 
-        if (property.pricing?.pricingEnabled && property.pricing.basePrice != null) {
+        const dateQuote = datePricingMap.get(property.uplisting_id);
+
+        if (dateQuote && dateQuote.nightly > 0) {
+          priceValue = dateQuote.nightly.toLocaleString('en-ZA', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+          });
+        } else if (property.pricing?.pricingEnabled && property.pricing.basePrice != null) {
           // Use dynamic pricing base price
           const base = property.pricing.basePrice;
           priceValue = base.toLocaleString('en-ZA', {
@@ -298,7 +352,10 @@ export default function AccommodationCards() {
           priceValue = attributes.currency === 'USD' ? '85' : '1,500';
         }
 
-        const price = `From ${pricePrefix}${priceValue}`;
+        const price =
+          dateQuote && dateQuote.total > 0
+            ? `${pricePrefix}${Math.round(dateQuote.total).toLocaleString('en-ZA')}`
+            : `From ${pricePrefix}${priceValue}`;
         
         const fullDescription = attributes.description || `${attributes.type || 'Beautiful property'} in Cape Town. Perfect for your African getaway.`;
         
@@ -310,7 +367,8 @@ export default function AccommodationCards() {
           title: attributes.name || attributes.nickname || "Luxury Property",
           location: propertyLocation,
           price: price,
-          priceUnit: "per night",
+          priceUnit:
+            dateQuote && dateQuote.nights > 0 ? `for ${dateQuote.nights} nights` : "per night",
           rating: 4.8,
           reviews: Math.floor(Math.random() * 100) + 50,
           guests: maxGuests,

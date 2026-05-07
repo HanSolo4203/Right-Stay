@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server';
-import { readFile } from 'fs/promises';
-import { join } from 'path';
 import { createClient } from '@supabase/supabase-js';
 import {
-  parsePriceLabsCSV,
-  calculateBookingPricing,
   calculateBookingPricingFromMap,
-  resolvePriceForDate,
+  buildDatePriceMap,
+  DEFAULT_NIGHTLY_PRICE,
+  DEFAULT_CLEANING_FEE,
+  DEFAULT_SERVICE_FEE_PERCENT,
 } from '@/lib/pricing';
 
 export const dynamic = 'force-dynamic';
@@ -55,8 +54,8 @@ export async function GET(request: Request) {
     }
 
     const nights = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-    const defaultPrice = 1500;
-    const cleaningFee = 500;
+    const defaultPrice = DEFAULT_NIGHTLY_PRICE;
+    const cleaningFee = DEFAULT_CLEANING_FEE;
 
     // Try DB-backed pricing first
     if (supabase) {
@@ -83,6 +82,12 @@ export async function GET(request: Request) {
             pricingRow.min_price != null ? Number(pricingRow.min_price) : null;
           const maxPrice =
             pricingRow.max_price != null ? Number(pricingRow.max_price) : null;
+          const cleaningFee =
+            pricingRow.cleaning_fee != null ? Number(pricingRow.cleaning_fee) : DEFAULT_CLEANING_FEE;
+          const serviceFeePercent =
+            pricingRow.service_fee_percent != null
+              ? Number(pricingRow.service_fee_percent)
+              : DEFAULT_SERVICE_FEE_PERCENT;
 
           const { data: dailyRows } = await supabase
             .from('property_daily_prices')
@@ -96,28 +101,24 @@ export async function GET(request: Request) {
             dailyOverrideMap[row.date] = Number(row.price);
           }
 
-          const priceMap = new Map<string, number>();
-          let d = new Date(start);
-          const endCopy = new Date(end);
-          while (d < endCopy) {
-            const dateStr = d.toISOString().split('T')[0];
-            const override = dailyOverrideMap[dateStr];
-            const price = resolvePriceForDate(
-              dateStr,
-              override,
-              basePrice,
-              minPrice,
-              maxPrice
-            );
-            priceMap.set(dateStr, price);
-            d.setDate(d.getDate() + 1);
-          }
+          const priceMap = buildDatePriceMap(
+            checkInDate,
+            checkOutDate,
+            basePrice,
+            dailyOverrideMap,
+            minPrice,
+            maxPrice
+          );
 
           const pricing = calculateBookingPricingFromMap(
             checkInDate,
             checkOutDate,
             priceMap,
-            basePrice
+            basePrice,
+            {
+              cleaningFee,
+              serviceFeePercent,
+            }
           );
           if (pricing) {
             return NextResponse.json({
@@ -132,33 +133,9 @@ export async function GET(request: Request) {
       }
     }
 
-    // Fallback: PriceLabs CSV
-    const csvPath = join(
-      process.cwd(),
-      'public',
-      'pricing',
-      'PriceLabs_uplisting_135133_2025-10-17.csv'
-    );
-    try {
-      const csvText = await readFile(csvPath, 'utf-8');
-      const priceMap = parsePriceLabsCSV(csvText);
-      const pricing = calculateBookingPricing(checkInDate, checkOutDate, priceMap);
-      if (pricing) {
-        return NextResponse.json({
-          propertyId,
-          checkInDate,
-          checkOutDate,
-          ...pricing,
-          usingDefaultPricing: false,
-        });
-      }
-    } catch {
-      // CSV not found, use default below
-    }
-
     // Final fallback: default pricing
     const basePrice = defaultPrice * nights;
-    const serviceFee = basePrice * 0.12;
+    const serviceFee = basePrice * (DEFAULT_SERVICE_FEE_PERCENT / 100);
     return NextResponse.json({
       propertyId,
       checkInDate,

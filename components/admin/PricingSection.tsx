@@ -5,17 +5,22 @@ interface PricingErrors {
   minPrice?: string;
   basePrice?: string;
   maxPrice?: string;
+  cleaningFee?: string;
+  serviceFeePercent?: string;
 }
 
 interface PricingSectionProps {
-  values: Pick<PropertyFormValues, 'pricingEnabled' | 'minPrice' | 'basePrice' | 'maxPrice'>;
+  values: Pick<
+    PropertyFormValues,
+    'pricingEnabled' | 'minPrice' | 'basePrice' | 'maxPrice' | 'cleaningFee' | 'serviceFeePercent'
+  >;
   currency: string;
   errors?: PricingErrors;
   onChange: (field: keyof PricingSectionProps['values'], value: string | boolean) => void;
 }
 
 export function PricingSection({ values, currency, errors, onChange }: PricingSectionProps) {
-  const { pricingEnabled, minPrice, basePrice, maxPrice } = values;
+  const { pricingEnabled, minPrice, basePrice, maxPrice, cleaningFee, serviceFeePercent } = values;
 
   const parsedMin = parseFloat(minPrice || '');
   const parsedBase = parseFloat(basePrice || '');
@@ -139,6 +144,31 @@ export function PricingSection({ values, currency, errors, onChange }: PricingSe
             />
           </div>
         )}
+      </div>
+
+      <div className="mt-4 grid gap-4 md:grid-cols-2">
+        <PricingInput
+          label="Cleaning Fee"
+          description="Flat fee added once per booking."
+          colorClass="text-sky-400"
+          prefix={currency === 'ZAR' ? 'R' : currency}
+          name="cleaningFee"
+          value={cleaningFee}
+          onChange={value => onChange('cleaningFee', value)}
+          disabled={!pricingEnabled}
+          error={errors?.cleaningFee}
+        />
+        <PricingInput
+          label="Service Fee %"
+          description="Percentage applied to accommodation subtotal."
+          colorClass="text-violet-400"
+          prefix="%"
+          name="serviceFeePercent"
+          value={serviceFeePercent}
+          onChange={value => onChange('serviceFeePercent', value)}
+          disabled={!pricingEnabled}
+          error={errors?.serviceFeePercent}
+        />
       </div>
     </section>
   );

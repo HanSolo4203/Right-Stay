@@ -4,6 +4,20 @@ export interface PropertyPricing {
   basePrice: number | null;
   maxPrice: number | null;
   pricingEnabled: boolean;
+  cleaningFee: number | null;
+  serviceFeePercent: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PropertyPriceLabsMapping {
+  propertyId: string;
+  pricelabsListingId: string;
+  pricelabsPms: string;
+  syncEnabled: boolean;
+  lastSyncedAt: string | null;
+  lastSyncStatus: string | null;
+  lastSyncError: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -27,6 +41,7 @@ export interface Property {
   updated_at: string;
   primaryPhotoUrl?: string;
   pricing?: PropertyPricing;
+  pricelabsMapping?: PropertyPriceLabsMapping | null;
 }
 
 export interface PropertyFormValues {
@@ -46,5 +61,10 @@ export interface PropertyFormValues {
   minPrice: string;
   basePrice: string;
   maxPrice: string;
+  cleaningFee: string;
+  serviceFeePercent: string;
+  pricelabsListingId: string;
+  pricelabsPms: string;
+  pricelabsSyncEnabled: boolean;
 }
 

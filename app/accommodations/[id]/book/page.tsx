@@ -5,7 +5,6 @@ import { useParams, useRouter } from 'next/navigation';
 import Header from '@/components/sections/Header';
 import Footer from '@/components/sections/Footer';
 import AvailabilityCalendar from '@/components/AvailabilityCalendar';
-import { parseLocalDatePlusOne } from '@/lib/date-utils';
 import Link from 'next/link';
 import Image from 'next/image';
 import { 
@@ -94,6 +93,17 @@ interface PricingBreakdown {
   usingDefaultPricing?: boolean;
 }
 
+interface CalendarDataState {
+  dailyPrices: Record<string, number>;
+  blockedDates: string[];
+  pricing: {
+    pricingEnabled: boolean;
+    minPrice: number | null;
+    basePrice: number | null;
+    maxPrice: number | null;
+  };
+}
+
 export default function BookingPage() {
   const params = useParams();
   const router = useRouter();
@@ -120,6 +130,16 @@ export default function BookingPage() {
   const [availabilityError, setAvailabilityError] = useState<string | null>(null);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
+  const [calendarData, setCalendarData] = useState<CalendarDataState>({
+    dailyPrices: {},
+    blockedDates: [],
+    pricing: {
+      pricingEnabled: false,
+      minPrice: null,
+      basePrice: null,
+      maxPrice: null,
+    },
+  });
 
   // Fetch property details
   useEffect(() => {
@@ -171,32 +191,6 @@ export default function BookingPage() {
         (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24)
       );
 
-      // If dynamic pricing is configured for this property, use it as the single source of truth
-      if (property?.pricing?.pricingEnabled && property.pricing.basePrice != null) {
-        const nightlyBase = property.pricing.basePrice;
-        const basePrice = nightlyBase * nights;
-        const cleaningFee = 500;
-        const serviceFee = basePrice * 0.12;
-
-        setPricing({
-          numberOfNights: nights,
-          nightlyPrices: Array.from({ length: nights }).map((_, i) => ({
-            date: new Date(checkIn.getTime() + i * 24 * 60 * 60 * 1000)
-              .toISOString()
-              .split('T')[0],
-            price: nightlyBase,
-          })),
-          basePrice,
-          averagePricePerNight: nightlyBase,
-          cleaningFee,
-          serviceFee,
-          total: basePrice + cleaningFee + serviceFee,
-          usingDefaultPricing: false,
-        });
-        return;
-      }
-
-      // Otherwise fall back to existing PriceLabs-based pricing endpoint
       const response = await fetch(
         `/api/get-pricing?propertyId=${propertyId}&checkInDate=${formData.checkInDate}&checkOutDate=${formData.checkOutDate}`
       );
@@ -403,10 +397,36 @@ export default function BookingPage() {
   const hasMorePhotos = photos.length > 5;
   const mainPhoto = photos[selectedPhotoIndex] || photos[0] || { url: propertyImage };
 
-  const nightlyBasePrice =
-    property?.pricing?.pricingEnabled && property.pricing.basePrice != null
-      ? property.pricing.basePrice
-      : 1500;
+  const nightlyBasePrice = (() => {
+    if (pricing?.averagePricePerNight != null) {
+      return pricing.averagePricePerNight;
+    }
+
+    const blockedSet = new Set(calendarData.blockedDates);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (let i = 0; i < 365; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const key = `${y}-${m}-${day}`;
+      if (!blockedSet.has(key)) {
+        const p = calendarData.dailyPrices[key];
+        if (p != null) return p;
+      }
+    }
+
+    if (calendarData.pricing.pricingEnabled && calendarData.pricing.basePrice != null) {
+      return calendarData.pricing.basePrice;
+    }
+    if (property?.pricing?.pricingEnabled && property.pricing.basePrice != null) {
+      return property.pricing.basePrice;
+    }
+    return 1500;
+  })();
 
   return (
     <>
@@ -609,9 +629,9 @@ export default function BookingPage() {
 
           {/* Main Content Layout */}
           <div className="mx-auto max-w-7xl px-6 md:px-8 pb-12">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
             {/* Property Details and Booking Form - Left Side */}
-            <div className="lg:col-span-2 space-y-8">
+            <div className="lg:col-span-3 space-y-8">
               {/* Property Description */}
               <div className="border-b border-gray-200 pb-8">
                 <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
@@ -634,7 +654,7 @@ export default function BookingPage() {
             </div>
 
             {/* Booking Sidebar - Right Side (Airbnb Style) */}
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-2">
               <div className="bg-white border border-gray-200 rounded-2xl shadow-lg p-6 sticky top-8">
                 {/* Price and Dates Section */}
                 <div className="mb-6">
@@ -666,40 +686,30 @@ export default function BookingPage() {
                     )}
                   </div>
 
-                  {/* Date Selection */}
-                  <div className="border border-gray-300 rounded-xl overflow-hidden mb-4">
+                  {/* Airbnb-style Date + Guest summary */}
+                  <div className="border border-gray-300 rounded-xl overflow-hidden mb-4 bg-white">
                     <div className="grid grid-cols-2 border-b border-gray-300">
-                      <div className="p-4 border-r border-gray-300">
-                        <label className="text-xs font-medium text-gray-700 uppercase mb-1 block">CHECK-IN</label>
-                        <input
-                          type="date"
-                          value={formData.checkInDate}
-                          onChange={(e) => {
-                            setFormData(prev => ({ ...prev, checkInDate: e.target.value }));
-                          }}
-                          className="w-full text-sm font-medium text-gray-900 focus:outline-none hide-native-calendar-icon"
-                        />
+                      <div className="p-3 border-r border-gray-300">
+                        <label className="text-[10px] font-semibold tracking-wide text-gray-500 uppercase block">Check-in</label>
+                        <div className="text-sm font-medium text-gray-900 mt-1">
+                          {formData.checkInDate || 'Add date'}
+                        </div>
                       </div>
-                      <div className="p-4">
-                        <label className="text-xs font-medium text-gray-700 uppercase mb-1 block">CHECKOUT</label>
-                        <input
-                          type="date"
-                          value={formData.checkOutDate}
-                          onChange={(e) => {
-                            setFormData(prev => ({ ...prev, checkOutDate: e.target.value }));
-                          }}
-                          className="w-full text-sm font-medium text-gray-900 focus:outline-none hide-native-calendar-icon"
-                        />
+                      <div className="p-3">
+                        <label className="text-[10px] font-semibold tracking-wide text-gray-500 uppercase block">Checkout</label>
+                        <div className="text-sm font-medium text-gray-900 mt-1">
+                          {formData.checkOutDate || 'Add date'}
+                        </div>
                       </div>
                     </div>
-                    <div className="p-4 border-t border-gray-300">
-                      <label className="text-xs font-medium text-gray-700 uppercase mb-1 block">GUESTS</label>
+                    <div className="p-3 border-t border-gray-300">
+                      <label className="text-[10px] font-semibold tracking-wide text-gray-500 uppercase block">Guests</label>
                       <select
                         value={formData.numberOfGuests}
                         onChange={(e) => {
                           setFormData(prev => ({ ...prev, numberOfGuests: parseInt(e.target.value) }));
                         }}
-                        className="w-full text-sm font-medium text-gray-900 focus:outline-none"
+                        className="mt-1 w-full text-sm font-medium text-gray-900 bg-white focus:outline-none"
                       >
                         {Array.from({ length: propertyData?.maximum_capacity || 10 }, (_, i) => i + 1).map(num => (
                           <option key={num} value={num}>{num} {num === 1 ? 'guest' : 'guests'}</option>
@@ -714,6 +724,7 @@ export default function BookingPage() {
                       propertyId={propertyId}
                       selectedCheckIn={formData.checkInDate}
                       selectedCheckOut={formData.checkOutDate}
+                      onCalendarDataChange={setCalendarData}
                       onDateSelect={(checkIn, checkOut) => {
                         setFormData(prev => ({
                           ...prev,
@@ -722,6 +733,15 @@ export default function BookingPage() {
                         }));
                       }}
                     />
+                    {formData.checkInDate && (
+                      <button
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, checkInDate: '', checkOutDate: '' }))}
+                        className="mt-3 w-full rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        Clear dates
+                      </button>
+                    )}
                   </div>
 
                   {/* Book Button */}

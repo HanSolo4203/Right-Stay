@@ -8,6 +8,16 @@ interface AvailabilityCalendarProps {
   onDateSelect: (checkIn: string | null, checkOut: string | null) => void;
   selectedCheckIn: string | null;
   selectedCheckOut: string | null;
+  onCalendarDataChange?: (data: {
+    dailyPrices: Record<string, number>;
+    blockedDates: string[];
+    pricing: {
+      pricingEnabled: boolean;
+      minPrice: number | null;
+      basePrice: number | null;
+      maxPrice: number | null;
+    };
+  }) => void;
 }
 
 interface BlockedDate {
@@ -21,11 +31,31 @@ export default function AvailabilityCalendar({
   onDateSelect,
   selectedCheckIn,
   selectedCheckOut,
+  onCalendarDataChange,
 }: AvailabilityCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [blockedDates, setBlockedDates] = useState<Set<string>>(new Set());
+  const [dailyPrices, setDailyPrices] = useState<Record<string, number>>({});
+  const [pricingMeta, setPricingMeta] = useState<{
+    pricingEnabled: boolean;
+    minPrice: number | null;
+    basePrice: number | null;
+    maxPrice: number | null;
+  }>({
+    pricingEnabled: false,
+    minPrice: null,
+    basePrice: null,
+    maxPrice: null,
+  });
   const [loading, setLoading] = useState(true);
   const [selectingCheckOut, setSelectingCheckOut] = useState(false);
+
+  const formatDateLocal = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
 
   // Fetch blocked dates for a wider range (6 months) to support navigation
   useEffect(() => {
@@ -42,13 +72,34 @@ export default function AvailabilityCalendar({
         endDate.setDate(0); // Last day of the month
         
         const response = await fetch(
-          `/api/get-blocked-dates?propertyId=${propertyId}&startDate=${startDate.toISOString().split('T')[0]}&endDate=${endDate.toISOString().split('T')[0]}`
+          `/api/get-blocked-dates?propertyId=${propertyId}&startDate=${formatDateLocal(startDate)}&endDate=${formatDateLocal(endDate)}`
         );
         
         if (response.ok) {
           const data = await response.json();
-          const blocked = new Set<string>(data.blockedDates.map((d: BlockedDate) => d.date));
+          const blockedDateList = (data.blockedDates || []).map((d: BlockedDate) => d.date);
+          const blocked = new Set<string>(blockedDateList);
           setBlockedDates(blocked);
+          setDailyPrices(data.dailyPrices || {});
+          setPricingMeta(
+            data.pricing || {
+              pricingEnabled: false,
+              minPrice: null,
+              basePrice: null,
+              maxPrice: null,
+            }
+          );
+          onCalendarDataChange?.({
+            dailyPrices: data.dailyPrices || {},
+            blockedDates: blockedDateList,
+            pricing:
+              data.pricing || {
+                pricingEnabled: false,
+                minPrice: null,
+                basePrice: null,
+                maxPrice: null,
+              },
+          });
         }
       } catch (error) {
         console.error('Error fetching availability:', error);
@@ -58,7 +109,7 @@ export default function AvailabilityCalendar({
     }
 
     fetchAvailability();
-  }, [propertyId, currentMonth]);
+  }, [propertyId, currentMonth, onCalendarDataChange]);
 
   const daysInMonth = (date: Date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -68,9 +119,7 @@ export default function AvailabilityCalendar({
     return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
   };
 
-  const formatDate = (date: Date) => {
-    return date.toISOString().split('T')[0];
-  };
+  const formatDate = (date: Date) => formatDateLocal(date);
 
   const isDateBlocked = (date: Date) => {
     return blockedDates.has(formatDate(date));
@@ -163,9 +212,7 @@ export default function AvailabilityCalendar({
 
     // Add empty cells for days before the first day of the month
     for (let i = 0; i < firstDay; i++) {
-      days.push(
-        <div key={`empty-${i}`} className="h-12 md:h-14"></div>
-      );
+      days.push(<div key={`empty-${i}`} className="h-16 md:h-20"></div>);
     }
 
     // Add cells for each day of the month
@@ -179,18 +226,28 @@ export default function AvailabilityCalendar({
       const isInRange = isDateInRange(date);
       const isSelectable = isDateSelectable(date);
 
-      let className = "h-10 md:h-12 lg:h-14 flex items-center justify-center rounded-lg cursor-pointer transition-all text-sm md:text-base font-medium relative ";
+      const dayPrice = dailyPrices[dateStr];
+      const fallbackPrice =
+        pricingMeta.basePrice != null
+          ? pricingMeta.basePrice
+          : pricingMeta.minPrice != null
+          ? pricingMeta.minPrice
+          : 1500;
+      const displayPrice = dayPrice ?? fallbackPrice;
+
+      let className =
+        "h-16 md:h-20 flex flex-col items-center justify-center rounded-xl cursor-pointer transition-all text-sm font-medium relative px-1 ";
 
       if (isCheckIn || isCheckOut) {
-        className += "bg-blue-600 text-white shadow-md hover:bg-blue-700 font-semibold ";
+        className += "bg-gray-900 text-white shadow-md hover:bg-black font-semibold ";
         if (isCheckIn) className += "rounded-r-none ";
         if (isCheckOut) className += "rounded-l-none ";
       } else if (isInRange) {
-        className += "bg-blue-100 text-blue-900 hover:bg-blue-200 ";
+        className += "bg-gray-100 text-gray-900 hover:bg-gray-200 ";
       } else if (!isSelectable) {
-        className += "bg-gray-100 text-gray-400 cursor-not-allowed line-through ";
+        className += "bg-gray-50 text-gray-400 cursor-not-allowed ";
       } else {
-        className += "hover:bg-blue-50 text-gray-900 border border-gray-200 hover:border-blue-300 hover:shadow-sm ";
+        className += "hover:bg-gray-50 text-gray-900 border border-gray-200 hover:border-gray-300 hover:shadow-sm ";
       }
 
       days.push(
@@ -212,7 +269,20 @@ export default function AvailabilityCalendar({
               : "Available"
           }
         >
-          {day}
+          <span className="text-sm md:text-base font-semibold leading-tight">{day}</span>
+          <span
+            className={`text-[10px] md:text-xs leading-tight ${
+              isCheckIn || isCheckOut
+                ? 'text-white/90'
+                : !isSelectable
+                ? 'text-gray-400'
+                : 'text-gray-600'
+            }`}
+          >
+            <span className="whitespace-nowrap">
+              {`R${Math.round(displayPrice).toLocaleString('en-ZA')}`}
+            </span>
+          </span>
         </button>
       );
     }
@@ -228,7 +298,7 @@ export default function AvailabilityCalendar({
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-4 md:p-6">
+    <div className="bg-white rounded-2xl border border-gray-200 p-4 md:p-5">
       {/* Calendar Header */}
       <div className="flex items-center justify-between mb-6">
         <button
@@ -257,14 +327,14 @@ export default function AvailabilityCalendar({
       </div>
 
       {/* Selection Instructions */}
-      <div className="mb-4 p-3 md:p-4 bg-blue-50 rounded-lg border border-blue-100">
-        <p className="text-sm md:text-base font-medium text-blue-900">
+      <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+        <p className="text-sm font-medium text-gray-800">
           {!selectedCheckIn ? (
-            "👆 Step 1: Select your check-in date"
+            "Select check-in date"
           ) : !selectedCheckOut ? (
-            "👆 Step 2: Select your check-out date"
+            "Select check-out date"
           ) : (
-            `✓ Selected: ${new Date(selectedCheckIn).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(selectedCheckOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+            `Selected: ${new Date(selectedCheckIn).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(selectedCheckOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
           )}
         </p>
       </div>
@@ -299,19 +369,22 @@ export default function AvailabilityCalendar({
       )}
 
       {/* Legend */}
-      <div className="mt-6 pt-4 border-t border-gray-200">
+      <div className="mt-5 pt-4 border-t border-gray-200">
         <div className="flex flex-wrap gap-4 text-xs md:text-sm">
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-blue-600 rounded"></div>
+            <div className="w-4 h-4 bg-gray-900 rounded"></div>
             <span className="text-gray-700">Selected</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-blue-100 rounded"></div>
+            <div className="w-4 h-4 bg-gray-100 rounded"></div>
             <span className="text-gray-700">In range</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-gray-100 rounded"></div>
-            <span className="text-gray-700 line-through">Unavailable</span>
+            <div className="w-4 h-4 bg-gray-50 border border-gray-200 rounded"></div>
+            <span className="text-gray-700">Unavailable</span>
+          </div>
+          <div className="flex items-center gap-2 text-gray-700">
+            <span>Daily prices from PriceLabs sync</span>
           </div>
         </div>
       </div>

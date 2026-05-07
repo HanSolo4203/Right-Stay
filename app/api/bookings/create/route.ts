@@ -1,5 +1,12 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import {
+  buildDatePriceMap,
+  calculateBookingPricingFromMap,
+  DEFAULT_NIGHTLY_PRICE,
+  DEFAULT_CLEANING_FEE,
+  DEFAULT_SERVICE_FEE_PERCENT,
+} from '@/lib/pricing';
 
 // Create Supabase client with better error handling
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -38,6 +45,77 @@ interface BookingRequest {
   };
 }
 
+async function calculateServerPricing(propertyId: string, checkInDate: string, checkOutDate: string) {
+  const start = new Date(checkInDate);
+  const end = new Date(checkOutDate);
+  const nights = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  if (nights <= 0) {
+    throw new Error('Invalid booking date range');
+  }
+
+  const { data: property } = await supabase
+    .from('cached_properties')
+    .select('id')
+    .eq('uplisting_id', propertyId)
+    .maybeSingle();
+
+  if (property?.id) {
+    const { data: pricingRow } = await supabase
+      .from('property_pricing')
+      .select('*')
+      .eq('property_id', property.id)
+      .maybeSingle();
+
+    if (pricingRow && pricingRow.pricing_enabled && pricingRow.base_price != null) {
+      const basePrice = Number(pricingRow.base_price);
+      const minPrice = pricingRow.min_price != null ? Number(pricingRow.min_price) : null;
+      const maxPrice = pricingRow.max_price != null ? Number(pricingRow.max_price) : null;
+      const cleaningFee =
+        pricingRow.cleaning_fee != null ? Number(pricingRow.cleaning_fee) : DEFAULT_CLEANING_FEE;
+      const serviceFeePercent =
+        pricingRow.service_fee_percent != null
+          ? Number(pricingRow.service_fee_percent)
+          : DEFAULT_SERVICE_FEE_PERCENT;
+
+      const { data: dailyRows } = await supabase
+        .from('property_daily_prices')
+        .select('date, price')
+        .eq('property_id', property.id)
+        .gte('date', checkInDate)
+        .lt('date', checkOutDate);
+
+      const dailyOverrideMap: Record<string, number> = {};
+      for (const row of dailyRows || []) {
+        dailyOverrideMap[row.date] = Number(row.price);
+      }
+
+      const map = buildDatePriceMap(
+        checkInDate,
+        checkOutDate,
+        basePrice,
+        dailyOverrideMap,
+        minPrice,
+        maxPrice
+      );
+      const pricing = calculateBookingPricingFromMap(checkInDate, checkOutDate, map, basePrice, {
+        cleaningFee,
+        serviceFeePercent,
+      });
+      if (pricing) return pricing;
+    }
+  }
+
+  const basePrice = nights * DEFAULT_NIGHTLY_PRICE;
+  const serviceFee = basePrice * (DEFAULT_SERVICE_FEE_PERCENT / 100);
+  return {
+    numberOfNights: nights,
+    basePrice,
+    cleaningFee: DEFAULT_CLEANING_FEE,
+    serviceFee,
+    total: basePrice + DEFAULT_CLEANING_FEE + serviceFee,
+  };
+}
+
 export async function POST(request: Request) {
   try {
     // Check environment variables first
@@ -67,7 +145,7 @@ export async function POST(request: Request) {
       guestPhone,
       numberOfGuests,
       specialRequests,
-      pricing
+      pricing: clientPricing
     } = body;
 
     // Validate required fields
@@ -230,8 +308,8 @@ export async function POST(request: Request) {
     // Generate a unique booking reference
     const bookingReference = `DIR-${Date.now()}-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
 
-    // Calculate accommodation total if not provided
-    const accommodationTotal = pricing.basePrice || (pricing.total - (pricing.cleaningFee || 0) - (pricing.serviceFee || 0));
+    const serverPricing = await calculateServerPricing(propertyId, checkInDate, checkOutDate);
+    const accommodationTotal = serverPricing.basePrice;
 
     // Ensure dates are in correct format (YYYY-MM-DD)
     const formatDate = (dateStr: string) => {
@@ -247,9 +325,9 @@ export async function POST(request: Request) {
       check_in_date: formatDate(checkInDate),
       check_out_date: formatDate(checkOutDate),
       accommodation_total: accommodationTotal,
-      cleaning_fee: pricing.cleaningFee || 0,
-      service_fee: pricing.serviceFee || 0,
-      total: pricing.total,
+      cleaning_fee: serverPricing.cleaningFee || 0,
+      service_fee: serverPricing.serviceFee || 0,
+      total: serverPricing.total,
       guest_name: guestName,
       guest_email: guestEmail
     });
@@ -265,8 +343,8 @@ export async function POST(request: Request) {
         check_in_date: formatDate(checkInDate),
         check_out_date: formatDate(checkOutDate),
         accommodation_total: accommodationTotal,
-        cleaning_fee: pricing.cleaningFee || 0,
-        extra_charges: pricing.serviceFee || 0,
+        cleaning_fee: serverPricing.cleaningFee || 0,
+        extra_charges: serverPricing.serviceFee || 0,
         discount_amount: 0,
         booking_taxes: 0,
         channel_commission: 0,
@@ -294,7 +372,8 @@ export async function POST(request: Request) {
         bookingReference: booking.booking_reference,
         checkInDate: booking.check_in_date,
         checkOutDate: booking.check_out_date,
-        total: pricing.total,
+        total: serverPricing.total,
+        clientTotal: clientPricing?.total ?? null,
       },
     });
   } catch (error) {

@@ -10,6 +10,8 @@ interface PropertyPricing {
   basePrice: number | null;
   maxPrice: number | null;
   pricingEnabled: boolean;
+  cleaningFee: number | null;
+  serviceFeePercent: number | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -23,6 +25,14 @@ interface Property {
   bathrooms: number | null;
   currency: string;
   pricing: PropertyPricing | null;
+  pricelabsMapping?: {
+    pricelabsListingId: string;
+    pricelabsPms: string;
+    syncEnabled: boolean;
+    lastSyncedAt: string | null;
+    lastSyncStatus: string | null;
+    lastSyncError: string | null;
+  } | null;
 }
 
 export default function PricingDashboard() {
@@ -31,6 +41,9 @@ export default function PricingDashboard() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [syncingId, setSyncingId] = useState<string | null>(null);
+  const [syncingAll, setSyncingAll] = useState(false);
+  const [syncMessage, setSyncMessage] = useState<{ type: 'success' | 'warning' | 'error'; text: string } | null>(null);
 
   const fetchProperties = useCallback(async () => {
     try {
@@ -78,6 +91,57 @@ export default function PricingDashboard() {
     }
   };
 
+  const handleSyncPrices = async (property?: Property) => {
+    if (property) {
+      setSyncingId(property.id);
+    } else {
+      setSyncingAll(true);
+    }
+    try {
+      const response = await fetch('/api/admin/pricing/sync-pricelabs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(property ? { propertyId: property.uplisting_id } : {}),
+      });
+      const result = await response.json().catch(() => null);
+      if (!response.ok) {
+        setSyncMessage({
+          type: 'error',
+          text: result?.error || 'Failed to sync PriceLabs pricing.',
+        });
+        return;
+      }
+
+      await fetchProperties();
+
+      if ((result?.requestedMappings || 0) === 0) {
+        setSyncMessage({
+          type: 'warning',
+          text: 'No PriceLabs mappings found. Open each property in Property Management and add PriceLabs Listing ID + PMS first.',
+        });
+        return;
+      }
+
+      const errorCount = Array.isArray(result?.errors) ? result.errors.length : 0;
+      setSyncMessage({
+        type: errorCount > 0 ? 'warning' : 'success',
+        text:
+          errorCount > 0
+            ? `Sync completed with issues. Synced ${result?.syncedProperties || 0}/${result?.requestedMappings || 0} mapped properties.`
+            : `Sync successful. Synced ${result?.syncedProperties || 0} properties and ${result?.syncedDays || 0} day prices.`,
+      });
+    } catch (error) {
+      console.error('Error syncing PriceLabs prices:', error);
+      setSyncMessage({
+        type: 'error',
+        text: 'Unexpected error while syncing PriceLabs pricing.',
+      });
+    } finally {
+      setSyncingId(null);
+      setSyncingAll(false);
+    }
+  };
+
   const filteredProperties = properties.filter(
     (p) =>
       !search ||
@@ -111,6 +175,16 @@ export default function PricingDashboard() {
 
       {/* Search */}
       <div className="mb-6">
+        <div className="flex justify-end mb-3">
+          <button
+            onClick={() => handleSyncPrices()}
+            disabled={syncingAll}
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-sm font-medium disabled:opacity-50"
+          >
+            {syncingAll ? <Loader2 className="w-4 h-4 animate-spin" /> : <Calendar className="w-4 h-4" />}
+            Sync all from PriceLabs
+          </button>
+        </div>
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input
@@ -127,17 +201,34 @@ export default function PricingDashboard() {
         Showing {filteredProperties.length}/{properties.length} listings
       </p>
 
+      {syncMessage && (
+        <div
+          className={`mb-4 rounded-lg border px-3 py-2 text-sm ${
+            syncMessage.type === 'success'
+              ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
+              : syncMessage.type === 'warning'
+              ? 'border-amber-500/30 bg-amber-500/10 text-amber-300'
+              : 'border-red-500/30 bg-red-500/10 text-red-300'
+          }`}
+        >
+          {syncMessage.text}
+        </div>
+      )}
+
       {/* Table - scroll horizontally on small screens */}
       <div className="overflow-x-auto rounded-lg border border-white/10">
-        <table className="w-full min-w-[800px]">
+        <table className="w-full min-w-[980px]">
           <thead>
             <tr className="border-b border-white/10 bg-white/5">
               <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">Listings</th>
               <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">Calendar</th>
+              <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">PriceLabs</th>
               <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">Sync Price</th>
               <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">Min Price</th>
               <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">Base Price</th>
               <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">Max Price</th>
+              <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">Cleaning Fee</th>
+              <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">Service Fee %</th>
               <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">Currency</th>
             </tr>
           </thead>
@@ -167,6 +258,36 @@ export default function PricingDashboard() {
                       Review Prices
                     </button>
                   </td>
+                  <td className="py-3 px-4 text-xs text-gray-300">
+                    {property.pricelabsMapping ? (
+                      <div className="space-y-1">
+                        <div>ID {property.pricelabsMapping.pricelabsListingId}</div>
+                        <div>PMS {property.pricelabsMapping.pricelabsPms}</div>
+                        {property.pricelabsMapping.lastSyncedAt && (
+                          <div className="text-gray-400">
+                            {new Date(property.pricelabsMapping.lastSyncedAt).toLocaleString()}
+                          </div>
+                        )}
+                        {property.pricelabsMapping.lastSyncError && (
+                          <div className="text-red-300">{property.pricelabsMapping.lastSyncError}</div>
+                        )}
+                        <button
+                          onClick={() => handleSyncPrices(property)}
+                          disabled={syncingId === property.id}
+                          className="mt-1 inline-flex items-center gap-1 px-2 py-1 rounded bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 disabled:opacity-50"
+                        >
+                          {syncingId === property.id ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : (
+                            <Calendar className="w-3 h-3" />
+                          )}
+                          Sync now
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-gray-500">Not mapped</span>
+                    )}
+                  </td>
                   <td className="py-3 px-4">
                     {p ? (
                       <button
@@ -195,6 +316,12 @@ export default function PricingDashboard() {
                   </td>
                   <td className="py-3 px-4 text-sm text-gray-300">
                     {p ? formatPrice(p.maxPrice, currency) : '—'}
+                  </td>
+                  <td className="py-3 px-4 text-sm text-gray-300">
+                    {p ? formatPrice(p.cleaningFee, currency) : '—'}
+                  </td>
+                  <td className="py-3 px-4 text-sm text-gray-300">
+                    {p?.serviceFeePercent != null ? `${p.serviceFeePercent.toFixed(2)}%` : '—'}
                   </td>
                   <td className="py-3 px-4 text-sm text-gray-400">{currency}</td>
                 </tr>

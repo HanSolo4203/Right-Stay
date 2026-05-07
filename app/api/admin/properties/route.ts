@@ -20,6 +20,28 @@ function buildPricingObject(row: any) {
       row.base_price !== null && row.base_price !== undefined ? Number(row.base_price) : null,
     maxPrice: row.max_price !== null && row.max_price !== undefined ? Number(row.max_price) : null,
     pricingEnabled: !!row.pricing_enabled,
+    cleaningFee:
+      row.cleaning_fee !== null && row.cleaning_fee !== undefined ? Number(row.cleaning_fee) : null,
+    serviceFeePercent:
+      row.service_fee_percent !== null && row.service_fee_percent !== undefined
+        ? Number(row.service_fee_percent)
+        : null,
+    createdAt: row.created_at as string,
+    updatedAt: row.updated_at as string,
+  };
+}
+
+function buildPriceLabsMappingObject(row: any) {
+  if (!row) return null;
+
+  return {
+    propertyId: row.property_id as string,
+    pricelabsListingId: row.pricelabs_listing_id as string,
+    pricelabsPms: row.pricelabs_pms as string,
+    syncEnabled: !!row.sync_enabled,
+    lastSyncedAt: (row.last_synced_at as string) || null,
+    lastSyncStatus: (row.last_sync_status as string) || null,
+    lastSyncError: (row.last_sync_error as string) || null,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   };
@@ -47,6 +69,7 @@ export async function GET() {
     // Fetch pricing rows for all properties in a single query
     const propertyIds = properties.map((p: any) => p.id).filter(Boolean);
     let pricingByPropertyId: Record<string, any> = {};
+    let mappingByPropertyId: Record<string, any> = {};
 
     if (propertyIds.length > 0) {
       const { data: pricingRows, error: pricingError } = await supabase
@@ -65,12 +88,30 @@ export async function GET() {
           {}
         );
       }
+
+      const { data: mappingRows, error: mappingError } = await supabase
+        .from('property_pricelabs_mapping')
+        .select('*')
+        .in('property_id', propertyIds);
+
+      if (mappingError) {
+        console.error('Supabase error fetching PriceLabs mappings:', mappingError);
+      } else {
+        mappingByPropertyId = (mappingRows || []).reduce(
+          (acc: Record<string, any>, row: any) => {
+            acc[row.property_id] = row;
+            return acc;
+          },
+          {}
+        );
+      }
     }
 
     // Transform the data to include extracted attributes for easier display
     const transformedData = properties.map((property: any) => {
       const attributes = property.data?.attributes || {};
       const pricingRow = pricingByPropertyId[property.id];
+      const mappingRow = mappingByPropertyId[property.id];
       return {
         id: property.id,
         uplisting_id: property.uplisting_id,
@@ -91,6 +132,7 @@ export async function GET() {
         created_at: property.created_at,
         updated_at: property.updated_at,
         pricing: buildPricingObject(pricingRow),
+        pricelabsMapping: buildPriceLabsMappingObject(mappingRow),
         // Keep full data for reference
         data: property.data
       };
@@ -153,6 +195,8 @@ export async function POST(request: NextRequest) {
       body.minPrice !== undefined ||
       body.basePrice !== undefined ||
       body.maxPrice !== undefined ||
+      body.cleaningFee !== undefined ||
+      body.serviceFeePercent !== undefined ||
       body.pricingEnabled !== undefined;
 
     if (hasPricingFields) {
@@ -169,6 +213,14 @@ export async function POST(request: NextRequest) {
           ? Number(body.maxPrice)
           : null;
       const pricing_enabled = !!body.pricingEnabled;
+      const cleaning_fee =
+        body.cleaningFee !== undefined && body.cleaningFee !== null
+          ? Number(body.cleaningFee)
+          : 450;
+      const service_fee_percent =
+        body.serviceFeePercent !== undefined && body.serviceFeePercent !== null
+          ? Number(body.serviceFeePercent)
+          : 5;
 
       const { data: pricingData, error: pricingError } = await supabase
         .from('property_pricing')
@@ -179,6 +231,8 @@ export async function POST(request: NextRequest) {
             base_price,
             max_price,
             pricing_enabled,
+            cleaning_fee,
+            service_fee_percent,
           },
           { onConflict: 'property_id' }
         )
@@ -189,6 +243,34 @@ export async function POST(request: NextRequest) {
         console.error('Error creating property pricing:', pricingError);
       } else {
         pricing = buildPricingObject(pricingData);
+      }
+    }
+
+    let pricelabsMapping = null;
+    const hasMappingFields =
+      body.pricelabsListingId !== undefined ||
+      body.pricelabsPms !== undefined ||
+      body.pricelabsSyncEnabled !== undefined;
+
+    if (hasMappingFields && body.pricelabsListingId && body.pricelabsPms) {
+      const { data: mappingData, error: mappingError } = await supabase
+        .from('property_pricelabs_mapping')
+        .upsert(
+          {
+            property_id: data.id,
+            pricelabs_listing_id: String(body.pricelabsListingId).trim(),
+            pricelabs_pms: String(body.pricelabsPms).trim(),
+            sync_enabled: body.pricelabsSyncEnabled !== undefined ? !!body.pricelabsSyncEnabled : true,
+          },
+          { onConflict: 'property_id' }
+        )
+        .select()
+        .single();
+
+      if (mappingError) {
+        console.error('Error creating PriceLabs mapping:', mappingError);
+      } else {
+        pricelabsMapping = buildPriceLabsMappingObject(mappingData);
       }
     }
 
@@ -206,6 +288,7 @@ export async function POST(request: NextRequest) {
       ical_url: data.ical_url,
       created_at: data.created_at,
       pricing,
+      pricelabsMapping,
     });
   } catch (error) {
     console.error('Error creating property:', error);
@@ -283,6 +366,8 @@ export async function PUT(request: NextRequest) {
       body.minPrice !== undefined ||
       body.basePrice !== undefined ||
       body.maxPrice !== undefined ||
+      body.cleaningFee !== undefined ||
+      body.serviceFeePercent !== undefined ||
       body.pricingEnabled !== undefined;
 
     if (hasPricingFields) {
@@ -299,6 +384,14 @@ export async function PUT(request: NextRequest) {
           ? Number(body.maxPrice)
           : null;
       const pricing_enabled = !!body.pricingEnabled;
+      const cleaning_fee =
+        body.cleaningFee !== undefined && body.cleaningFee !== null
+          ? Number(body.cleaningFee)
+          : 450;
+      const service_fee_percent =
+        body.serviceFeePercent !== undefined && body.serviceFeePercent !== null
+          ? Number(body.serviceFeePercent)
+          : 5;
 
       const { data: pricingData, error: pricingError } = await supabase
         .from('property_pricing')
@@ -309,6 +402,8 @@ export async function PUT(request: NextRequest) {
             base_price,
             max_price,
             pricing_enabled,
+            cleaning_fee,
+            service_fee_percent,
           },
           { onConflict: 'property_id' }
         )
@@ -333,6 +428,57 @@ export async function PUT(request: NextRequest) {
       }
     }
 
+    let pricelabsMapping = null;
+    const hasMappingFields =
+      body.pricelabsListingId !== undefined ||
+      body.pricelabsPms !== undefined ||
+      body.pricelabsSyncEnabled !== undefined;
+
+    if (hasMappingFields) {
+      const listingId = body.pricelabsListingId ? String(body.pricelabsListingId).trim() : '';
+      const pms = body.pricelabsPms ? String(body.pricelabsPms).trim() : '';
+
+      if (listingId && pms) {
+        const { data: mappingData, error: mappingError } = await supabase
+          .from('property_pricelabs_mapping')
+          .upsert(
+            {
+              property_id: id,
+              pricelabs_listing_id: listingId,
+              pricelabs_pms: pms,
+              sync_enabled:
+                body.pricelabsSyncEnabled !== undefined ? !!body.pricelabsSyncEnabled : true,
+            },
+            { onConflict: 'property_id' }
+          )
+          .select()
+          .single();
+
+        if (mappingError) {
+          console.error('Error upserting PriceLabs mapping:', mappingError);
+        } else {
+          pricelabsMapping = buildPriceLabsMappingObject(mappingData);
+        }
+      } else if (body.pricelabsListingId === '' || body.pricelabsPms === '') {
+        const { error: deleteError } = await supabase
+          .from('property_pricelabs_mapping')
+          .delete()
+          .eq('property_id', id);
+        if (deleteError) {
+          console.error('Error clearing PriceLabs mapping:', deleteError);
+        }
+      }
+    } else {
+      const { data: mappingData, error: mappingError } = await supabase
+        .from('property_pricelabs_mapping')
+        .select('*')
+        .eq('property_id', id)
+        .maybeSingle();
+      if (!mappingError && mappingData) {
+        pricelabsMapping = buildPriceLabsMappingObject(mappingData);
+      }
+    }
+
     // Transform response
     const attributes = data.data?.attributes || {};
     return NextResponse.json({
@@ -347,6 +493,7 @@ export async function PUT(request: NextRequest) {
       ical_url: data.ical_url,
       updated_at: data.updated_at,
       pricing,
+      pricelabsMapping,
     });
   } catch (error) {
     console.error('Error updating property:', error);

@@ -51,11 +51,18 @@ export default function PropertySettings() {
     minPrice: '',
     basePrice: '',
     maxPrice: '',
+    cleaningFee: '450',
+    serviceFeePercent: '5',
+    pricelabsListingId: '',
+    pricelabsPms: '',
+    pricelabsSyncEnabled: true,
   });
   const [pricingErrors, setPricingErrors] = useState<{
     minPrice?: string;
     basePrice?: string;
     maxPrice?: string;
+    cleaningFee?: string;
+    serviceFeePercent?: string;
   }>({});
 
   const fetchPrimaryPhotosForProperties = async (properties: Property[]) => {
@@ -192,6 +199,15 @@ export default function PropertySettings() {
         minPrice: property.pricing?.minPrice != null ? property.pricing.minPrice.toString() : '',
         basePrice: property.pricing?.basePrice != null ? property.pricing.basePrice.toString() : '',
         maxPrice: property.pricing?.maxPrice != null ? property.pricing.maxPrice.toString() : '',
+        cleaningFee:
+          property.pricing?.cleaningFee != null ? property.pricing.cleaningFee.toString() : '450',
+        serviceFeePercent:
+          property.pricing?.serviceFeePercent != null
+            ? property.pricing.serviceFeePercent.toString()
+            : '5',
+        pricelabsListingId: property.pricelabsMapping?.pricelabsListingId || '',
+        pricelabsPms: property.pricelabsMapping?.pricelabsPms || '',
+        pricelabsSyncEnabled: property.pricelabsMapping?.syncEnabled ?? true,
       });
       setPricingErrors({});
       // Fetch photos for this property
@@ -215,6 +231,11 @@ export default function PropertySettings() {
         minPrice: '',
         basePrice: '',
         maxPrice: '',
+        cleaningFee: '450',
+        serviceFeePercent: '5',
+        pricelabsListingId: '',
+        pricelabsPms: '',
+        pricelabsSyncEnabled: true,
       });
       setPhotos([]);
       setPricingErrors({});
@@ -262,6 +283,11 @@ export default function PropertySettings() {
       minPrice: '',
       basePrice: '',
       maxPrice: '',
+      cleaningFee: '450',
+      serviceFeePercent: '5',
+      pricelabsListingId: '',
+      pricelabsPms: '',
+      pricelabsSyncEnabled: true,
     });
     setPricingErrors({});
   };
@@ -471,7 +497,13 @@ export default function PropertySettings() {
   };
 
   const validatePricing = (values: PropertyFormValues) => {
-    const errors: { minPrice?: string; basePrice?: string; maxPrice?: string } = {};
+    const errors: {
+      minPrice?: string;
+      basePrice?: string;
+      maxPrice?: string;
+      cleaningFee?: string;
+      serviceFeePercent?: string;
+    } = {};
 
     if (!values.pricingEnabled) {
       return errors;
@@ -480,6 +512,8 @@ export default function PropertySettings() {
     const min = parseFloat(values.minPrice || '');
     const base = parseFloat(values.basePrice || '');
     const max = parseFloat(values.maxPrice || '');
+    const cleaningFee = parseFloat(values.cleaningFee || '');
+    const serviceFeePercent = parseFloat(values.serviceFeePercent || '');
 
     if (Number.isNaN(min) || Number.isNaN(base) || Number.isNaN(max)) {
       if (Number.isNaN(min)) {
@@ -503,11 +537,27 @@ export default function PropertySettings() {
       errors.maxPrice = 'Maximum price must be greater than base price';
     }
 
+    if (Number.isNaN(cleaningFee) || cleaningFee < 0) {
+      errors.cleaningFee = 'Cleaning fee must be 0 or greater';
+    }
+
+    if (Number.isNaN(serviceFeePercent) || serviceFeePercent < 0 || serviceFeePercent > 100) {
+      errors.serviceFeePercent = 'Service fee % must be between 0 and 100';
+    }
+
     return errors;
   };
 
   const handlePricingChange = (
-    field: keyof Pick<PropertyFormValues, 'pricingEnabled' | 'minPrice' | 'basePrice' | 'maxPrice'>,
+    field: keyof Pick<
+      PropertyFormValues,
+      | 'pricingEnabled'
+      | 'minPrice'
+      | 'basePrice'
+      | 'maxPrice'
+      | 'cleaningFee'
+      | 'serviceFeePercent'
+    >,
     value: string | boolean
   ) => {
     setFormData(prev => {
@@ -549,7 +599,12 @@ export default function PropertySettings() {
         minPrice: formData.minPrice ? parseFloat(formData.minPrice) : null,
         basePrice: formData.basePrice ? parseFloat(formData.basePrice) : null,
         maxPrice: formData.maxPrice ? parseFloat(formData.maxPrice) : null,
+        cleaningFee: formData.cleaningFee ? parseFloat(formData.cleaningFee) : 450,
+        serviceFeePercent: formData.serviceFeePercent ? parseFloat(formData.serviceFeePercent) : 5,
         pricingEnabled: formData.pricingEnabled,
+        pricelabsListingId: formData.pricelabsListingId.trim(),
+        pricelabsPms: formData.pricelabsPms.trim(),
+        pricelabsSyncEnabled: formData.pricelabsSyncEnabled,
       };
 
       const response = await fetch(url, {
@@ -849,6 +904,51 @@ export default function PropertySettings() {
                             {property.pricing.maxPrice?.toFixed(2)}
                           </span>
                         </div>
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-sky-400 font-medium">Cleaning</span>
+                          <span className="text-gray-400">·</span>
+                          <span className="text-white">
+                            {property.currency === 'ZAR' ? 'R' : property.currency}
+                            {property.pricing.cleaningFee?.toFixed(2)}
+                          </span>
+                        </div>
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-violet-400 font-medium">Service</span>
+                          <span className="text-gray-400">·</span>
+                          <span className="text-white">
+                            {property.pricing.serviceFeePercent?.toFixed(2)}%
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {property.pricelabsMapping && (
+                    <div className="md:col-span-3">
+                      <span className="text-gray-400">PriceLabs:</span>
+                      <div className="mt-1 flex flex-wrap items-center gap-3 text-xs">
+                        <span className="px-2 py-1 rounded bg-indigo-500/10 border border-indigo-500/20 text-indigo-300">
+                          ID {property.pricelabsMapping.pricelabsListingId}
+                        </span>
+                        <span className="px-2 py-1 rounded bg-cyan-500/10 border border-cyan-500/20 text-cyan-300">
+                          PMS {property.pricelabsMapping.pricelabsPms}
+                        </span>
+                        <span className={`px-2 py-1 rounded border ${
+                          property.pricelabsMapping.syncEnabled
+                            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300'
+                            : 'bg-gray-500/10 border-gray-500/20 text-gray-300'
+                        }`}>
+                          Sync {property.pricelabsMapping.syncEnabled ? 'enabled' : 'disabled'}
+                        </span>
+                        {property.pricelabsMapping.lastSyncedAt && (
+                          <span className="text-gray-400">
+                            Last sync {new Date(property.pricelabsMapping.lastSyncedAt).toLocaleString()}
+                          </span>
+                        )}
+                        {property.pricelabsMapping.lastSyncError && (
+                          <span className="text-red-300">
+                            Error: {property.pricelabsMapping.lastSyncError}
+                          </span>
+                        )}
                       </div>
                     </div>
                   )}
@@ -913,8 +1013,9 @@ export default function PropertySettings() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-gray-900 rounded-2xl border border-white/10 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-sm p-4 sm:p-6">
+          <div className="min-h-full flex items-start justify-center pt-4 sm:pt-8">
+            <div className="bg-gray-900 rounded-2xl border border-white/10 w-full max-w-5xl max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-gray-900 border-b border-white/10 p-6 flex justify-between items-center">
               <h3 className="text-xl font-bold text-white">
                 {editingProperty ? 'Edit Property' : 'Add New Property'}
@@ -1129,11 +1230,59 @@ export default function PropertySettings() {
                   minPrice: formData.minPrice,
                   basePrice: formData.basePrice,
                   maxPrice: formData.maxPrice,
+                  cleaningFee: formData.cleaningFee,
+                  serviceFeePercent: formData.serviceFeePercent,
                 }}
                 currency={formData.currency}
                 errors={pricingErrors}
                 onChange={handlePricingChange}
               />
+
+              <div className="grid md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    PriceLabs Listing ID
+                  </label>
+                  <input
+                    type="text"
+                    name="pricelabsListingId"
+                    value={formData.pricelabsListingId}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                    placeholder="e.g., 834874"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    PriceLabs PMS
+                  </label>
+                  <input
+                    type="text"
+                    name="pricelabsPms"
+                    value={formData.pricelabsPms}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                    placeholder="e.g., airbnb"
+                  />
+                </div>
+                <div className="flex items-end">
+                  <label className="flex items-center gap-3 px-4 py-2 bg-white/5 border border-white/10 rounded-lg w-full">
+                    <input
+                      type="checkbox"
+                      name="pricelabsSyncEnabled"
+                      checked={formData.pricelabsSyncEnabled}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          pricelabsSyncEnabled: e.target.checked,
+                        }))
+                      }
+                      className="h-4 w-4"
+                    />
+                    <span className="text-sm text-gray-200">Enable PriceLabs sync</span>
+                  </label>
+                </div>
+              </div>
 
               {/* Photo Management Section */}
               {editingProperty && (
@@ -1312,6 +1461,7 @@ export default function PropertySettings() {
                 </button>
               </div>
             </form>
+            </div>
           </div>
         </div>
       )}

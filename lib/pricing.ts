@@ -9,6 +9,11 @@ interface PriceData {
   available: boolean;
 }
 
+export const DEFAULT_NIGHTLY_PRICE = 1500;
+export const DEFAULT_CLEANING_FEE = 450;
+export const DEFAULT_SERVICE_FEE_PERCENT = 5;
+export const SERVICE_FEE_RATE = 0.05;
+
 // Parse CSV data and create a price map
 const parsePriceLabsCSV = (csvText: string): Map<string, PriceData> => {
   const priceMap = new Map<string, PriceData>();
@@ -70,7 +75,7 @@ export const calculateBookingPricing = (
       totalAccommodation += priceData.price;
     } else {
       // Fallback to default price if not in CSV
-      const defaultPrice = 1500;
+      const defaultPrice = DEFAULT_NIGHTLY_PRICE;
       nightlyPrices.push({ date: dateStr, price: defaultPrice });
       totalAccommodation += defaultPrice;
     }
@@ -79,8 +84,8 @@ export const calculateBookingPricing = (
   }
   
   // Calculate fees
-  const cleaningFee = 500; // R500 flat cleaning fee
-  const serviceFee = totalAccommodation * 0.12; // 12% service fee
+  const cleaningFee = DEFAULT_CLEANING_FEE; // default flat cleaning fee
+  const serviceFee = totalAccommodation * SERVICE_FEE_RATE; // default service fee %
   const total = totalAccommodation + cleaningFee + serviceFee;
   
   return {
@@ -97,7 +102,7 @@ export const calculateBookingPricing = (
 // Get price for a specific date
 export const getPriceForDate = (date: string, priceMap: Map<string, PriceData>): number => {
   const priceData = priceMap.get(date);
-  return priceData ? priceData.price : 1500; // Default fallback
+  return priceData ? priceData.price : DEFAULT_NIGHTLY_PRICE; // Default fallback
 };
 
 /**
@@ -124,7 +129,11 @@ export const calculateBookingPricingFromMap = (
   checkInDate: string,
   checkOutDate: string,
   priceMap: Map<string, number>,
-  defaultPrice: number = 1500
+  defaultPrice: number = DEFAULT_NIGHTLY_PRICE,
+  options?: {
+    cleaningFee?: number;
+    serviceFeePercent?: number;
+  }
 ) => {
   const checkIn = new Date(checkInDate);
   const checkOut = new Date(checkOutDate);
@@ -143,8 +152,9 @@ export const calculateBookingPricingFromMap = (
     currentDate.setDate(currentDate.getDate() + 1);
   }
 
-  const cleaningFee = 500;
-  const serviceFee = totalAccommodation * 0.12;
+  const cleaningFee = options?.cleaningFee ?? DEFAULT_CLEANING_FEE;
+  const serviceFeePercent = options?.serviceFeePercent ?? DEFAULT_SERVICE_FEE_PERCENT;
+  const serviceFee = totalAccommodation * (serviceFeePercent / 100);
   const total = totalAccommodation + cleaningFee + serviceFee;
 
   return {
@@ -156,6 +166,30 @@ export const calculateBookingPricingFromMap = (
     serviceFee,
     total,
   };
+};
+
+export const buildDatePriceMap = (
+  checkInDate: string,
+  checkOutDate: string,
+  basePrice: number,
+  dailyOverrideMap: Record<string, number>,
+  minPrice?: number | null,
+  maxPrice?: number | null
+) => {
+  const start = new Date(checkInDate);
+  const end = new Date(checkOutDate);
+  const map = new Map<string, number>();
+  let d = new Date(start);
+
+  while (d < end) {
+    const dateStr = d.toISOString().split('T')[0];
+    const override = dailyOverrideMap[dateStr];
+    const price = resolvePriceForDate(dateStr, override, basePrice, minPrice, maxPrice);
+    map.set(dateStr, price);
+    d.setDate(d.getDate() + 1);
+  }
+
+  return map;
 };
 
 // Check minimum stay requirement

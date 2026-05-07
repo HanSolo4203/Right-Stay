@@ -61,12 +61,63 @@ export async function GET(request: Request) {
       }, { status: 500 });
     }
 
+    // Resolve cached property row so we can return dynamic pricing metadata and daily prices
+    const { data: cachedProperty } = await supabaseServer
+      .from('cached_properties')
+      .select('id')
+      .eq('uplisting_id', propertyId)
+      .maybeSingle();
+
+    let pricing: {
+      pricingEnabled: boolean;
+      minPrice: number | null;
+      basePrice: number | null;
+      maxPrice: number | null;
+    } = {
+      pricingEnabled: false,
+      minPrice: null,
+      basePrice: null,
+      maxPrice: null,
+    };
+
+    const dailyPrices: Record<string, number> = {};
+
+    if (cachedProperty?.id) {
+      const { data: pricingRow } = await supabaseServer
+        .from('property_pricing')
+        .select('pricing_enabled, min_price, base_price, max_price')
+        .eq('property_id', cachedProperty.id)
+        .maybeSingle();
+
+      if (pricingRow) {
+        pricing = {
+          pricingEnabled: !!pricingRow.pricing_enabled,
+          minPrice: pricingRow.min_price != null ? Number(pricingRow.min_price) : null,
+          basePrice: pricingRow.base_price != null ? Number(pricingRow.base_price) : null,
+          maxPrice: pricingRow.max_price != null ? Number(pricingRow.max_price) : null,
+        };
+      }
+
+      const { data: dailyRows } = await supabaseServer
+        .from('property_daily_prices')
+        .select('date, price')
+        .eq('property_id', cachedProperty.id)
+        .gte('date', startDate)
+        .lte('date', endDate);
+
+      for (const row of dailyRows || []) {
+        dailyPrices[row.date] = Number(row.price);
+      }
+    }
+
     return NextResponse.json({
       propertyId,
       startDate,
       endDate,
       blockedDates: blockedDates || [],
-      count: blockedDates?.length || 0
+      count: blockedDates?.length || 0,
+      dailyPrices,
+      pricing,
     });
   } catch (error) {
     console.error('Error:', error);
