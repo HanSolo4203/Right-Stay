@@ -43,12 +43,12 @@ export default function Header() {
   }, []);
 
   return (
-    <header className={`z-20 transition-[background-color,backdrop-filter,border-color,box-shadow] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+    <header className={`z-20 transition-[background-color,backdrop-filter,border-color,box-shadow] duration-500 ease-in-out ${
       isScrollingDown 
         ? 'fixed top-0 left-0 right-0 bg-black/90 backdrop-blur-md border-b border-white/10 shadow-lg' 
         : 'relative'
     }`}>
-      <div className={`flex md:px-8 max-w-7xl mr-auto ml-auto items-center justify-between transition-[padding] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+      <div className={`flex md:px-8 max-w-7xl mr-auto ml-auto items-center justify-between transition-[padding] duration-500 ease-in-out ${
         isScrollingDown ? 'pt-4 pr-6 pb-4 pl-6' : 'pt-6 pr-6 pb-6 pl-6'
       }`}>
         <Link href="/" className="flex items-center gap-3">

@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { Star, MapPin, Users, Calendar, Wifi, Car, Coffee, Shield, Eye, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import QuickViewModal from '@/components/QuickViewModal';
+import { listingImageSrc } from '@/lib/listing-image';
 
 interface PropertyData {
   id?: string;
@@ -612,12 +613,17 @@ export default function AccommodationCards() {
                         onClick={() => setQuickViewProperty(accommodation)}
                       >
                         <Image
-                          src={currentPhoto.url || accommodation.image}
+                          src={listingImageSrc(
+                            currentPhoto.url || accommodation.image,
+                            'card'
+                          )}
                           alt={accommodation.title}
                           fill
                           sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           className="object-cover transition-opacity duration-300"
                           key={currentPhoto.id}
+                          priority={index < 6}
+                          quality={78}
                         />
                         
                         {/* Rating Badge */}
@@ -691,11 +697,15 @@ export default function AccommodationCards() {
                                 aria-label={`Go to photo ${thumbIndex + 1}`}
                               >
                                 <Image
-                                  src={photo.url || accommodation.image}
+                                  src={listingImageSrc(
+                                    photo.url || accommodation.image,
+                                    'thumbnail'
+                                  )}
                                   alt={`${accommodation.title} - Photo ${thumbIndex + 1}`}
                                   fill
                                   sizes="64px"
                                   className="object-cover"
+                                  quality={65}
                                 />
                               </button>
                             ))}

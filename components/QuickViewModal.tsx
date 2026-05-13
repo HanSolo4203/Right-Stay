@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
-import { X, ChevronLeft, ChevronRight, Grid, Wifi, Car, Coffee, Shield, MapPin, Star, Users } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Grid, Wifi, Car, Coffee, Shield, MapPin, Star, Users, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { listingImageSrc } from '@/lib/listing-image';
 
 interface PropertyPhoto {
   id: string;
@@ -38,6 +39,7 @@ interface QuickViewModalProps {
 export default function QuickViewModal({ isOpen, onClose, property }: QuickViewModalProps) {
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
+  const [lightboxMainLoaded, setLightboxMainLoaded] = useState(false);
 
   // Get photos array - handle both array format and single image
   // Use useMemo to prevent dependency changes on every render
@@ -78,6 +80,26 @@ export default function QuickViewModal({ isOpen, onClose, property }: QuickViewM
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [showPhotoModal, photos.length]);
+
+  // Reset full-screen viewer loading state when the slide or viewer opens
+  useEffect(() => {
+    setLightboxMainLoaded(false);
+  }, [selectedPhotoIndex, showPhotoModal]);
+
+  // Warm browser cache for current and neighbour slides (full-size URLs)
+  useEffect(() => {
+    if (!showPhotoModal || photos.length === 0) return;
+    const preload = (idx: number) => {
+      if (idx < 0 || idx >= photos.length) return;
+      const href = listingImageSrc(photos[idx].url, 'lightbox');
+      if (!href) return;
+      const img = new window.Image();
+      img.src = href;
+    };
+    preload(selectedPhotoIndex);
+    preload(selectedPhotoIndex - 1);
+    preload(selectedPhotoIndex + 1);
+  }, [showPhotoModal, selectedPhotoIndex, photos]);
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -129,12 +151,14 @@ export default function QuickViewModal({ isOpen, onClose, property }: QuickViewM
                   onClick={() => setShowPhotoModal(true)}
                 >
                   <Image
-                    src={mainPhoto?.url || propertyImage}
+                    key={mainPhoto?.id ?? `main-${selectedPhotoIndex}`}
+                    src={listingImageSrc(mainPhoto?.url || propertyImage, 'modalMain')}
                     alt={property.title}
                     fill
                     className="object-cover"
                     priority
                     sizes="(max-width: 768px) 100vw, 50vw"
+                    quality={78}
                   />
                   {hasMultiplePhotos && (
                     <>
@@ -182,11 +206,12 @@ export default function QuickViewModal({ isOpen, onClose, property }: QuickViewM
                           }}
                         >
                           <Image
-                            src={photo.url}
+                            src={listingImageSrc(photo.url, 'modalTile')}
                             alt={`${property.title} - Photo ${actualIndex + 1}`}
                             fill
                             className="object-cover"
                             sizes="(max-width: 768px) 50vw, 25vw"
+                            quality={72}
                           />
                           {/* Show All Photos Overlay */}
                           {showAllButton && (
@@ -220,11 +245,12 @@ export default function QuickViewModal({ isOpen, onClose, property }: QuickViewM
                         </button>
                         {galleryPhotos[4] && (
                           <Image
-                            src={galleryPhotos[4].url}
+                            src={listingImageSrc(galleryPhotos[4].url, 'modalTile')}
                             alt={`${property.title} - Photo 5`}
                             fill
                             className="object-cover"
                             sizes="50vw"
+                            quality={72}
                           />
                         )}
                       </div>
@@ -237,12 +263,13 @@ export default function QuickViewModal({ isOpen, onClose, property }: QuickViewM
             <div className="p-4">
               <div className="relative h-[300px] md:h-[400px] rounded-2xl overflow-hidden bg-gray-200">
                 <Image
-                  src={propertyImage}
+                  src={listingImageSrc(propertyImage, 'modalMain')}
                   alt={property.title}
                   fill
                   className="object-cover"
                   priority
                   sizes="100vw"
+                  quality={78}
                 />
               </div>
             </div>
@@ -363,14 +390,37 @@ export default function QuickViewModal({ isOpen, onClose, property }: QuickViewM
             {/* Main Photo Display */}
             <div className="relative aspect-video bg-gray-900 rounded-2xl overflow-hidden mb-4">
               {photos[selectedPhotoIndex] && (
-                <Image
-                  src={photos[selectedPhotoIndex].url}
-                  alt={`${property.title} - Photo ${selectedPhotoIndex + 1}`}
-                  fill
-                  className="object-contain"
-                  priority
-                  sizes="90vw"
-                />
+                <>
+                  {/* Instant preview from cached thumbnail while the main image decodes */}
+                  <img
+                    src={listingImageSrc(photos[selectedPhotoIndex].url, 'thumbnail')}
+                    alt=""
+                    aria-hidden
+                    className={`pointer-events-none absolute inset-0 h-full w-full object-contain transition-opacity duration-300 ${
+                      lightboxMainLoaded ? 'opacity-0' : 'opacity-100'
+                    } blur-sm scale-[1.02]`}
+                  />
+                  {!lightboxMainLoaded && (
+                    <div className="pointer-events-none absolute inset-0 z-[5] flex items-center justify-center">
+                      <Loader2 className="h-10 w-10 animate-spin text-white/80" aria-hidden />
+                    </div>
+                  )}
+                  <Image
+                    key={`lb-${photos[selectedPhotoIndex].id ?? selectedPhotoIndex}`}
+                    src={listingImageSrc(photos[selectedPhotoIndex].url, 'lightbox')}
+                    alt={`${property.title} - Photo ${selectedPhotoIndex + 1}`}
+                    fill
+                    className={`object-contain transition-opacity duration-300 ${
+                      lightboxMainLoaded ? 'opacity-100' : 'opacity-0'
+                    }`}
+                    priority
+                    fetchPriority="high"
+                    sizes="(max-width: 1280px) 90vw, 1152px"
+                    quality={78}
+                    onLoad={() => setLightboxMainLoaded(true)}
+                    onError={() => setLightboxMainLoaded(true)}
+                  />
+                </>
               )}
               
               {/* Navigation Arrows */}
@@ -412,11 +462,12 @@ export default function QuickViewModal({ isOpen, onClose, property }: QuickViewM
                   }`}
                 >
                   <Image
-                    src={photo.url}
+                    src={listingImageSrc(photo.url, 'thumbnail')}
                     alt={`Thumbnail ${index + 1}`}
                     fill
                     className="object-cover"
                     sizes="96px"
+                    quality={68}
                   />
                 </button>
               ))}
