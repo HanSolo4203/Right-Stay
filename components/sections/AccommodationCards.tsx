@@ -1,13 +1,18 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { Star, MapPin, Users, Calendar, Wifi, Car, Coffee, Shield, Eye, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
-import QuickViewModal from '@/components/QuickViewModal';
 import { listingImageSrc } from '@/lib/listing-image';
+
+const QuickViewModal = dynamic(() => import('@/components/QuickViewModal'), {
+  ssr: false,
+  loading: () => null,
+});
 
 interface PropertyData {
   id?: string;

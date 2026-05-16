@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Smaller dev + prod bundles when importing many icons from lucide-react.
+  experimental: {
+    optimizePackageImports: ['lucide-react'],
+  },
   images: {
     // Serve responsive sizes via the Next.js optimizer (respects `sizes` on <Image />).
     // If you see 502/timeouts on large originals in production, set unoptimized: true

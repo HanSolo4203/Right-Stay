@@ -2,10 +2,11 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Manrope } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
-const manrope = Manrope({ 
+const inter = Inter({ subsets: ["latin"], display: "swap" });
+const manrope = Manrope({
   subsets: ["latin"],
-  weight: ['300', '400', '500', '600', '700', '800']
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -24,7 +25,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} min-h-screen bg-black text-white antialiased`} style={{ fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji' }}>
+      <body
+        className={`${inter.className} ${manrope.className} min-h-screen bg-black text-white antialiased`}
+        style={{
+          fontFamily:
+            "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji",
+        }}
+      >
         {children}
       </body>
     </html>

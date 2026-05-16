@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "dev:clean": "rm -rf .next && next dev",
+    "dev": "next dev --turbo",
+    "dev:webpack": "next dev",
+    "dev:clean": "rm -rf .next && next dev --turbo",
     "dev:fresh": "bash scripts/dev-fresh.sh",
     "build": "next build",
     "start": "next start",

@@ -8,4 +8,4 @@ for p in 3000 3001 3002; do
   fi
 done
 rm -rf .next
-exec npx next dev
+exec npx next dev --turbo

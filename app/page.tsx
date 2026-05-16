@@ -1,16 +1,24 @@
-import { Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import Header from '@/components/sections/Header';
 import HeroSection from '@/components/sections/HeroSection';
-import SecondHero from '@/components/sections/SecondHero';
-import StatsSection from '@/components/sections/StatsSection';
-import ServicesSection from '@/components/sections/ServicesSection';
-import WhyChooseSection from '@/components/sections/WhyChooseSection';
-import HowItWorksSection from '@/components/sections/HowItWorksSection';
-import TrustSection from '@/components/sections/TrustSection';
-import AccommodationCards from '@/components/sections/AccommodationCards';
-import TestimonialSection from '@/components/sections/TestimonialSection';
-import CTASection from '@/components/sections/CTASection';
-import Footer from '@/components/sections/Footer';
+
+const SecondHero = dynamic(() => import('@/components/sections/SecondHero'));
+const StatsSection = dynamic(() => import('@/components/sections/StatsSection'));
+const ServicesSection = dynamic(() => import('@/components/sections/ServicesSection'));
+const WhyChooseSection = dynamic(() => import('@/components/sections/WhyChooseSection'));
+const HowItWorksSection = dynamic(() => import('@/components/sections/HowItWorksSection'));
+const TrustSection = dynamic(() => import('@/components/sections/TrustSection'));
+const AccommodationCards = dynamic(
+  () => import('@/components/sections/AccommodationCards'),
+  {
+    loading: () => (
+      <div className="py-16 text-center text-white/70">Loading accommodations…</div>
+    ),
+  }
+);
+const TestimonialSection = dynamic(() => import('@/components/sections/TestimonialSection'));
+const CTASection = dynamic(() => import('@/components/sections/CTASection'));
+const Footer = dynamic(() => import('@/components/sections/Footer'));
 
 export default function Home() {
   return (
@@ -25,13 +33,10 @@ export default function Home() {
       <WhyChooseSection />
       <HowItWorksSection />
       <TrustSection />
-      <Suspense fallback={<div className="py-16 text-center">Loading accommodations...</div>}>
-        <AccommodationCards />
-      </Suspense>
+      <AccommodationCards />
       <TestimonialSection />
       <CTASection />
       <Footer />
     </>
   );
 }
-
