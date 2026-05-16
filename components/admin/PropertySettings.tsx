@@ -28,7 +28,8 @@ export default function PropertySettings() {
   const [photos, setPhotos] = useState<PropertyPhoto[]>([]);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [uploadingPhotoId, setUploadingPhotoId] = useState<string | null>(null);
-  const [syncingPropertyId, setSyncingPropertyId] = useState<string | null>(null);
+  const [syncingCalendarPropertyId, setSyncingCalendarPropertyId] = useState<string | null>(null);
+  const [syncingUplistingPropertyId, setSyncingUplistingPropertyId] = useState<string | null>(null);
   const [syncingFromUplisting, setSyncingFromUplisting] = useState(false);
   const [savingProperty, setSavingProperty] = useState(false);
   const [dragActive, setDragActive] = useState(false);
@@ -657,8 +658,8 @@ export default function PropertySettings() {
     }
   };
 
-  const handleSyncProperty = async (propertyId: string) => {
-    setSyncingPropertyId(propertyId);
+  const handleSyncCalendar = async (propertyId: string) => {
+    setSyncingCalendarPropertyId(propertyId);
     try {
       const response = await fetch('/api/sync-availability', {
         method: 'POST',
@@ -669,23 +670,61 @@ export default function PropertySettings() {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage({ 
-          type: 'success', 
-          text: `Successfully synced ${data.blockedDates} blocked dates for this property.` 
+        setMessage({
+          type: 'success',
+          text: `Successfully synced ${data.blockedDates} blocked dates for this property.`,
         });
-        fetchProperties(); // Refresh to update last_synced timestamp
+        fetchProperties();
         setTimeout(() => setMessage(null), 3000);
       } else {
-        throw new Error(data.error || 'Failed to sync property');
+        throw new Error(data.error || 'Failed to sync calendar');
       }
     } catch (error: any) {
-      setMessage({ 
-        type: 'error', 
-        text: `Error syncing property: ${error.message || 'Please try again.'}` 
+      setMessage({
+        type: 'error',
+        text: `Error syncing calendar: ${error.message || 'Please try again.'}`,
       });
       setTimeout(() => setMessage(null), 5000);
     } finally {
-      setSyncingPropertyId(null);
+      setSyncingCalendarPropertyId(null);
+    }
+  };
+
+  const handleSyncPropertyFromUplisting = async (propertyId: string) => {
+    setSyncingUplistingPropertyId(propertyId);
+    setMessage(null);
+
+    try {
+      const response = await fetch(`/api/admin/properties/${propertyId}/sync`, {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        const apiCount = data.photos_in_uplisting_api ?? data.photos_synced;
+        setMessage({
+          type: 'success',
+          text: `Synced "${data.property_name}" from Uplisting with ${data.photos_synced} photo${data.photos_synced === 1 ? '' : 's'} (Uplisting API reports ${apiCount} listing photo${apiCount === 1 ? '' : 's'}).`,
+        });
+        await fetchProperties();
+        setTimeout(() => setMessage(null), 5000);
+      } else {
+        const errorMsg = data.error || 'Failed to sync from Uplisting';
+        const detailsMsg =
+          data.details && data.details !== errorMsg && !errorMsg.includes(data.details)
+            ? ` ${data.details}`
+            : '';
+        throw new Error(`${errorMsg}${detailsMsg}`);
+      }
+    } catch (error: any) {
+      setMessage({
+        type: 'error',
+        text: `Error syncing from Uplisting: ${error.message || 'Please try again.'}`,
+      });
+      setTimeout(() => setMessage(null), 8000);
+    } finally {
+      setSyncingUplistingPropertyId(null);
     }
   };
 
@@ -970,14 +1009,26 @@ export default function PropertySettings() {
                     </div>
                     
                     <div className="flex space-x-2 ml-4">
+                      <button
+                        onClick={() => handleSyncPropertyFromUplisting(property.uplisting_id)}
+                        disabled={syncingUplistingPropertyId === property.uplisting_id}
+                        className="p-2 text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Sync property and photos from Uplisting"
+                      >
+                        {syncingUplistingPropertyId === property.uplisting_id ? (
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : (
+                          <Download className="w-5 h-5" />
+                        )}
+                      </button>
                       {property.ical_url && (
                         <button
-                          onClick={() => handleSyncProperty(property.uplisting_id)}
-                          disabled={syncingPropertyId === property.uplisting_id}
+                          onClick={() => handleSyncCalendar(property.uplisting_id)}
+                          disabled={syncingCalendarPropertyId === property.uplisting_id}
                           className="p-2 text-green-400 hover:bg-green-500/10 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          title="Sync calendar"
+                          title="Sync calendar availability"
                         >
-                          {syncingPropertyId === property.uplisting_id ? (
+                          {syncingCalendarPropertyId === property.uplisting_id ? (
                             <RefreshCw className="w-5 h-5 animate-spin" />
                           ) : (
                             <RefreshCw className="w-5 h-5" />

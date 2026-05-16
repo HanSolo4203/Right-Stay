@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
@@ -72,7 +72,7 @@ interface CachedProperty {
   } | null;
 }
 
-export default function AccommodationCards() {
+function AccommodationCardsContent() {
   useScrollAnimation();
   const searchParams = useSearchParams();
   const [properties, setProperties] = useState<CachedProperty[]>([]);
@@ -594,26 +594,30 @@ export default function AccommodationCards() {
               }`}
             >
               {/* Photo Gallery */}
-              <div 
+              {(() => {
+                const photos = accommodation.photos || [];
+                const currentIndex = getCurrentPhotoIndex(accommodation.id);
+                const currentPhoto = photos[currentIndex] || { url: accommodation.image, id: accommodation.id };
+                const hasMultiplePhotos = photos.length > 1;
+
+                return (
+              <div
+                className={`flex flex-col overflow-hidden ${
+                  accommodations.length === 1 ? 'w-1/2 rounded-l-3xl' : ''
+                }`}
+              >
+              <div
                 className={`relative overflow-hidden ${
                   accommodations.length === 1
-                    ? 'w-1/2 h-auto min-h-[400px] rounded-l-3xl'
+                    ? 'flex-1 min-h-[320px]'
                     : 'h-32 sm:h-48 lg:h-64 rounded-t-3xl'
                 }`}
                 onTouchStart={(e) => onTouchStart(accommodation.id, e)}
                 onTouchMove={(e) => onTouchMove(accommodation.id, e)}
                 onTouchEnd={() => onTouchEnd(accommodation)}
               >
-                {(() => {
-                  const photos = accommodation.photos || [];
-                  const currentIndex = getCurrentPhotoIndex(accommodation.id);
-                  const currentPhoto = photos[currentIndex] || { url: accommodation.image, id: accommodation.id };
-                  const hasMultiplePhotos = photos.length > 1;
-
-                  return (
-                    <>
                       {/* Main Image */}
-                      <div 
+                      <div
                         className="relative w-full h-full cursor-pointer"
                         onClick={() => setQuickViewProperty(accommodation)}
                       >
@@ -686,41 +690,42 @@ export default function AccommodationCards() {
                         )}
                       </div>
 
-                      {/* Thumbnail Strip */}
-                      {hasMultiplePhotos && (
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 sm:p-3 z-10">
-                          <div className="flex gap-1.5 sm:gap-2 overflow-x-auto scrollbar-hide pb-1">
-                            {photos.map((photo: any, thumbIndex: number) => (
-                              <button
-                                key={photo.id || thumbIndex}
-                                onClick={(e) => goToPhoto(accommodation, thumbIndex, e)}
-                                className={`relative flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
-                                  thumbIndex === currentIndex
-                                    ? 'border-white scale-110'
-                                    : 'border-transparent opacity-70 hover:opacity-100 hover:scale-105'
-                                }`}
-                                aria-label={`Go to photo ${thumbIndex + 1}`}
-                              >
-                                <Image
-                                  src={listingImageSrc(
-                                    photo.url || accommodation.image,
-                                    'thumbnail'
-                                  )}
-                                  alt={`${accommodation.title} - Photo ${thumbIndex + 1}`}
-                                  fill
-                                  sizes="64px"
-                                  className="object-cover"
-                                  quality={65}
-                                />
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  );
-                })()}
               </div>
+
+              {/* Thumbnail strip — below main image, not overlaid */}
+              {hasMultiplePhotos && (
+                <div className="flex-shrink-0 border-t border-gray-100 bg-gray-50 px-2 py-1.5 sm:px-2.5 sm:py-2">
+                  <div className="flex gap-1 overflow-x-auto scrollbar-hide">
+                    {photos.map((photo: any, thumbIndex: number) => (
+                      <button
+                        key={photo.id || thumbIndex}
+                        onClick={(e) => goToPhoto(accommodation, thumbIndex, e)}
+                        className={`relative flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded overflow-hidden ring-1 transition-all duration-200 ${
+                          thumbIndex === currentIndex
+                            ? 'ring-gray-900 ring-2 opacity-100'
+                            : 'ring-gray-200 opacity-60 hover:opacity-100'
+                        }`}
+                        aria-label={`Go to photo ${thumbIndex + 1}`}
+                      >
+                        <Image
+                          src={listingImageSrc(
+                            photo.url || accommodation.image,
+                            'thumbnail'
+                          )}
+                          alt={`${accommodation.title} - Photo ${thumbIndex + 1}`}
+                          fill
+                          sizes="32px"
+                          className="object-cover"
+                          quality={65}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              </div>
+                );
+              })()}
 
               {/* Content */}
               <div className={`p-3 sm:p-5 lg:p-6 flex flex-col ${
@@ -829,5 +834,25 @@ export default function AccommodationCards() {
         />
       )}
     </section>
+  );
+}
+
+function AccommodationCardsFallback() {
+  return (
+    <section className="isolate py-16 sm:py-20 lg:py-24 relative bg-gray-50">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 text-right-stay-500 animate-spin" />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export default function AccommodationCards() {
+  return (
+    <Suspense fallback={<AccommodationCardsFallback />}>
+      <AccommodationCardsContent />
+    </Suspense>
   );
 }

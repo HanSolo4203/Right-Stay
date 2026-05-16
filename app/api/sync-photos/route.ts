@@ -83,7 +83,7 @@ export async function GET(request: Request) {
             photo_id: photo.id,
             url: photo.attributes.url,
             caption: photo.attributes.caption || null,
-            position: photo.attributes.position ?? index,
+            position: photo.attributes.position ?? photo.attributes.order ?? index,
             is_primary: index === 0, // First photo is primary
             width: photo.attributes.width || null,
             height: photo.attributes.height || null,

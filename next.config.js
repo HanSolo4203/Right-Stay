@@ -40,6 +40,12 @@ const nextConfig = {
         hostname: 'images.unsplash.com',
         pathname: '/**',
       },
+      // Uplisting property photos (served via CloudFront after API sync)
+      {
+        protocol: 'https',
+        hostname: '*.cloudfront.net',
+        pathname: '/**',
+      },
     ],
   },
 }

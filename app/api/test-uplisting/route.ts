@@ -27,10 +27,11 @@ export async function GET() {
     console.log('API Key (first 10 chars):', apiKey.substring(0, 10) + '...');
 
     // Test with properties endpoint (correct base URL)
+    const trimmedKey = apiKey.trim();
     const response = await fetch('https://connect.uplisting.io/properties', {
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Accept': 'application/json',
+        Authorization: `Basic ${Buffer.from(trimmedKey).toString('base64')}`,
+        Accept: 'application/json',
       },
     });
 
