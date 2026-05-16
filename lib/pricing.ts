@@ -14,6 +14,55 @@ export const DEFAULT_CLEANING_FEE = 450;
 export const DEFAULT_SERVICE_FEE_PERCENT = 5;
 export const SERVICE_FEE_RATE = 0.05;
 
+export function formatDateLocal(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * First bookable nightly rate in the lookahead window (matches book page display).
+ */
+export function getNextAvailableNightlyPrice(options: {
+  dailyPrices: Record<string, number>;
+  blockedDates?: Set<string> | string[];
+  pricing?: {
+    pricingEnabled?: boolean;
+    basePrice?: number | null;
+    startingNightlyPrice?: number | null;
+  } | null;
+  maxDaysAhead?: number;
+  fallbackPrice?: number;
+}): number {
+  const blockedSet =
+    options.blockedDates instanceof Set
+      ? options.blockedDates
+      : new Set(options.blockedDates || []);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const maxDays = options.maxDaysAhead ?? 365;
+
+  for (let i = 0; i < maxDays; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    const key = formatDateLocal(d);
+    if (blockedSet.has(key)) continue;
+    const price = options.dailyPrices[key];
+    if (price != null) return price;
+  }
+
+  if (options.pricing?.startingNightlyPrice != null) {
+    return options.pricing.startingNightlyPrice;
+  }
+
+  if (options.pricing?.pricingEnabled && options.pricing.basePrice != null) {
+    return options.pricing.basePrice;
+  }
+
+  return options.fallbackPrice ?? DEFAULT_NIGHTLY_PRICE;
+}
+
 // Parse CSV data and create a price map
 const parsePriceLabsCSV = (csvText: string): Map<string, PriceData> => {
   const priceMap = new Map<string, PriceData>();

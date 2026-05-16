@@ -1,9 +1,21 @@
 import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase-server';
+import { formatDateLocal, getNextAvailableNightlyPrice } from '@/lib/pricing';
 
 export const dynamic = 'force-dynamic';
 
-function buildPricingObject(row: any) {
+type PricingConfig = {
+  propertyId: string;
+  minPrice: number | null;
+  basePrice: number | null;
+  maxPrice: number | null;
+  pricingEnabled: boolean;
+  cleaningFee: number | null;
+  serviceFeePercent: number | null;
+  startingNightlyPrice?: number;
+};
+
+function buildPricingObject(row: any): PricingConfig | null {
   if (!row) return null;
 
   return {
@@ -20,6 +32,76 @@ function buildPricingObject(row: any) {
         ? Number(row.service_fee_percent)
         : null,
   };
+}
+
+/** Shorter window for listing cards — avoids multi‑second bulk queries. */
+const LISTING_PRICE_LOOKAHEAD_DAYS = 60;
+
+async function attachStartingNightlyPrices<
+  T extends { id: string; uplisting_id: string; pricing: PricingConfig | null },
+>(properties: T[]): Promise<T[]> {
+  if (!supabaseServer || properties.length === 0) return properties;
+
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const end = new Date(today);
+    end.setDate(end.getDate() + LISTING_PRICE_LOOKAHEAD_DAYS);
+    const startDate = formatDateLocal(today);
+    const endDate = formatDateLocal(end);
+    const cachedIds = properties.map((p) => p.id);
+
+    const { data: dailyRows, error: dailyError } = await supabaseServer
+      .from('property_daily_prices')
+      .select('property_id, date, price')
+      .in('property_id', cachedIds)
+      .gte('date', startDate)
+      .lte('date', endDate)
+      .order('date', { ascending: true });
+
+    if (dailyError) {
+      console.warn('Error fetching daily prices for listings:', dailyError);
+      return properties;
+    }
+
+    const firstDailyPriceByProperty = new Map<string, number>();
+    for (const row of dailyRows || []) {
+      if (!firstDailyPriceByProperty.has(row.property_id)) {
+        firstDailyPriceByProperty.set(row.property_id, Number(row.price));
+      }
+    }
+
+    return properties.map((property) => {
+      const pricing = property.pricing;
+      const firstDaily = firstDailyPriceByProperty.get(property.id);
+      const startingNightlyPrice =
+        firstDaily ??
+        getNextAvailableNightlyPrice({
+          dailyPrices: {},
+          pricing,
+          maxDaysAhead: LISTING_PRICE_LOOKAHEAD_DAYS,
+        });
+
+      return {
+        ...property,
+        pricing: {
+          ...(pricing || {
+            propertyId: property.id,
+            minPrice: null,
+            basePrice: null,
+            maxPrice: null,
+            pricingEnabled: false,
+            cleaningFee: null,
+            serviceFeePercent: null,
+          }),
+          startingNightlyPrice,
+        },
+      };
+    });
+  } catch (error) {
+    console.warn('attachStartingNightlyPrices failed, returning properties without starting price:', error);
+    return properties;
+  }
 }
 
 export async function GET(request: Request) {
@@ -83,13 +165,15 @@ export async function GET(request: Request) {
         console.warn('Error fetching pricing:', pricingError);
       }
 
-      const propertyWithPhotosAndPricing = {
-        ...property,
-        photos: photos || [],
-        pricing: buildPricingObject(pricingRow),
-      };
+      const [propertyWithStartingPrice] = await attachStartingNightlyPrices([
+        {
+          ...property,
+          photos: photos || [],
+          pricing: buildPricingObject(pricingRow),
+        },
+      ]);
 
-      return NextResponse.json({ property: propertyWithPhotosAndPricing });
+      return NextResponse.json({ property: propertyWithStartingPrice });
     }
 
     // Otherwise fetch all properties
@@ -102,16 +186,19 @@ export async function GET(request: Request) {
 
     if (propertiesError) {
       console.error('Supabase error fetching properties:', propertiesError);
-      console.error('Error details:', JSON.stringify(propertiesError, null, 2));
-      console.error('Error code:', propertiesError.code);
-      console.error('Error hint:', propertiesError.hint);
-      
-      // Return a more helpful error message
-      return NextResponse.json({ 
-        error: propertiesError.message || 'Failed to fetch properties',
-        code: propertiesError.code,
-        details: propertiesError.hint || propertiesError.details
-      }, { status: 500 });
+      const isNetworkError =
+        propertiesError.message?.includes('fetch failed') ||
+        propertiesError.details?.includes('fetch failed');
+
+      return NextResponse.json(
+        {
+          error: isNetworkError
+            ? 'Unable to reach the database. Please try again.'
+            : propertiesError.message || 'Failed to fetch properties',
+          properties: [],
+        },
+        { status: isNetworkError ? 503 : 500 }
+      );
     }
 
     console.log('API: Found', properties?.length || 0, 'properties');
@@ -166,12 +253,13 @@ export async function GET(request: Request) {
       }
     }
 
-    // Attach photos and pricing to properties
-    const propertiesWithExtras = properties.map(property => ({
+    const propertiesWithPhotosAndPricing = properties.map((property) => ({
       ...property,
       photos: photosByProperty.get(property.uplisting_id) || [],
       pricing: buildPricingObject(pricingByPropertyId.get(property.id)),
     }));
+
+    const propertiesWithExtras = await attachStartingNightlyPrices(propertiesWithPhotosAndPricing);
 
     console.log('API: Attached photos and pricing to properties');
     return NextResponse.json({ properties: propertiesWithExtras });

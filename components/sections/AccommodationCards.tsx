@@ -69,6 +69,7 @@ interface CachedProperty {
     basePrice: number | null;
     maxPrice: number | null;
     pricingEnabled: boolean;
+    startingNightlyPrice?: number;
   } | null;
 }
 
@@ -346,8 +347,12 @@ function AccommodationCardsContent() {
             minimumFractionDigits: 0,
             maximumFractionDigits: 0,
           });
+        } else if (property.pricing?.startingNightlyPrice != null && property.pricing.startingNightlyPrice > 0) {
+          priceValue = property.pricing.startingNightlyPrice.toLocaleString('en-ZA', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+          });
         } else if (property.pricing?.pricingEnabled && property.pricing.basePrice != null) {
-          // Use dynamic pricing base price
           const base = property.pricing.basePrice;
           priceValue = base.toLocaleString('en-ZA', {
             minimumFractionDigits: 0,
@@ -359,8 +364,8 @@ function AccommodationCardsContent() {
         }
 
         const price =
-          dateQuote && dateQuote.total > 0
-            ? `${pricePrefix}${Math.round(dateQuote.total).toLocaleString('en-ZA')}`
+          dateQuote && dateQuote.nightly > 0
+            ? `${pricePrefix}${priceValue}`
             : `From ${pricePrefix}${priceValue}`;
         
         const fullDescription = attributes.description || `${attributes.type || 'Beautiful property'} in Cape Town. Perfect for your African getaway.`;

@@ -6,6 +6,33 @@ interface BlockedDate {
   source: string;
 }
 
+type IcalDateValue = Date & { dateOnly?: boolean };
+
+/** Convert node-ical date (incl. VALUE=DATE) to YYYY-MM-DD without timezone drift */
+export function icalDateToYmd(value: IcalDateValue | Date): string {
+  const date = value instanceof Date ? value : new Date(value);
+  const dateOnly = 'dateOnly' in value && Boolean((value as IcalDateValue).dateOnly);
+
+  if (dateOnly && date.getUTCHours() !== 0) {
+    const adjusted = new Date(
+      Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + 1)
+    );
+    return adjusted.toISOString().slice(0, 10);
+  }
+
+  const y = date.getUTCFullYear();
+  const m = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const d = String(date.getUTCDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+/** Add one calendar day to a YYYY-MM-DD string */
+function addDaysYmd(ymd: string, days: number): string {
+  const [y, m, d] = ymd.split('-').map(Number);
+  const next = new Date(Date.UTC(y, m - 1, d + days));
+  return next.toISOString().slice(0, 10);
+}
+
 /**
  * Parse an iCal feed URL and extract blocked dates
  * @param icalUrl - The URL of the iCal feed (e.g., from Airbnb, Booking.com)
@@ -19,23 +46,21 @@ export async function parseIcalFeed(icalUrl: string): Promise<BlockedDate[]> {
 
     for (const event of Object.values(events)) {
       if (event.type === 'VEVENT') {
-        const start = new Date(event.start);
-        const end = new Date(event.end);
+        const startYmd = icalDateToYmd(event.start as IcalDateValue);
+        const endYmd = icalDateToYmd(event.end as IcalDateValue);
         const summary = event.summary || 'Booked';
-        
-        console.log(`Processing event: ${summary} from ${start.toISOString()} to ${end.toISOString()}`);
-        
-        // Generate all dates between start and end (excluding end date as per booking convention)
-        const currentDate = new Date(start);
-        currentDate.setHours(0, 0, 0, 0); // Normalize to start of day
-        
-        while (currentDate < end) {
+
+        console.log(`Processing event: ${summary} from ${startYmd} to ${endYmd}`);
+
+        // DTEND is exclusive for all-day events (last blocked night is day before end)
+        let currentYmd = startYmd;
+        while (currentYmd < endYmd) {
           blockedDates.push({
-            date: currentDate.toISOString().split('T')[0],
+            date: currentYmd,
             reason: summary,
-            source: 'airbnb'
+            source: 'airbnb',
           });
-          currentDate.setDate(currentDate.getDate() + 1);
+          currentYmd = addDaysYmd(currentYmd, 1);
         }
       }
     }

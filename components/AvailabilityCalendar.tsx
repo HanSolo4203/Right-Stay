@@ -1,7 +1,11 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+
+function normalizeDateKey(value: string): string {
+  return value.slice(0, 10);
+}
 
 interface AvailabilityCalendarProps {
   propertyId: string;
@@ -49,6 +53,8 @@ export default function AvailabilityCalendar({
   });
   const [loading, setLoading] = useState(true);
   const [selectingCheckOut, setSelectingCheckOut] = useState(false);
+  const onCalendarDataChangeRef = useRef(onCalendarDataChange);
+  onCalendarDataChangeRef.current = onCalendarDataChange;
 
   const formatDateLocal = (date: Date) => {
     const year = date.getFullYear();
@@ -59,57 +65,71 @@ export default function AvailabilityCalendar({
 
   // Fetch blocked dates for a wider range (6 months) to support navigation
   useEffect(() => {
+    const abortController = new AbortController();
+
     async function fetchAvailability() {
       setLoading(true);
       try {
-        // Get date range: 1 month before current to 6 months ahead
-        const startDate = new Date(currentMonth);
-        startDate.setMonth(startDate.getMonth() - 1);
-        startDate.setDate(1);
-        
-        const endDate = new Date(currentMonth);
-        endDate.setMonth(endDate.getMonth() + 6);
-        endDate.setDate(0); // Last day of the month
-        
-        const response = await fetch(
-          `/api/get-blocked-dates?propertyId=${propertyId}&startDate=${formatDateLocal(startDate)}&endDate=${formatDateLocal(endDate)}`
+        // 1 month before viewed month through end of month 6 months ahead
+        const rangeStart = new Date(
+          currentMonth.getFullYear(),
+          currentMonth.getMonth() - 1,
+          1
         );
-        
+        const rangeEndInclusive = new Date(
+          currentMonth.getFullYear(),
+          currentMonth.getMonth() + 7,
+          0
+        );
+        // Exclusive end (day after last included day) — avoids stale cache on 10-31 URLs
+        const rangeEndExclusive = new Date(rangeEndInclusive);
+        rangeEndExclusive.setDate(rangeEndExclusive.getDate() + 1);
+
+        const startParam = formatDateLocal(rangeStart);
+        const endParam = formatDateLocal(rangeEndExclusive);
+
+        const response = await fetch(
+          `/api/get-blocked-dates?propertyId=${encodeURIComponent(propertyId)}&startDate=${startParam}&endDate=${endParam}`,
+          { cache: 'no-store', signal: abortController.signal }
+        );
+
         if (response.ok) {
           const data = await response.json();
-          const blockedDateList = (data.blockedDates || []).map((d: BlockedDate) => d.date);
+          const blockedDateList = (data.blockedDates || [])
+            .map((d: BlockedDate | string) =>
+              typeof d === 'string' ? normalizeDateKey(d) : normalizeDateKey(d.date || '')
+            )
+            .filter(Boolean);
           const blocked = new Set<string>(blockedDateList);
           setBlockedDates(blocked);
           setDailyPrices(data.dailyPrices || {});
-          setPricingMeta(
+          const pricing =
             data.pricing || {
               pricingEnabled: false,
               minPrice: null,
               basePrice: null,
               maxPrice: null,
-            }
-          );
-          onCalendarDataChange?.({
+            };
+          setPricingMeta(pricing);
+          onCalendarDataChangeRef.current?.({
             dailyPrices: data.dailyPrices || {},
             blockedDates: blockedDateList,
-            pricing:
-              data.pricing || {
-                pricingEnabled: false,
-                minPrice: null,
-                basePrice: null,
-                maxPrice: null,
-              },
+            pricing,
           });
         }
       } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') return;
         console.error('Error fetching availability:', error);
       } finally {
-        setLoading(false);
+        if (!abortController.signal.aborted) {
+          setLoading(false);
+        }
       }
     }
 
     fetchAvailability();
-  }, [propertyId, currentMonth, onCalendarDataChange]);
+    return () => abortController.abort();
+  }, [propertyId, currentMonth]);
 
   const daysInMonth = (date: Date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -244,8 +264,10 @@ export default function AvailabilityCalendar({
         if (isCheckOut) className += "rounded-l-none ";
       } else if (isInRange) {
         className += "bg-gray-100 text-gray-900 hover:bg-gray-200 ";
-      } else if (!isSelectable) {
-        className += "bg-gray-50 text-gray-400 cursor-not-allowed ";
+      } else if (isBlocked) {
+        className += "bg-gray-100 cursor-not-allowed ";
+      } else if (isPast) {
+        className += "bg-gray-50 text-gray-300 cursor-not-allowed ";
       } else {
         className += "hover:bg-gray-50 text-gray-900 border border-gray-200 hover:border-gray-300 hover:shadow-sm ";
       }
@@ -269,20 +291,30 @@ export default function AvailabilityCalendar({
               : "Available"
           }
         >
-          <span className="text-sm md:text-base font-semibold leading-tight">{day}</span>
           <span
-            className={`text-[10px] md:text-xs leading-tight ${
-              isCheckIn || isCheckOut
-                ? 'text-white/90'
-                : !isSelectable
-                ? 'text-gray-400'
-                : 'text-gray-600'
+            className={`relative inline-flex items-center justify-center text-sm md:text-base font-semibold leading-tight ${
+              isBlocked ? 'text-gray-400' : isPast ? 'text-gray-300' : ''
             }`}
           >
-            <span className="whitespace-nowrap">
-              {`R${Math.round(displayPrice).toLocaleString('en-ZA')}`}
-            </span>
+            {day}
+            {isBlocked && (
+              <span
+                className="pointer-events-none absolute left-1/2 top-1/2 h-0 w-[1.25em] -translate-x-1/2 -translate-y-1/2 border-t border-gray-400"
+                aria-hidden
+              />
+            )}
           </span>
+          {!isBlocked && !isPast && (
+            <span
+              className={`text-[10px] md:text-xs leading-tight ${
+                isCheckIn || isCheckOut ? 'text-white/90' : 'text-gray-600'
+              }`}
+            >
+              <span className="whitespace-nowrap">
+                {`R${Math.round(displayPrice).toLocaleString('en-ZA')}`}
+              </span>
+            </span>
+          )}
         </button>
       );
     }
@@ -380,7 +412,13 @@ export default function AvailabilityCalendar({
             <span className="text-gray-700">In range</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-gray-50 border border-gray-200 rounded"></div>
+            <div className="relative w-4 h-4 bg-gray-100 rounded flex items-center justify-center text-[10px] text-gray-400">
+              <span>0</span>
+              <span
+                className="pointer-events-none absolute left-1/2 top-1/2 h-0 w-3 -translate-x-1/2 -translate-y-1/2 border-t border-gray-400"
+                aria-hidden
+              />
+            </div>
             <span className="text-gray-700">Unavailable</span>
           </div>
           <div className="flex items-center gap-2 text-gray-700">

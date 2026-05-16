@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { Settings, Building2, Map, Menu, X, Calendar, Link, LogOut, Loader2, User, MessageSquare, DollarSign } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import SiteSettings from '@/components/admin/SiteSettings';
 import PropertySettings from '@/components/admin/PropertySettings';
 import TourPackageSettings from '@/components/admin/TourPackageSettings';
@@ -14,12 +14,31 @@ import MatrixBackground from '@/components/admin/MatrixBackground';
 
 type TabType = 'site' | 'properties' | 'pricing' | 'tours' | 'bookings' | 'mapping' | 'reviews';
 
-export default function AdminDashboard() {
+const VALID_TABS: TabType[] = ['site', 'properties', 'pricing', 'tours', 'bookings', 'mapping', 'reviews'];
+
+function parseTab(value: string | null): TabType {
+  if (value && VALID_TABS.includes(value as TabType)) {
+    return value as TabType;
+  }
+  return 'site';
+}
+
+function AdminDashboard() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<TabType>('site');
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState<TabType>(() => parseTab(searchParams.get('tab')));
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    setActiveTab(parseTab(searchParams.get('tab')));
+  }, [searchParams]);
+
+  const handleTabChange = (tab: TabType) => {
+    setActiveTab(tab);
+    router.replace(`/admin?tab=${tab}`, { scroll: false });
+  };
 
   // Check authentication
   useEffect(() => {
@@ -123,7 +142,7 @@ export default function AdminDashboard() {
                 return (
                   <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
+                    onClick={() => handleTabChange(tab.id)}
                     className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg transition-all duration-200 font-medium text-sm ${
                       activeTab === tab.id
                         ? 'bg-white/10 text-white shadow-md shadow-white/5'
@@ -181,7 +200,7 @@ export default function AdminDashboard() {
                     <button
                       key={tab.id}
                       onClick={() => {
-                        setActiveTab(tab.id);
+                        handleTabChange(tab.id);
                         setMobileMenuOpen(false);
                       }}
                       className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-all font-medium ${
@@ -250,5 +269,20 @@ export default function AdminDashboard() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function AdminDashboardPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-black flex items-center justify-center relative">
+          <MatrixBackground />
+          <Loader2 className="w-8 h-8 text-blue-500 animate-spin relative z-10" />
+        </div>
+      }
+    >
+      <AdminDashboard />
+    </Suspense>
   );
 }

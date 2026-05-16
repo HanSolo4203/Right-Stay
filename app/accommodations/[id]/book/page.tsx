@@ -7,6 +7,7 @@ import Footer from '@/components/sections/Footer';
 import AvailabilityCalendar from '@/components/AvailabilityCalendar';
 import Link from 'next/link';
 import Image from 'next/image';
+import { getNextAvailableNightlyPrice } from '@/lib/pricing';
 import { 
   ArrowLeft, 
   Calendar, 
@@ -69,6 +70,7 @@ interface Property {
     basePrice: number | null;
     maxPrice: number | null;
     pricingEnabled: boolean;
+    startingNightlyPrice?: number;
   } | null;
 }
 
@@ -397,36 +399,16 @@ export default function BookingPage() {
   const hasMorePhotos = photos.length > 5;
   const mainPhoto = photos[selectedPhotoIndex] || photos[0] || { url: propertyImage };
 
-  const nightlyBasePrice = (() => {
-    if (pricing?.averagePricePerNight != null) {
-      return pricing.averagePricePerNight;
-    }
-
-    const blockedSet = new Set(calendarData.blockedDates);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    for (let i = 0; i < 365; i++) {
-      const d = new Date(today);
-      d.setDate(today.getDate() + i);
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      const key = `${y}-${m}-${day}`;
-      if (!blockedSet.has(key)) {
-        const p = calendarData.dailyPrices[key];
-        if (p != null) return p;
-      }
-    }
-
-    if (calendarData.pricing.pricingEnabled && calendarData.pricing.basePrice != null) {
-      return calendarData.pricing.basePrice;
-    }
-    if (property?.pricing?.pricingEnabled && property.pricing.basePrice != null) {
-      return property.pricing.basePrice;
-    }
-    return 1500;
-  })();
+  const nightlyBasePrice =
+    pricing?.averagePricePerNight ??
+    getNextAvailableNightlyPrice({
+      dailyPrices: calendarData.dailyPrices,
+      blockedDates: calendarData.blockedDates,
+      pricing: {
+        ...(calendarData.pricing.pricingEnabled ? calendarData.pricing : property?.pricing),
+        startingNightlyPrice: property?.pricing?.startingNightlyPrice,
+      },
+    });
 
   return (
     <>

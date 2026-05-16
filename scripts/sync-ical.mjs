@@ -44,6 +44,28 @@ if (!supabaseUrl || !supabaseServiceKey) {
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+function icalDateToYmd(value) {
+  const date = value instanceof Date ? value : new Date(value);
+  const dateOnly = value?.dateOnly === true;
+
+  if (dateOnly && date.getUTCHours() !== 0) {
+    const adjusted = new Date(
+      Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + 1)
+    );
+    return adjusted.toISOString().slice(0, 10);
+  }
+
+  const y = date.getUTCFullYear();
+  const m = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const d = String(date.getUTCDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function addDaysYmd(ymd, days) {
+  const [y, m, d] = ymd.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d + days)).toISOString().slice(0, 10);
+}
+
 async function parseIcalFeed(icalUrl) {
   try {
     console.log('📥 Fetching iCal feed from:', icalUrl);
@@ -52,22 +74,20 @@ async function parseIcalFeed(icalUrl) {
 
     for (const event of Object.values(events)) {
       if (event.type === 'VEVENT') {
-        const start = new Date(event.start);
-        const end = new Date(event.end);
+        const startYmd = icalDateToYmd(event.start);
+        const endYmd = icalDateToYmd(event.end);
         const summary = event.summary || 'Booked';
-        
-        console.log(`  📅 Event: ${summary} from ${start.toISOString().split('T')[0]} to ${end.toISOString().split('T')[0]}`);
-        
-        const currentDate = new Date(start);
-        currentDate.setHours(0, 0, 0, 0);
-        
-        while (currentDate < end) {
+
+        console.log(`  📅 Event: ${summary} from ${startYmd} to ${endYmd}`);
+
+        let currentYmd = startYmd;
+        while (currentYmd < endYmd) {
           blockedDates.push({
-            date: currentDate.toISOString().split('T')[0],
+            date: currentYmd,
             reason: summary,
-            source: 'airbnb'
+            source: 'airbnb',
           });
-          currentDate.setDate(currentDate.getDate() + 1);
+          currentYmd = addDaysYmd(currentYmd, 1);
         }
       }
     }
@@ -107,12 +127,7 @@ async function syncProperty(propertyId) {
     // Parse iCal feed
     const blockedDates = await parseIcalFeed(property.ical_url);
 
-    if (blockedDates.length === 0) {
-      console.log('ℹ️  No blocked dates found in iCal feed');
-      return;
-    }
-
-    // Clear existing availability
+    // Clear existing availability (even when feed has no blocks — stale blocks must be removed)
     console.log('\n🗑️  Clearing existing availability data...');
     const { error: deleteError } = await supabase
       .from('cached_availability')
@@ -135,14 +150,22 @@ async function syncProperty(propertyId) {
       last_synced: new Date().toISOString(),
     }));
 
-    const { error: insertError } = await supabase
-      .from('cached_availability')
-      .insert(availabilityRecords);
+    if (availabilityRecords.length > 0) {
+      const { error: insertError } = await supabase
+        .from('cached_availability')
+        .insert(availabilityRecords);
 
-    if (insertError) {
-      console.error('❌ Error inserting data:', insertError.message);
-      return;
+      if (insertError) {
+        console.error('❌ Error inserting data:', insertError.message);
+        return;
+      }
     }
+
+    const now = new Date().toISOString();
+    await supabase
+      .from('cached_properties')
+      .update({ last_synced: now })
+      .eq('uplisting_id', propertyId);
 
     console.log(`✅ Successfully synced ${blockedDates.length} blocked dates`);
     console.log(`\n📊 Sample dates:`);
@@ -158,18 +181,53 @@ async function syncProperty(propertyId) {
   }
 }
 
-// Get property ID from command line
-const propertyId = process.argv[2] || '135133';
+async function syncAllProperties() {
+  const { data: properties, error } = await supabase
+    .from('cached_properties')
+    .select('uplisting_id, ical_url, data')
+    .not('ical_url', 'is', null);
 
-syncProperty(propertyId)
-  .then(() => {
-    console.log('\n✨ Sync complete!');
-    process.exit(0);
-  })
-  .catch(err => {
-    console.error('\n❌ Sync failed:', err);
+  if (error) {
+    console.error('❌ Error fetching properties:', error.message);
     process.exit(1);
-  });
+  }
+
+  if (!properties?.length) {
+    console.log('ℹ️  No properties with iCal URLs found');
+    return;
+  }
+
+  console.log(`\n📋 Found ${properties.length} properties with iCal URLs\n`);
+
+  let successCount = 0;
+  for (const property of properties) {
+    await syncProperty(property.uplisting_id);
+    successCount++;
+  }
+
+  console.log(`\n✨ Sync complete: ${successCount}/${properties.length} properties processed`);
+}
+
+const arg = process.argv[2];
+if (arg === '--all' || arg === 'all') {
+  syncAllProperties()
+    .then(() => process.exit(0))
+    .catch(err => {
+      console.error('\n❌ Sync failed:', err);
+      process.exit(1);
+    });
+} else {
+  const propertyId = arg || '135133';
+  syncProperty(propertyId)
+    .then(() => {
+      console.log('\n✨ Sync complete!');
+      process.exit(0);
+    })
+    .catch(err => {
+      console.error('\n❌ Sync failed:', err);
+      process.exit(1);
+    });
+}
 
 
 

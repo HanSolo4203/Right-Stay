@@ -43,14 +43,14 @@ export async function GET(request: Request) {
 
     console.log(`Fetching blocked dates for property ${propertyId} from ${startDate} to ${endDate}`);
 
-    // Fetch all blocked dates in the range
+    // Fetch all blocked dates in the range (endDate is exclusive — day after last included day)
     const { data: blockedDates, error } = await supabaseServer
       .from('cached_availability')
       .select('date, blocked_reason, available')
       .eq('property_id', propertyId)
       .eq('available', false)
       .gte('date', startDate)
-      .lte('date', endDate)
+      .lt('date', endDate)
       .order('date', { ascending: true });
 
     if (error) {
@@ -103,22 +103,29 @@ export async function GET(request: Request) {
         .select('date, price')
         .eq('property_id', cachedProperty.id)
         .gte('date', startDate)
-        .lte('date', endDate);
+        .lt('date', endDate);
 
       for (const row of dailyRows || []) {
         dailyPrices[row.date] = Number(row.price);
       }
     }
 
-    return NextResponse.json({
-      propertyId,
-      startDate,
-      endDate,
-      blockedDates: blockedDates || [],
-      count: blockedDates?.length || 0,
-      dailyPrices,
-      pricing,
-    });
+    return NextResponse.json(
+      {
+        propertyId,
+        startDate,
+        endDate,
+        blockedDates: blockedDates || [],
+        count: blockedDates?.length || 0,
+        dailyPrices,
+        pricing,
+      },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate',
+        },
+      }
+    );
   } catch (error) {
     console.error('Error:', error);
     return NextResponse.json({ 
