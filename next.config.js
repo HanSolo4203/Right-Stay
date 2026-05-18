@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  transpilePackages: ['leaflet', 'react-leaflet'],
   // Smaller dev + prod bundles when importing many icons from lucide-react.
   experimental: {
     optimizePackageImports: ['lucide-react'],

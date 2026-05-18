@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import {
+  extractLocationFromAttributes,
+  locationFieldsForAttributes,
+} from '@/lib/property-location';
 
 export const dynamic = 'force-dynamic';
 
@@ -112,6 +116,7 @@ export async function GET() {
       const attributes = property.data?.attributes || {};
       const pricingRow = pricingByPropertyId[property.id];
       const mappingRow = mappingByPropertyId[property.id];
+      const location = extractLocationFromAttributes(attributes);
       return {
         id: property.id,
         uplisting_id: property.uplisting_id,
@@ -131,6 +136,7 @@ export async function GET() {
         last_synced: property.last_synced,
         created_at: property.created_at,
         updated_at: property.updated_at,
+        ...location,
         pricing: buildPricingObject(pricingRow),
         pricelabsMapping: buildPriceLabsMappingObject(mappingRow),
         // Keep full data for reference
@@ -157,6 +163,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    const location = locationFieldsForAttributes(body);
 
     // Create property data structure for cached_properties
     const propertyData = {
@@ -175,7 +182,8 @@ export async function POST(request: NextRequest) {
           check_in_time: body.check_in_time ? parseInt(body.check_in_time) : 15,
           check_out_time: body.check_out_time ? parseInt(body.check_out_time) : 11,
           property_slug: body.property_slug || null,
-          time_zone: body.time_zone || 'Africa/Johannesburg'
+          time_zone: body.time_zone || 'Africa/Johannesburg',
+          ...location,
         }
       },
       ical_url: body.ical_url || null
@@ -312,6 +320,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
+    const location = locationFieldsForAttributes(body);
 
     // First get the existing property to preserve data structure
     const { data: existing, error: fetchError } = await supabase
@@ -321,6 +330,12 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (fetchError) throw fetchError;
+
+    const hasLocationFields =
+      body.location_address !== undefined ||
+      body.location_display !== undefined ||
+      body.latitude !== undefined ||
+      body.longitude !== undefined;
 
     // Update the data JSONB field
     const updatedData = {
@@ -339,7 +354,8 @@ export async function PUT(request: NextRequest) {
         check_in_time: body.check_in_time !== undefined ? parseInt(body.check_in_time) : existing.data?.attributes?.check_in_time,
         check_out_time: body.check_out_time !== undefined ? parseInt(body.check_out_time) : existing.data?.attributes?.check_out_time,
         property_slug: body.property_slug !== undefined ? body.property_slug : existing.data?.attributes?.property_slug,
-        time_zone: body.time_zone !== undefined ? body.time_zone : existing.data?.attributes?.time_zone || 'Africa/Johannesburg'
+        time_zone: body.time_zone !== undefined ? body.time_zone : existing.data?.attributes?.time_zone || 'Africa/Johannesburg',
+        ...(hasLocationFields ? location : {}),
       }
     };
 

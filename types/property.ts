@@ -42,6 +42,10 @@ export interface Property {
   primaryPhotoUrl?: string;
   pricing?: PropertyPricing;
   pricelabsMapping?: PropertyPriceLabsMapping | null;
+  location_address?: string | null;
+  location_display?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 export interface PropertyFormValues {
@@ -66,5 +70,9 @@ export interface PropertyFormValues {
   pricelabsListingId: string;
   pricelabsPms: string;
   pricelabsSyncEnabled: boolean;
+  location_address: string;
+  location_display: string;
+  latitude: string;
+  longitude: string;
 }
 

@@ -6,6 +6,8 @@ import Image from 'next/image';
 import imageCompression from 'browser-image-compression';
 import type { Property, PropertyFormValues } from '@/types/property';
 import { PricingSection } from './PricingSection';
+import { extractLocationFromAttributes } from '@/lib/property-location';
+import PropertyLocationPicker from './PropertyLocationPicker';
 
 interface PropertyPhoto {
   id: string;
@@ -17,6 +19,39 @@ interface PropertyPhoto {
   is_primary: boolean;
   width: number | null;
   height: number | null;
+}
+
+const emptyLocationFields = {
+  location_address: '',
+  location_display: '',
+  latitude: '',
+  longitude: '',
+};
+
+function locationFieldsFromProperty(property?: Property | null) {
+  if (!property) return { ...emptyLocationFields };
+  const fromData = extractLocationFromAttributes(
+    (property as Property & { data?: { attributes?: Record<string, unknown> } }).data
+      ?.attributes
+  );
+  return {
+    location_address:
+      property.location_address ?? fromData.location_address ?? '',
+    location_display:
+      property.location_display ?? fromData.location_display ?? '',
+    latitude:
+      property.latitude != null
+        ? String(property.latitude)
+        : fromData.latitude != null
+          ? String(fromData.latitude)
+          : '',
+    longitude:
+      property.longitude != null
+        ? String(property.longitude)
+        : fromData.longitude != null
+          ? String(fromData.longitude)
+          : '',
+  };
 }
 
 export default function PropertySettings() {
@@ -32,6 +67,8 @@ export default function PropertySettings() {
   const [syncingUplistingPropertyId, setSyncingUplistingPropertyId] = useState<string | null>(null);
   const [syncingFromUplisting, setSyncingFromUplisting] = useState(false);
   const [savingProperty, setSavingProperty] = useState(false);
+  const [geocodingLocation, setGeocodingLocation] = useState(false);
+  const [mapPickerSession, setMapPickerSession] = useState(0);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [propertyPrimaryPhotos, setPropertyPrimaryPhotos] = useState<Record<string, string>>({});
@@ -57,6 +94,7 @@ export default function PropertySettings() {
     pricelabsListingId: '',
     pricelabsPms: '',
     pricelabsSyncEnabled: true,
+    ...emptyLocationFields,
   });
   const [pricingErrors, setPricingErrors] = useState<{
     minPrice?: string;
@@ -209,6 +247,7 @@ export default function PropertySettings() {
         pricelabsListingId: property.pricelabsMapping?.pricelabsListingId || '',
         pricelabsPms: property.pricelabsMapping?.pricelabsPms || '',
         pricelabsSyncEnabled: property.pricelabsMapping?.syncEnabled ?? true,
+        ...locationFieldsFromProperty(property),
       });
       setPricingErrors({});
       // Fetch photos for this property
@@ -237,10 +276,12 @@ export default function PropertySettings() {
         pricelabsListingId: '',
         pricelabsPms: '',
         pricelabsSyncEnabled: true,
+        ...emptyLocationFields,
       });
       setPhotos([]);
       setPricingErrors({});
     }
+    setMapPickerSession((session) => session + 1);
     setShowModal(true);
   };
 
@@ -289,9 +330,56 @@ export default function PropertySettings() {
       pricelabsListingId: '',
       pricelabsPms: '',
       pricelabsSyncEnabled: true,
+      ...emptyLocationFields,
     });
     setPricingErrors({});
   };
+
+  const handleGeocodeAddress = async () => {
+    const query = formData.location_address.trim();
+    if (query.length < 3) {
+      setMessage({
+        type: 'error',
+        text: 'Enter a property address (at least 3 characters) to find on map.',
+      });
+      return;
+    }
+
+    setGeocodingLocation(true);
+    try {
+      const response = await fetch(
+        `/api/admin/geocode?q=${encodeURIComponent(query)}`
+      );
+      const data = await response.json();
+
+      if (!response.ok) {
+        setMessage({
+          type: 'error',
+          text: data.error || 'Could not find that address.',
+        });
+        return;
+      }
+
+      setFormData((prev) => ({
+        ...prev,
+        latitude: String(data.lat),
+        longitude: String(data.lng),
+        location_address: data.displayName || prev.location_address,
+        location_display:
+          prev.location_display.trim() ||
+          data.displayName?.split(',').slice(-2).join(',').trim() ||
+          prev.location_display,
+      }));
+    } catch {
+      setMessage({ type: 'error', text: 'Geocoding request failed.' });
+    } finally {
+      setGeocodingLocation(false);
+    }
+  };
+
+  const handleCoordinatesChange = useCallback((lat: string, lng: string) => {
+    setFormData((prev) => ({ ...prev, latitude: lat, longitude: lng }));
+  }, []);
 
   const compressImage = async (file: File): Promise<File> => {
     // Only compress if file is larger than 2MB
@@ -1165,6 +1253,86 @@ export default function PropertySettings() {
                   className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors resize-none"
                   placeholder="Property description..."
                 />
+              </div>
+
+              <div className="space-y-4 rounded-lg border border-white/10 bg-white/[0.02] p-4">
+                <h3 className="text-sm font-semibold text-white">Property location</h3>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Display location
+                  </label>
+                  <input
+                    type="text"
+                    name="location_display"
+                    value={formData.location_display}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                    placeholder="e.g., Cape Town, South Africa"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    Short label shown on the booking page header.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Property address
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      name="location_address"
+                      value={formData.location_address}
+                      onChange={handleChange}
+                      className="flex-1 px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                      placeholder="Full street address or area"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleGeocodeAddress}
+                      disabled={geocodingLocation}
+                      className="shrink-0 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                    >
+                      {geocodingLocation ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : null}
+                      Find on map
+                    </button>
+                  </div>
+                </div>
+
+                <PropertyLocationPicker
+                  key={`map-${editingProperty?.id ?? 'new'}-${mapPickerSession}`}
+                  latitude={formData.latitude}
+                  longitude={formData.longitude}
+                  onCoordinatesChange={handleCoordinatesChange}
+                />
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Latitude
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.latitude}
+                      readOnly
+                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-gray-400 cursor-default"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Longitude
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.longitude}
+                      readOnly
+                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-gray-400 cursor-default"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="grid md:grid-cols-3 gap-4">

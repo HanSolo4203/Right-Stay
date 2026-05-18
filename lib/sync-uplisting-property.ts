@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { fetchUplistingProperty } from '@/lib/uplisting';
+import { mergePreservedLocationAttributes } from '@/lib/property-location';
 
 export type SyncPropertyResult = {
   property_id: string;
@@ -52,12 +53,28 @@ export async function syncSinglePropertyFromUplisting(
   const photosInApi =
     fullProperty.relationships?.photos?.data?.length ?? photos.length;
 
+  const { data: existingProperty } = await supabase
+    .from('cached_properties')
+    .select('data')
+    .eq('uplisting_id', propertyId)
+    .maybeSingle();
+
+  const incomingAttributes = (fullProperty.attributes || {}) as Record<string, unknown>;
+  const existingAttributes = (existingProperty?.data?.attributes || {}) as Record<
+    string,
+    unknown
+  >;
+  const mergedAttributes = mergePreservedLocationAttributes(
+    incomingAttributes,
+    existingAttributes
+  );
+
   const propertyData = {
     uplisting_id: propertyId,
     data: {
       id: fullProperty.id,
       type: fullProperty.type,
-      attributes: fullProperty.attributes || {},
+      attributes: mergedAttributes,
       relationships: fullProperty.relationships || {},
     },
     last_synced: new Date().toISOString(),

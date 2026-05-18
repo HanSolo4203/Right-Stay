@@ -1,13 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Manrope } from "next/font/google";
+import "@fontsource-variable/inter";
+import "@fontsource-variable/manrope";
 import "./globals.css";
-
-const inter = Inter({ subsets: ["latin"], display: "swap" });
-const manrope = Manrope({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "Right Stay Africa | Premium Accommodations & African Tours",
@@ -25,13 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${inter.className} ${manrope.className} min-h-screen bg-black text-white antialiased`}
-        style={{
-          fontFamily:
-            "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji",
-        }}
-      >
+      <body className="min-h-screen bg-black font-sans text-white antialiased">
         {children}
       </body>
     </html>
