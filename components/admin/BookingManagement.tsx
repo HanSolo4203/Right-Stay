@@ -1,7 +1,24 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Loader2, Calendar, User, Home, DollarSign, Filter, ChevronDown, Eye, Search, Edit2, Trash2, CheckCircle, AlertCircle, X } from 'lucide-react';
+import {
+  Loader2,
+  Calendar,
+  User,
+  Home,
+  DollarSign,
+  Filter,
+  ChevronDown,
+  Eye,
+  Search,
+  Edit2,
+  Trash2,
+  CheckCircle,
+  AlertCircle,
+  X,
+  Moon,
+} from 'lucide-react';
+import { admin, statusBadge, paymentBadge } from '@/components/admin/ui/classes';
 
 interface Booking {
   id: string;
@@ -102,21 +119,6 @@ export default function BookingManagement() {
     filterBookings();
   }, [bookings, statusFilter, searchQuery, filterBookings]);
 
-  const getStatusBadgeColor = (status: string) => {
-    switch (status) {
-      case 'confirmed':
-        return 'bg-green-500/10 text-green-400 border-green-500/20';
-      case 'pending':
-        return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20';
-      case 'cancelled':
-        return 'bg-red-500/10 text-red-400 border-red-500/20';
-      case 'completed':
-        return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
-      default:
-        return 'bg-gray-500/10 text-gray-400 border-gray-500/20';
-    }
-  };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-ZA', {
       year: 'numeric',
@@ -212,73 +214,129 @@ export default function BookingManagement() {
     }
   };
 
-  const getPaymentStatusColor = (status: string) => {
-    switch (status) {
-      case 'paid':
-        return 'bg-green-500/10 text-green-400 border-green-500/20';
-      case 'partial':
-        return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20';
-      case 'pending':
-        return 'bg-orange-500/10 text-orange-400 border-orange-500/20';
-      case 'refunded':
-        return 'bg-red-500/10 text-red-400 border-red-500/20';
-      default:
-        return 'bg-gray-500/10 text-gray-400 border-gray-500/20';
+
+
+  const renderBookingActions = (booking: Booking, compact = false) => {
+    const canDelete = booking.channel?.name === 'Direct';
+
+    if (compact) {
+      return (
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => handleViewDetails(booking)}
+            className={`${admin.btnSecondary} flex-1 min-w-[5.5rem] py-2 text-sm`}
+          >
+            <Eye className="w-4 h-4" />
+            View
+          </button>
+          <button
+            type="button"
+            onClick={() => handleEdit(booking)}
+            className={`${admin.btnSecondary} flex-1 min-w-[5.5rem] py-2 text-sm text-green-700 border-green-200 hover:bg-green-50`}
+          >
+            <Edit2 className="w-4 h-4" />
+            Edit
+          </button>
+          {canDelete && (
+            <button
+              type="button"
+              onClick={() => handleDelete(booking)}
+              className={`${admin.btnDanger} flex-1 min-w-[5.5rem] py-2 text-sm`}
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete
+            </button>
+          )}
+        </div>
+      );
     }
+
+    return (
+      <div className="flex items-center justify-end gap-1">
+        <button
+          type="button"
+          onClick={() => handleViewDetails(booking)}
+          className={admin.iconBtnBlue}
+          title="View details"
+          aria-label="View booking details"
+        >
+          <Eye className="w-5 h-5" />
+        </button>
+        <button
+          type="button"
+          onClick={() => handleEdit(booking)}
+          className={admin.iconBtnGreen}
+          title="Edit status and payment"
+          aria-label="Edit booking"
+        >
+          <Edit2 className="w-5 h-5" />
+        </button>
+        {canDelete && (
+          <button
+            type="button"
+            onClick={() => handleDelete(booking)}
+            className={admin.iconBtnRed}
+            title="Delete booking"
+            aria-label="Delete booking"
+          >
+            <Trash2 className="w-5 h-5" />
+          </button>
+        )}
+      </div>
+    );
   };
+
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+        <Loader2 className={admin.spinner} />
       </div>
     );
   }
 
+  const emptyState = (
+    <div className={admin.empty}>
+      <p>No bookings found matching your filters.</p>
+    </div>
+  );
+
   return (
     <div className="p-3 sm:p-4 lg:p-8">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-white mb-2">Booking Management</h2>
-        <p className="text-gray-400">View and manage all property bookings</p>
-      </div>
-
-      {/* Message */}
       {message && (
-        <div className={`mb-6 p-4 rounded-lg flex items-center space-x-2 ${
-          message.type === 'success' ? 'bg-green-500/10 border border-green-500/20' : 'bg-red-500/10 border border-red-500/20'
-        }`}>
+        <div
+          className={`mb-4 sm:mb-6 ${message.type === 'success' ? admin.alertSuccess : admin.alertError}`}
+          role="status"
+        >
           {message.type === 'success' ? (
-            <CheckCircle className="w-5 h-5 text-green-500" />
+            <CheckCircle className="w-5 h-5 shrink-0" />
           ) : (
-            <AlertCircle className="w-5 h-5 text-red-500" />
+            <AlertCircle className="w-5 h-5 shrink-0" />
           )}
-          <span className={message.type === 'success' ? 'text-green-400' : 'text-red-400'}>
-            {message.text}
-          </span>
+          <span className="text-sm sm:text-base">{message.text}</span>
         </div>
       )}
 
-      {/* Filters */}
-      <div className="mb-6 flex flex-col sm:flex-row gap-3 sm:gap-4">
-        {/* Search */}
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+      <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row gap-3">
+        <div className="flex-1 relative min-w-0">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
           <input
-            type="text"
-            placeholder="Search by reference, guest, property, or channel..."
+            type="search"
+            placeholder="Search reference, guest, property, channel…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+            className={`${admin.input} pl-10`}
+            aria-label="Search bookings"
           />
         </div>
-
-        {/* Status Filter */}
-        <div className="relative">
-          <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <div className="relative w-full sm:w-auto sm:min-w-[11rem]">
+          <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="pl-10 pr-10 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors appearance-none cursor-pointer"
+            className={`${admin.select} pl-10 pr-10 w-full`}
+            aria-label="Filter by status"
           >
             <option value="all">All Status</option>
             <option value="confirmed">Confirmed</option>
@@ -286,475 +344,299 @@ export default function BookingManagement() {
             <option value="completed">Completed</option>
             <option value="cancelled">Cancelled</option>
           </select>
-          <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6">
-        <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/10">
-          <p className="text-gray-400 text-sm mb-1">Total Bookings</p>
-          <p className="text-2xl font-bold text-white">{bookings.length}</p>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div className={admin.statCard}>
+          <p className="text-slate-500 text-xs sm:text-sm mb-1">Total Bookings</p>
+          <p className="text-xl sm:text-2xl font-bold text-slate-900">{bookings.length}</p>
         </div>
-        <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/10">
-          <p className="text-gray-400 text-sm mb-1">Confirmed</p>
-          <p className="text-2xl font-bold text-green-400">
-            {bookings.filter(b => b.booking_status === 'confirmed').length}
+        <div className={admin.statCard}>
+          <p className="text-slate-500 text-xs sm:text-sm mb-1">Confirmed</p>
+          <p className="text-xl sm:text-2xl font-bold text-green-700">
+            {bookings.filter((b) => b.booking_status === 'confirmed').length}
           </p>
         </div>
-        <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/10">
-          <p className="text-gray-400 text-sm mb-1">Pending</p>
-          <p className="text-2xl font-bold text-yellow-400">
-            {bookings.filter(b => b.booking_status === 'pending').length}
+        <div className={admin.statCard}>
+          <p className="text-slate-500 text-xs sm:text-sm mb-1">Pending</p>
+          <p className="text-xl sm:text-2xl font-bold text-amber-700">
+            {bookings.filter((b) => b.booking_status === 'pending').length}
           </p>
         </div>
-        <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/10">
-          <p className="text-gray-400 text-sm mb-1">Total Revenue</p>
-          <p className="text-2xl font-bold text-blue-400">
+        <div className={`${admin.statCard} col-span-2 lg:col-span-1`}>
+          <p className="text-slate-500 text-xs sm:text-sm mb-1">Total Revenue</p>
+          <p className="text-xl sm:text-2xl font-bold text-right-stay-600 truncate">
             {formatCurrency(bookings.reduce((sum, b) => sum + (b.total_payout || 0), 0))}
           </p>
         </div>
       </div>
 
-      {/* Bookings Table */}
-      <div className="bg-white/5 rounded-xl border border-white/10 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-white/5 border-b border-white/10">
-              <tr>
-                <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                  Reference
-                </th>
-                <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                  Property
-                </th>
-                <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                  Guest
-                </th>
-                <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                  Check-in
-                </th>
-                <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                  Check-out
-                </th>
-                <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                  Nights
-                </th>
-                <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                  Channel
-                </th>
-                <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                  Total
-                </th>
-                <th className="px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/10">
-              {filteredBookings.map((booking) => (
-                <tr key={booking.id} className="hover:bg-white/5 transition-colors">
-                  <td className="px-3 sm:px-4 py-3 sm:py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-white">
-                      {booking.booking_reference}
-                    </div>
-                  </td>
-                  <td className="px-3 sm:px-4 py-3 sm:py-4 whitespace-nowrap">
-                    <div className="flex items-center space-x-2">
-                      <Home className="w-4 h-4 text-blue-400" />
-                      <span className="text-sm text-white">
-                        {booking.apartment?.apartment_number || 'N/A'}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-3 sm:px-4 py-3 sm:py-4 whitespace-nowrap">
-                    <div className="flex items-center space-x-2">
-                      <User className="w-4 h-4 text-purple-400" />
-                      <span className="text-sm text-white">{booking.guest?.name || 'N/A'}</span>
-                    </div>
-                  </td>
-                  <td className="px-3 sm:px-4 py-3 sm:py-4 whitespace-nowrap">
-                    <div className="flex items-center space-x-2">
-                      <Calendar className="w-4 h-4 text-green-400" />
-                      <span className="text-sm text-white">
-                        {formatDate(booking.check_in_date)}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-3 sm:px-4 py-3 sm:py-4 whitespace-nowrap">
-                    <div className="flex items-center space-x-2">
-                      <Calendar className="w-4 h-4 text-red-400" />
-                      <span className="text-sm text-white">
-                        {formatDate(booking.check_out_date)}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-3 sm:px-4 py-3 sm:py-4 whitespace-nowrap">
-                    <span className="text-sm text-white font-medium">
-                      {booking.nights}
-                    </span>
-                  </td>
-                  <td className="px-3 sm:px-4 py-3 sm:py-4 whitespace-nowrap">
-                    <span className="text-sm text-gray-300">
-                      {booking.channel?.name || 'N/A'}
-                    </span>
-                  </td>
-                  <td className="px-3 sm:px-4 py-3 sm:py-4 whitespace-nowrap">
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getStatusBadgeColor(booking.booking_status)}`}>
-                      {booking.booking_status}
-                    </span>
-                  </td>
-                  <td className="px-3 sm:px-4 py-3 sm:py-4 whitespace-nowrap">
-                    <div className="flex items-center space-x-2">
-                      <DollarSign className="w-4 h-4 text-yellow-400" />
-                      <span className="text-sm font-semibold text-white">
-                        {formatCurrency(booking.total_payout || 0)}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-3 sm:px-4 py-3 sm:py-4 whitespace-nowrap">
-                    <div className="flex space-x-1 sm:space-x-2">
-                      <button
-                        onClick={() => handleViewDetails(booking)}
-                        className="p-2 text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors min-h-11"
-                        title="View Details"
-                      >
-                        <Eye className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => handleEdit(booking)}
-                        className="p-2 text-green-400 hover:bg-green-500/10 rounded-lg transition-colors min-h-11"
-                        title="Edit Status"
-                      >
-                        <Edit2 className="w-5 h-5" />
-                      </button>
-                      {booking.channel?.name === 'Direct' && (
-                        <button
-                          onClick={() => handleDelete(booking)}
-                          className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors min-h-11"
-                          title="Delete Booking"
-                        >
-                          <Trash2 className="w-5 h-5" />
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {filteredBookings.length > 0 && (
+        <p className="text-sm text-slate-500 mb-3">
+          Showing {filteredBookings.length} of {bookings.length} bookings
+        </p>
+      )}
 
-          {filteredBookings.length === 0 && (
-            <div className="text-center py-12 text-gray-400">
-              <p>No bookings found matching your filters.</p>
-            </div>
-          )}
-        </div>
+      {/* Mobile cards */}
+      <div className="md:hidden space-y-3">
+        {filteredBookings.length === 0
+          ? emptyState
+          : filteredBookings.map((booking) => (
+              <article key={booking.id} className={`${admin.card} p-4 space-y-3`}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-mono text-sm font-semibold text-slate-900 truncate">
+                      {booking.booking_reference}
+                    </p>
+                    <p className="text-sm text-slate-600 mt-0.5 flex items-center gap-1.5 min-w-0">
+                      <User className="w-3.5 h-3.5 shrink-0 text-violet-500" />
+                      <span className="truncate">{booking.guest?.name || 'N/A'}</span>
+                    </p>
+                  </div>
+                  <span className={statusBadge(booking.booking_status)}>{booking.booking_status}</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-x-3 gap-y-2.5 text-sm">
+                  <div>
+                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Property</p>
+                    <p className="text-slate-900 mt-0.5 flex items-center gap-1">
+                      <Home className="w-3.5 h-3.5 text-right-stay-600 shrink-0" />
+                      {booking.apartment?.apartment_number || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Channel</p>
+                    <p className="text-slate-900 mt-0.5">{booking.channel?.name || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Check-in</p>
+                    <p className="text-slate-900 mt-0.5">{formatDate(booking.check_in_date)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Check-out</p>
+                    <p className="text-slate-900 mt-0.5">{formatDate(booking.check_out_date)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Nights</p>
+                    <p className="text-slate-900 mt-0.5 flex items-center gap-1">
+                      <Moon className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      {booking.nights}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Total payout</p>
+                    <p className="text-slate-900 font-semibold mt-0.5">{formatCurrency(booking.total_payout || 0)}</p>
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-slate-100">
+                  {renderBookingActions(booking, true)}
+                </div>
+              </article>
+            ))}
       </div>
 
-      {/* Details Modal */}
+      {/* Desktop table */}
+      <div className={`hidden md:block ${admin.tableWrap}`}>
+        <table className={admin.table}>
+          <thead className={admin.thead}>
+            <tr>
+              <th className={admin.th}>Reference</th>
+              <th className={admin.th}>Guest</th>
+              <th className={admin.th}>Property</th>
+              <th className={admin.th}>Check-in</th>
+              <th className={admin.th}>Check-out</th>
+              <th className={admin.th}>Nights</th>
+              <th className={admin.th}>Channel</th>
+              <th className={admin.th}>Status</th>
+              <th className={`${admin.th} text-right`}>Total</th>
+              <th className={`${admin.th} text-right`}>Actions</th>
+            </tr>
+          </thead>
+          <tbody className={admin.tbody}>
+            {filteredBookings.map((booking) => (
+              <tr key={booking.id} className={admin.tr}>
+                <td className={`${admin.td} font-mono text-xs font-medium text-slate-900`}>
+                  {booking.booking_reference}
+                </td>
+                <td className={`${admin.td} font-medium text-slate-900`}>{booking.guest?.name || 'N/A'}</td>
+                <td className={admin.td}>{booking.apartment?.apartment_number || 'N/A'}</td>
+                <td className={admin.td}>{formatDate(booking.check_in_date)}</td>
+                <td className={admin.td}>{formatDate(booking.check_out_date)}</td>
+                <td className={admin.td}>{booking.nights}</td>
+                <td className={admin.td}>{booking.channel?.name || 'N/A'}</td>
+                <td className={admin.td}>
+                  <span className={statusBadge(booking.booking_status)}>{booking.booking_status}</span>
+                </td>
+                <td className={`${admin.td} text-right font-semibold text-slate-900`}>
+                  {formatCurrency(booking.total_payout || 0)}
+                </td>
+                <td className={admin.td}>{renderBookingActions(booking)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {filteredBookings.length === 0 && emptyState}
+      </div>
+
       {showDetailsModal && selectedBooking && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-gray-900 rounded-2xl border border-white/10 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-gray-900 border-b border-white/10 p-6 flex justify-between items-center">
-              <div>
-                <h3 className="text-xl font-bold text-white">Booking Details</h3>
-                <p className="text-sm text-gray-400">{selectedBooking.booking_reference}</p>
-              </div>
-              <button
-                onClick={() => setShowDetailsModal(false)}
-                className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="p-6 space-y-6">
-              {/* Status */}
-              <div>
-                <span className={`px-4 py-2 text-sm font-medium rounded-lg border ${getStatusBadgeColor(selectedBooking.booking_status)}`}>
-                  {selectedBooking.booking_status.toUpperCase()}
-                </span>
-              </div>
-
-              {/* Guest Information */}
-              <div className="bg-white/5 rounded-lg p-4">
-                <h4 className="text-lg font-semibold text-white mb-3 flex items-center">
-                  <User className="w-5 h-5 mr-2 text-purple-400" />
-                  Guest Information
-                </h4>
-                <div className="grid md:grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <span className="text-gray-400">Name:</span>
-                    <p className="text-white font-medium">{selectedBooking.guest?.name || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-400">Email:</span>
-                    <p className="text-white">{selectedBooking.guest?.email || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-400">Phone:</span>
-                    <p className="text-white">{selectedBooking.guest?.phone || 'N/A'}</p>
-                  </div>
+        <div className={admin.modalOverlayScroll} role="dialog" aria-modal="true">
+          <div className="min-h-full flex items-end sm:items-start justify-center py-4 sm:py-8">
+            <div className={`${admin.modalPanel} w-full max-w-3xl flex flex-col max-h-[min(90vh,calc(100dvh-2rem))] sm:max-h-[90vh]`}>
+              <div className={`${admin.modalHeader} shrink-0 px-4 sm:px-6 py-4`}>
+                <div className="min-w-0 pr-3">
+                  <h3 className="text-lg sm:text-xl font-bold text-slate-900">Booking Details</h3>
+                  <p className="text-sm text-slate-500 font-mono truncate">{selectedBooking.booking_reference}</p>
                 </div>
+                <button type="button" onClick={() => setShowDetailsModal(false)} className={`${admin.btnIcon} text-slate-500 hover:bg-slate-100`} aria-label="Close">
+                  <X className="w-5 h-5" />
+                </button>
               </div>
-
-              {/* Property Information */}
-              <div className="bg-white/5 rounded-lg p-4">
-                <h4 className="text-lg font-semibold text-white mb-3 flex items-center">
-                  <Home className="w-5 h-5 mr-2 text-blue-400" />
-                  Property Information
-                </h4>
-                <div className="space-y-2 text-sm">
-                  <div>
-                    <span className="text-gray-400">Property:</span>
-                    <p className="text-white font-medium">{selectedBooking.apartment?.apartment_number || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-400">Address:</span>
-                    <p className="text-white">{selectedBooking.apartment?.address || 'N/A'}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Booking Details */}
-              <div className="bg-white/5 rounded-lg p-4">
-                <h4 className="text-lg font-semibold text-white mb-3 flex items-center">
-                  <Calendar className="w-5 h-5 mr-2 text-green-400" />
-                  Booking Details
-                </h4>
-                <div className="grid md:grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <span className="text-gray-400">Check-in:</span>
-                    <p className="text-white font-medium">{formatDate(selectedBooking.check_in_date)}</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-400">Check-out:</span>
-                    <p className="text-white font-medium">{formatDate(selectedBooking.check_out_date)}</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-400">Nights:</span>
-                    <p className="text-white font-medium">{selectedBooking.nights}</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-400">Channel:</span>
-                    <p className="text-white font-medium">{selectedBooking.channel?.name || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-400">Booking Date:</span>
-                    <p className="text-white">{formatDate(selectedBooking.booking_date)}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Financial Information */}
-              <div className="bg-white/5 rounded-lg p-4">
-                <h4 className="text-lg font-semibold text-white mb-3 flex items-center">
-                  <DollarSign className="w-5 h-5 mr-2 text-yellow-400" />
-                  Financial Details
-                </h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Accommodation:</span>
-                    <span className="text-white font-medium">{formatCurrency(selectedBooking.accommodation_total)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Cleaning Fee:</span>
-                    <span className="text-white font-medium">{formatCurrency(selectedBooking.cleaning_fee || 0)}</span>
-                  </div>
-                  <div className="border-t border-white/10 pt-2 mt-2 flex justify-between">
-                    <span className="text-white font-semibold">Total Payout:</span>
-                    <span className="text-white font-bold text-lg">{formatCurrency(selectedBooking.total_payout || 0)}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Notes */}
-              {selectedBooking.notes && (
-                <div className="bg-white/5 rounded-lg p-4">
-                  <h4 className="text-lg font-semibold text-white mb-2">Notes</h4>
-                  <p className="text-gray-300 text-sm">{selectedBooking.notes}</p>
-                </div>
-              )}
-
-              {/* Payment Information */}
-              {selectedBooking.payment_status && (
-                <div className="bg-white/5 rounded-lg p-4">
-                  <h4 className="text-lg font-semibold text-white mb-3">Payment Information</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-400">Payment Status:</span>
-                      <span className={`px-3 py-1 text-xs font-medium rounded-full border ${getPaymentStatusColor(selectedBooking.payment_status)}`}>
-                        {selectedBooking.payment_status}
-                      </span>
-                    </div>
-                    {selectedBooking.payment_date && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Payment Date:</span>
-                        <span className="text-white">{formatDate(selectedBooking.payment_date)}</span>
+              <div className="overflow-y-auto overscroll-contain flex-1 px-4 sm:px-6 pb-6 pt-4 space-y-4">
+                <span className={statusBadge(selectedBooking.booking_status)}>{selectedBooking.booking_status}</span>
+                <section className={`${admin.cardMuted} p-4`}>
+                  <h4 className="text-base font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                    <User className="w-5 h-5 text-violet-600" /> Guest
+                  </h4>
+                  <dl className="grid sm:grid-cols-2 gap-3 text-sm">
+                    <div><dt className="text-slate-500">Name</dt><dd className="text-slate-900 font-medium">{selectedBooking.guest?.name || 'N/A'}</dd></div>
+                    <div><dt className="text-slate-500">Email</dt><dd className="text-slate-900 break-all">{selectedBooking.guest?.email || 'N/A'}</dd></div>
+                    <div className="sm:col-span-2"><dt className="text-slate-500">Phone</dt><dd className="text-slate-900">{selectedBooking.guest?.phone || 'N/A'}</dd></div>
+                  </dl>
+                </section>
+                <section className={`${admin.cardMuted} p-4`}>
+                  <h4 className="text-base font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                    <Home className="w-5 h-5 text-right-stay-600" /> Property
+                  </h4>
+                  <dl className="space-y-2 text-sm">
+                    <div><dt className="text-slate-500">Property</dt><dd className="text-slate-900 font-medium">{selectedBooking.apartment?.apartment_number || 'N/A'}</dd></div>
+                    <div><dt className="text-slate-500">Address</dt><dd className="text-slate-900">{selectedBooking.apartment?.address || 'N/A'}</dd></div>
+                  </dl>
+                </section>
+                <section className={`${admin.cardMuted} p-4`}>
+                  <h4 className="text-base font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-green-600" /> Stay
+                  </h4>
+                  <dl className="grid sm:grid-cols-2 gap-3 text-sm">
+                    <div><dt className="text-slate-500">Check-in</dt><dd className="text-slate-900 font-medium">{formatDate(selectedBooking.check_in_date)}</dd></div>
+                    <div><dt className="text-slate-500">Check-out</dt><dd className="text-slate-900 font-medium">{formatDate(selectedBooking.check_out_date)}</dd></div>
+                    <div><dt className="text-slate-500">Nights</dt><dd className="text-slate-900 font-medium">{selectedBooking.nights}</dd></div>
+                    <div><dt className="text-slate-500">Channel</dt><dd className="text-slate-900 font-medium">{selectedBooking.channel?.name || 'N/A'}</dd></div>
+                    <div className="sm:col-span-2"><dt className="text-slate-500">Booking date</dt><dd className="text-slate-900">{formatDate(selectedBooking.booking_date)}</dd></div>
+                  </dl>
+                </section>
+                <section className={`${admin.cardMuted} p-4`}>
+                  <h4 className="text-base font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                    <DollarSign className="w-5 h-5 text-amber-600" /> Financial
+                  </h4>
+                  <dl className="space-y-2 text-sm">
+                    <div className="flex justify-between gap-4"><dt className="text-slate-500">Accommodation</dt><dd className="text-slate-900 font-medium">{formatCurrency(selectedBooking.accommodation_total)}</dd></div>
+                    <div className="flex justify-between gap-4"><dt className="text-slate-500">Cleaning fee</dt><dd className="text-slate-900 font-medium">{formatCurrency(selectedBooking.cleaning_fee || 0)}</dd></div>
+                    <div className="flex justify-between gap-4 border-t border-slate-200 pt-2"><dt className="text-slate-900 font-semibold">Total payout</dt><dd className="text-right-stay-600 font-bold text-lg">{formatCurrency(selectedBooking.total_payout || 0)}</dd></div>
+                  </dl>
+                </section>
+                {selectedBooking.notes && (
+                  <section className={`${admin.cardMuted} p-4`}>
+                    <h4 className="text-base font-semibold text-slate-900 mb-2">Notes</h4>
+                    <p className="text-slate-600 text-sm whitespace-pre-wrap">{selectedBooking.notes}</p>
+                  </section>
+                )}
+                {selectedBooking.payment_status && (
+                  <section className={`${admin.cardMuted} p-4`}>
+                    <h4 className="text-base font-semibold text-slate-900 mb-3">Payment</h4>
+                    <dl className="space-y-2 text-sm">
+                      <div className="flex justify-between items-center gap-4">
+                        <dt className="text-slate-500">Status</dt>
+                        <dd><span className={paymentBadge(selectedBooking.payment_status)}>{selectedBooking.payment_status}</span></dd>
                       </div>
-                    )}
-                    {selectedBooking.payment_method && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Payment Method:</span>
-                        <span className="text-white">{selectedBooking.payment_method}</span>
-                      </div>
-                    )}
-                    {selectedBooking.payment_notes && (
-                      <div>
-                        <span className="text-gray-400">Payment Notes:</span>
-                        <p className="text-white mt-1">{selectedBooking.payment_notes}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
+                      {selectedBooking.payment_date && <div className="flex justify-between gap-4"><dt className="text-slate-500">Date</dt><dd className="text-slate-900">{formatDate(selectedBooking.payment_date)}</dd></div>}
+                      {selectedBooking.payment_method && <div className="flex justify-between gap-4"><dt className="text-slate-500">Method</dt><dd className="text-slate-900">{selectedBooking.payment_method}</dd></div>}
+                      {selectedBooking.payment_notes && <div><dt className="text-slate-500">Notes</dt><dd className="text-slate-700 mt-1 whitespace-pre-wrap">{selectedBooking.payment_notes}</dd></div>}
+                    </dl>
+                  </section>
+                )}
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Edit Modal */}
       {showEditModal && selectedBooking && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-gray-900 rounded-2xl border border-white/10 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-gray-900 border-b border-white/10 p-6 flex justify-between items-center">
-              <div>
-                <h3 className="text-xl font-bold text-white">Update Booking Status</h3>
-                <p className="text-sm text-gray-400">{selectedBooking.booking_reference}</p>
-              </div>
-              <button
-                onClick={() => setShowEditModal(false)}
-                className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            <form onSubmit={handleUpdateBooking} className="p-6 space-y-4">
-              {/* Booking Status */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Booking Status
-                </label>
-                <select
-                  value={editFormData.booking_status}
-                  onChange={(e) => setEditFormData(prev => ({ ...prev, booking_status: e.target.value }))}
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors"
-                >
-                  <option value="pending">Pending</option>
-                  <option value="confirmed">Confirmed</option>
-                  <option value="completed">Completed</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
-              </div>
-
-              {/* Payment Status */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Payment Status *
-                </label>
-                <select
-                  value={editFormData.payment_status}
-                  onChange={(e) => setEditFormData(prev => ({ ...prev, payment_status: e.target.value }))}
-                  required
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors"
-                >
-                  <option value="pending">Pending</option>
-                  <option value="partial">Partial</option>
-                  <option value="paid">Paid</option>
-                  <option value="refunded">Refunded</option>
-                </select>
-                <p className="text-xs text-gray-500 mt-1">
-                  Note: Booking can only be confirmed if payment status is &quot;Paid&quot;
-                </p>
-              </div>
-
-              {/* Payment Date */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Payment Date
-                </label>
-                <input
-                  type="date"
-                  value={editFormData.payment_date}
-                  onChange={(e) => setEditFormData(prev => ({ ...prev, payment_date: e.target.value }))}
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors"
-                />
-              </div>
-
-              {/* Payment Method */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Payment Method
-                </label>
-                <select
-                  value={editFormData.payment_method}
-                  onChange={(e) => setEditFormData(prev => ({ ...prev, payment_method: e.target.value }))}
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors"
-                >
-                  <option value="">Select method...</option>
-                  <option value="Bank Transfer">Bank Transfer</option>
-                  <option value="Credit Card">Credit Card</option>
-                  <option value="Debit Card">Debit Card</option>
-                  <option value="Cash">Cash</option>
-                  <option value="PayPal">PayPal</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-
-              {/* Payment Notes */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Payment Notes
-                </label>
-                <textarea
-                  value={editFormData.payment_notes}
-                  onChange={(e) => setEditFormData(prev => ({ ...prev, payment_notes: e.target.value }))}
-                  rows={3}
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors resize-none"
-                  placeholder="Add any payment-related notes..."
-                />
-              </div>
-
-              {/* Warning if trying to confirm without payment */}
-              {editFormData.booking_status === 'confirmed' && editFormData.payment_status !== 'paid' && (
-                <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 flex items-start space-x-2">
-                  <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-red-400 text-sm font-medium">Cannot confirm without payment</p>
-                    <p className="text-red-300 text-xs mt-1">
-                      Please set payment status to &quot;Paid&quot; before confirming the booking.
-                    </p>
-                  </div>
+        <div className={admin.modalOverlayScroll} role="dialog" aria-modal="true">
+          <div className="min-h-full flex items-end sm:items-start justify-center py-4 sm:py-8">
+            <div className={`${admin.modalPanel} w-full max-w-2xl flex flex-col max-h-[min(90vh,calc(100dvh-2rem))] sm:max-h-[90vh]`}>
+              <div className={`${admin.modalHeader} shrink-0 px-4 sm:px-6 py-4`}>
+                <div className="min-w-0 pr-3">
+                  <h3 className="text-lg sm:text-xl font-bold text-slate-900">Update booking</h3>
+                  <p className="text-sm text-slate-500 font-mono truncate">{selectedBooking.booking_reference}</p>
                 </div>
-              )}
-
-              {/* Submit Buttons */}
-              <div className="flex justify-end space-x-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowEditModal(false)}
-                  className="px-6 py-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex items-center space-x-2 px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium rounded-lg transition-all"
-                >
-                  <CheckCircle className="w-5 h-5" />
-                  <span>Update Booking</span>
+                <button type="button" onClick={() => setShowEditModal(false)} className={`${admin.btnIcon} text-slate-500 hover:bg-slate-100`} aria-label="Close">
+                  <X className="w-5 h-5" />
                 </button>
               </div>
-            </form>
+              <form onSubmit={handleUpdateBooking} className="overflow-y-auto overscroll-contain flex-1 px-4 sm:px-6 pb-6 pt-4 space-y-4">
+                <div>
+                  <label className={admin.label}>Booking status</label>
+                  <select value={editFormData.booking_status} onChange={(e) => setEditFormData((prev) => ({ ...prev, booking_status: e.target.value }))} className={admin.select}>
+                    <option value="pending">Pending</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </div>
+                <div>
+                  <label className={admin.label}>Payment status <span className="text-red-500">*</span></label>
+                  <select value={editFormData.payment_status} onChange={(e) => setEditFormData((prev) => ({ ...prev, payment_status: e.target.value }))} required className={admin.select}>
+                    <option value="pending">Pending</option>
+                    <option value="partial">Partial</option>
+                    <option value="paid">Paid</option>
+                    <option value="refunded">Refunded</option>
+                  </select>
+                  <p className={`${admin.hint} mt-1.5`}>Bookings can only be confirmed when payment status is Paid.</p>
+                </div>
+                <div>
+                  <label className={admin.label}>Payment date</label>
+                  <input type="date" value={editFormData.payment_date} onChange={(e) => setEditFormData((prev) => ({ ...prev, payment_date: e.target.value }))} className={admin.input} />
+                </div>
+                <div>
+                  <label className={admin.label}>Payment method</label>
+                  <select value={editFormData.payment_method} onChange={(e) => setEditFormData((prev) => ({ ...prev, payment_method: e.target.value }))} className={admin.select}>
+                    <option value="">Select method…</option>
+                    <option value="Bank Transfer">Bank Transfer</option>
+                    <option value="Credit Card">Credit Card</option>
+                    <option value="Debit Card">Debit Card</option>
+                    <option value="Cash">Cash</option>
+                    <option value="PayPal">PayPal</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className={admin.label}>Payment notes</label>
+                  <textarea value={editFormData.payment_notes} onChange={(e) => setEditFormData((prev) => ({ ...prev, payment_notes: e.target.value }))} rows={3} className={admin.textarea} placeholder="Payment-related notes…" />
+                </div>
+                {editFormData.booking_status === 'confirmed' && editFormData.payment_status !== 'paid' && (
+                  <div className={`${admin.alertError} items-start`}>
+                    <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium">Cannot confirm without payment</p>
+                      <p className="text-sm opacity-90 mt-1">Set payment status to Paid before confirming.</p>
+                    </div>
+                  </div>
+                )}
+                <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2">
+                  <button type="button" onClick={() => setShowEditModal(false)} className={admin.btnGhost}>Cancel</button>
+                  <button type="submit" className={admin.btnPrimary}>
+                    <CheckCircle className="w-5 h-5" />
+                    Update booking
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}
     </div>
   );
 }
-

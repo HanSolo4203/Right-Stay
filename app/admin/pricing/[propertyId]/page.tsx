@@ -217,8 +217,8 @@ export default function PricingCalendarPage() {
 
   if (!authChecked || loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-right-stay-500 animate-spin" />
       </div>
     );
   }
@@ -226,13 +226,13 @@ export default function PricingCalendarPage() {
   const currencyPrefix = property?.currency === 'ZAR' ? 'R' : property?.currency || 'R';
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-slate-50 text-white">
       {/* Top bar */}
-      <header className="sticky top-0 z-40 bg-gray-950/95 backdrop-blur border-b border-white/10 px-4 py-3">
+      <header className="sticky top-0 z-40 bg-gray-950/95 backdrop-blur border-b border-slate-200 px-4 py-3">
         <div className="flex items-center justify-between">
           <button
             onClick={() => router.push('/admin')}
-            className="flex items-center gap-2 text-gray-400 hover:text-white"
+            className="flex items-center gap-2 text-slate-500 hover:text-slate-900"
           >
             <ArrowLeft className="w-5 h-5" />
             Back to Admin
@@ -244,14 +244,14 @@ export default function PricingCalendarPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 max-w-[1800px] mx-auto">
         {/* Left Panel */}
         <div className="lg:col-span-3 space-y-4">
-          <div className="bg-white/5 rounded-xl border border-white/10 p-4">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
             <div className="flex items-center justify-between mb-3">
               <span className="font-medium">
                 {property?.name || 'Loading...'}
               </span>
-              <ChevronDown className="w-4 h-4 text-gray-400" />
+              <ChevronDown className="w-4 h-4 text-slate-500" />
             </div>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-slate-500">
               {property?.bedrooms ?? '—'} Bedroom · {property?.type || '—'} · Uplisting (ID: {propertyId})
             </p>
 
@@ -259,7 +259,7 @@ export default function PricingCalendarPage() {
             <select
               value={propertyId}
               onChange={(e) => router.push(`/admin/pricing/${e.target.value}`)}
-              className="mt-3 w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+              className="mt-3 w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
             >
               {properties.map((p) => (
                 <option key={p.id} value={p.uplisting_id}>
@@ -270,44 +270,44 @@ export default function PricingCalendarPage() {
           </div>
 
           {/* Configure Prices */}
-          <div className="bg-white/5 rounded-xl border border-white/10 p-4">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
             <h3 className="font-semibold mb-4 flex items-center gap-2">
               Configure Prices
-              <Info className="w-4 h-4 text-gray-400" />
+              <Info className="w-4 h-4 text-slate-500" />
             </h3>
             <div className="space-y-3">
               <div>
-                <label className="block text-xs text-gray-400 mb-1">Minimum</label>
+                <label className="block text-xs text-slate-500 mb-1">Minimum</label>
                 <input
                   type="number"
                   value={minPrice}
                   onChange={(e) => setMinPrice(e.target.value)}
                   placeholder="988"
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-400 mb-1">Base</label>
+                <label className="block text-xs text-slate-500 mb-1">Base</label>
                 <input
                   type="number"
                   value={basePrice}
                   onChange={(e) => setBasePrice(e.target.value)}
                   placeholder="1288"
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-400 mb-1">Maximum</label>
+                <label className="block text-xs text-slate-500 mb-1">Maximum</label>
                 <input
                   type="number"
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(e.target.value)}
                   placeholder="2488"
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
                 />
               </div>
             </div>
-            <p className="text-xs text-gray-500 mt-2">All prices in {property?.currency || 'ZAR'}</p>
+            <p className="text-xs text-slate-500 mt-2">All prices in {property?.currency || 'ZAR'}</p>
             <button
               onClick={() => void handleSavePricing()}
               disabled={savingPricing}
@@ -317,27 +317,27 @@ export default function PricingCalendarPage() {
               Save & Refresh
             </button>
             {calendarData?.pricing?.updatedAt && (
-              <p className="text-xs text-gray-500 mt-2">
+              <p className="text-xs text-slate-500 mt-2">
                 Last refreshed {new Date(calendarData.pricing.updatedAt).toLocaleString()}
               </p>
             )}
           </div>
 
           {/* Applied Customizations */}
-          <div className="bg-white/5 rounded-xl border border-white/10 overflow-hidden">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <button
               onClick={() => setCustomOverridesExpanded(!customOverridesExpanded)}
-              className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-white/5"
+              className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-slate-50"
             >
               <span className="font-medium">
                 ▸ Applied Customizations
               </span>
-              <span className="text-sm text-gray-400">Edit</span>
+              <span className="text-sm text-slate-500">Edit</span>
             </button>
             {customOverridesExpanded && (
-              <div className="border-t border-white/10 p-4 max-h-48 overflow-y-auto">
+              <div className="border-t border-slate-200 p-4 max-h-48 overflow-y-auto">
                 {customDates.length === 0 ? (
-                  <p className="text-sm text-gray-400">No custom prices set</p>
+                  <p className="text-sm text-slate-500">No custom prices set</p>
                 ) : (
                   <ul className="space-y-2">
                     {customDates.map(({ date, price }) => (
@@ -357,12 +357,12 @@ export default function PricingCalendarPage() {
         </div>
 
         {/* Center Calendar */}
-        <div className="lg:col-span-6 bg-white/5 rounded-xl border border-white/10 p-4">
+        <div className="lg:col-span-6 bg-white rounded-xl border border-slate-200 shadow-sm p-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))}
-                className="p-2 rounded-lg hover:bg-white/10"
+                className="p-2 rounded-lg hover:bg-slate-50"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
@@ -371,14 +371,14 @@ export default function PricingCalendarPage() {
               </h2>
               <button
                 onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))}
-                className="p-2 rounded-lg hover:bg-white/10"
+                className="p-2 rounded-lg hover:bg-slate-50"
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
             </div>
             <button
               onClick={() => setCurrentMonth(new Date())}
-              className="text-sm text-blue-400 hover:text-blue-300"
+              className="text-sm text-right-stay-600 hover:text-blue-300"
             >
               Today
             </button>
@@ -386,7 +386,7 @@ export default function PricingCalendarPage() {
 
           <div className="grid grid-cols-7 gap-1 mb-2">
             {WEEKDAYS.map((d) => (
-              <div key={d} className="text-center text-xs font-medium text-gray-400 py-1">
+              <div key={d} className="text-center text-xs font-medium text-slate-500 py-1">
                 {d}
               </div>
             ))}
@@ -419,7 +419,7 @@ export default function PricingCalendarPage() {
 
         {/* Right Panel */}
         <div className="lg:col-span-3 space-y-4">
-          <div className="bg-white/5 rounded-xl border border-white/10 p-4">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
             <div className="flex items-center justify-between">
               <span className="font-medium">Enable Price Sync</span>
               <button
@@ -436,20 +436,20 @@ export default function PricingCalendarPage() {
               </button>
             </div>
             {calendarData?.pricing?.updatedAt && (
-              <p className="text-xs text-gray-500 mt-2">Last synced {new Date(calendarData.pricing.updatedAt).toLocaleString()}</p>
+              <p className="text-xs text-slate-500 mt-2">Last synced {new Date(calendarData.pricing.updatedAt).toLocaleString()}</p>
             )}
           </div>
 
-          <div className="bg-white/5 rounded-xl border border-white/10 overflow-hidden">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="flex items-center justify-between px-4 py-3">
               <span className="font-medium flex items-center gap-2">
                 <Eye className="w-4 h-4" />
                 Date Overrides
               </span>
-              <Settings className="w-4 h-4 text-gray-400" />
+              <Settings className="w-4 h-4 text-slate-500" />
             </div>
-            <div className="border-t border-white/10 p-4">
-              <p className="text-sm text-gray-400">{customDates.length} custom price(s) set</p>
+            <div className="border-t border-slate-200 p-4">
+              <p className="text-sm text-slate-500">{customDates.length} custom price(s) set</p>
             </div>
           </div>
         </div>
@@ -458,14 +458,14 @@ export default function PricingCalendarPage() {
       {/* Edit modal */}
       {editModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
-          <div className="bg-gray-900 rounded-xl border border-white/10 p-6 w-full max-w-sm">
+          <div className="bg-white rounded-xl border border-slate-200 p-6 w-full max-w-sm">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-semibold">
                 Set price for {new Date(editModal.date).toLocaleDateString()}
               </h3>
               <button
                 onClick={() => setEditModal(null)}
-                className="p-1 text-gray-400 hover:text-white"
+                className="p-1 text-slate-500 hover:text-slate-900"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -474,21 +474,21 @@ export default function PricingCalendarPage() {
               type="number"
               value={editPrice}
               onChange={(e) => setEditPrice(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 mb-4 focus:outline-none focus:border-blue-500"
+              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 mb-4 focus:outline-none focus:border-blue-500"
               placeholder="Price"
             />
             <div className="flex gap-2">
               <button
                 onClick={handleSaveDailyPrice}
                 disabled={savingDaily}
-                className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium disabled:opacity-50"
+                className="flex-1 py-2 bg-right-stay-500 hover:bg-right-stay-600 rounded-lg font-medium disabled:opacity-50"
               >
                 {savingDaily ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Save'}
               </button>
               <button
                 onClick={handleClearCustom}
                 disabled={savingDaily || !calendarData?.dailyPrices[editModal.date]}
-                className="py-2 px-4 border border-white/20 rounded-lg hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="py-2 px-4 border border-white/20 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Clear custom
               </button>

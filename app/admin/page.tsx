@@ -1,33 +1,98 @@
 'use client';
 
-import { useState, useEffect, useRef, Suspense, type ComponentType } from 'react';
+import { useState, useEffect, useRef, Suspense, type ComponentType, type ReactElement } from 'react';
 import dynamic from 'next/dynamic';
-import { Settings, Building2, Map, Menu, X, Calendar, Link, LogOut, Loader2, User, MessageSquare, DollarSign } from 'lucide-react';
+import {
+  Settings,
+  Building2,
+  Map,
+  Menu,
+  X,
+  Calendar,
+  Link,
+  LogOut,
+  Loader2,
+  User,
+  MessageSquare,
+  DollarSign,
+  PanelLeft,
+} from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useRouter, useSearchParams } from 'next/navigation';
-import MatrixBackground from '@/components/admin/MatrixBackground';
+import { cn } from '@/lib/utils';
+import {
+  SiteSettingsSkeleton,
+  PropertySettingsSkeleton,
+  PricingDashboardSkeleton,
+  TourPackageSettingsSkeleton,
+  BookingManagementSkeleton,
+  PropertyMappingSkeleton,
+} from '@/components/admin/AdminTabSkeletons';
 
-function TabLoader() {
-  return (
-    <div className="flex items-center justify-center py-24">
-      <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
-    </div>
-  );
-}
+const dynamicTab = (
+  loader: () => Promise<{ default: ComponentType }>,
+  loading: () => ReactElement
+) => dynamic(loader, { loading, ssr: false });
 
-const dynamicTab = (loader: () => Promise<{ default: ComponentType }>) =>
-  dynamic(loader, { loading: TabLoader });
-
-const SiteSettings = dynamicTab(() => import('@/components/admin/SiteSettings'));
-const PropertySettings = dynamicTab(() => import('@/components/admin/PropertySettings'));
-const PricingDashboard = dynamicTab(() => import('@/components/admin/PricingDashboard'));
-const TourPackageSettings = dynamicTab(() => import('@/components/admin/TourPackageSettings'));
-const BookingManagement = dynamicTab(() => import('@/components/admin/BookingManagement'));
-const PropertyMapping = dynamicTab(() => import('@/components/admin/PropertyMapping'));
+const SiteSettings = dynamicTab(
+  () => import('@/components/admin/SiteSettings'),
+  SiteSettingsSkeleton
+);
+const PropertySettings = dynamicTab(
+  () => import('@/components/admin/PropertySettings'),
+  PropertySettingsSkeleton
+);
+const PricingDashboard = dynamicTab(
+  () => import('@/components/admin/PricingDashboard'),
+  PricingDashboardSkeleton
+);
+const TourPackageSettings = dynamicTab(
+  () => import('@/components/admin/TourPackageSettings'),
+  TourPackageSettingsSkeleton
+);
+const BookingManagement = dynamicTab(
+  () => import('@/components/admin/BookingManagement'),
+  BookingManagementSkeleton
+);
+const PropertyMapping = dynamicTab(
+  () => import('@/components/admin/PropertyMapping'),
+  PropertyMappingSkeleton
+);
 
 type TabType = 'site' | 'properties' | 'pricing' | 'tours' | 'bookings' | 'mapping' | 'reviews';
 
 const VALID_TABS: TabType[] = ['site', 'properties', 'pricing', 'tours', 'bookings', 'mapping', 'reviews'];
+
+const TAB_META: Record<TabType, { title: string; description: string }> = {
+  site: {
+    title: 'Site Settings',
+    description: 'Manage your website’s global configuration',
+  },
+  properties: {
+    title: 'Properties',
+    description: 'Manage listings, photos, and property details',
+  },
+  pricing: {
+    title: 'Dynamic Pricing',
+    description: 'Configure rates and pricing rules per property',
+  },
+  tours: {
+    title: 'Tour Packages',
+    description: 'Create and edit tour offerings',
+  },
+  bookings: {
+    title: 'Bookings',
+    description: 'View and manage all property bookings',
+  },
+  mapping: {
+    title: 'Property Mapping',
+    description: 'Link Uplisting properties to apartments',
+  },
+  reviews: {
+    title: 'Import Reviews',
+    description: 'Bulk import guest reviews from a markdown file',
+  },
+};
 
 function parseTab(value: string | null): TabType {
   if (value && VALID_TABS.includes(value as TabType)) {
@@ -40,7 +105,7 @@ function AdminDashboard() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<TabType>(() => parseTab(searchParams.get('tab')));
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const loadingRef = useRef(true);
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -57,21 +122,21 @@ function AdminDashboard() {
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);
     router.replace(`/admin?tab=${tab}`, { scroll: false });
+    setMobileNavOpen(false);
   };
 
-  // Check authentication
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
-        
+
         if (error) {
           console.error('Auth error:', error);
           finishLoading();
           router.push('/admin/login');
           return;
         }
-        
+
         if (!session) {
           router.push('/admin/login');
         } else {
@@ -85,7 +150,6 @@ function AdminDashboard() {
       }
     };
 
-    // Set a timeout to prevent infinite loading
     const timeout = setTimeout(() => {
       if (loadingRef.current) {
         console.warn('Auth check timeout, redirecting to login');
@@ -96,7 +160,6 @@ function AdminDashboard() {
 
     checkAuth();
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT' || !session) {
         router.push('/admin/login');
@@ -112,6 +175,17 @@ function AdminDashboard() {
     };
   }, [router]);
 
+  useEffect(() => {
+    if (mobileNavOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileNavOpen]);
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     router.push('/admin/login');
@@ -119,174 +193,237 @@ function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center relative">
-        <MatrixBackground />
-        <Loader2 className="w-8 h-8 text-blue-500 animate-spin relative z-10" />
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <Loader2 className="w-8 h-8 text-right-stay-500 animate-spin" />
       </div>
     );
   }
 
   const tabs = [
-    { id: 'site' as TabType, name: 'Site Settings', icon: Settings },
-    { id: 'properties' as TabType, name: 'Properties', icon: Building2 },
-    { id: 'pricing' as TabType, name: 'Dynamic Pricing', icon: DollarSign },
-    { id: 'tours' as TabType, name: 'Tour Packages', icon: Map },
-    { id: 'bookings' as TabType, name: 'Bookings', icon: Calendar },
-    { id: 'mapping' as TabType, name: 'Property Mapping', icon: Link },
-    { id: 'reviews' as TabType, name: 'Import Reviews', icon: MessageSquare },
+    { id: 'site' as TabType, name: 'Site Settings', shortName: 'Site', icon: Settings },
+    { id: 'properties' as TabType, name: 'Properties', shortName: 'Properties', icon: Building2 },
+    { id: 'pricing' as TabType, name: 'Dynamic Pricing', shortName: 'Pricing', icon: DollarSign },
+    { id: 'tours' as TabType, name: 'Tour Packages', shortName: 'Tours', icon: Map },
+    { id: 'bookings' as TabType, name: 'Bookings', shortName: 'Bookings', icon: Calendar },
+    { id: 'mapping' as TabType, name: 'Property Mapping', shortName: 'Mapping', icon: Link },
+    { id: 'reviews' as TabType, name: 'Import Reviews', shortName: 'Reviews', icon: MessageSquare },
   ];
 
+  const meta = TAB_META[activeTab];
+
+  const NavButton = ({
+    tab,
+    compact = false,
+  }: {
+    tab: (typeof tabs)[0];
+    compact?: boolean;
+  }) => {
+    const Icon = tab.icon;
+    const isActive = activeTab === tab.id;
+    return (
+      <button
+        type="button"
+        onClick={() => handleTabChange(tab.id)}
+        className={cn(
+          'flex items-center gap-3 w-full rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+          isActive
+            ? 'bg-right-stay-50 text-right-stay-700 border border-right-stay-200'
+            : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent',
+          compact && 'flex-col gap-1 px-2 py-2 text-[10px] leading-tight min-w-0 flex-1'
+        )}
+      >
+        <Icon className={cn('shrink-0', compact ? 'w-5 h-5' : 'w-4 h-4')} strokeWidth={2} />
+        <span className={cn(compact ? 'truncate w-full text-center' : 'truncate')}>
+          {compact ? tab.shortName : tab.name}
+        </span>
+      </button>
+    );
+  };
+
   return (
-    <div className="min-h-screen bg-black relative">
-      <MatrixBackground />
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-gray-950/95 backdrop-blur-lg border-b border-gray-800/50 shadow-lg relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            {/* Left: Branding */}
-            <div className="flex items-center space-x-4 min-w-0 flex-shrink-0">
-              <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20">
-                <Settings className="w-6 h-6 text-white" strokeWidth={2} />
-              </div>
-              <div className="min-w-0">
-                <h1 className="text-lg font-bold text-white tracking-tight truncate">Admin Dashboard</h1>
-                <p className="text-xs text-gray-400 font-medium">Right Stay Africa</p>
-              </div>
+    <div className="min-h-screen bg-slate-50">
+      {/* Desktop sidebar */}
+      <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:flex lg:w-64 lg:flex-col border-r border-slate-200 bg-white">
+        <div className="flex h-16 items-center gap-3 border-b border-slate-200 px-5">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-right-stay-500 text-white font-bold text-sm">
+            RS
+          </div>
+          <div className="min-w-0">
+            <p className="font-semibold text-slate-900 truncate">Right Stay Africa</p>
+            <p className="text-xs text-slate-500">Admin</p>
+          </div>
+        </div>
+
+        <nav className="flex-1 overflow-y-auto p-3 space-y-1">
+          {tabs.map((tab) => (
+            <NavButton key={tab.id} tab={tab} />
+          ))}
+        </nav>
+
+        <div className="border-t border-slate-200 p-4 space-y-3">
+          <div className="flex items-center gap-3 rounded-lg bg-slate-50 px-3 py-2.5 border border-slate-100">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-right-stay-100 text-right-stay-700">
+              <User className="w-4 h-4" strokeWidth={2.5} />
             </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-slate-900 truncate">{userEmail}</p>
+              <p className="text-xs text-slate-500">Administrator</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-medium text-red-700 hover:bg-red-100 transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+            Sign out
+          </button>
+        </div>
+      </aside>
 
-            {/* Center: Navigation - Desktop */}
-            <nav className="hidden lg:flex items-center space-x-1 mx-8 flex-1 justify-center">
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => handleTabChange(tab.id)}
-                    className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg transition-all duration-200 font-medium text-sm ${
-                      activeTab === tab.id
-                        ? 'bg-white/10 text-white shadow-md shadow-white/5'
-                        : 'text-gray-400 hover:text-white hover:bg-white/5'
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" strokeWidth={2} />
-                    <span>{tab.name}</span>
-                  </button>
-                );
-              })}
-            </nav>
-
-            {/* Right: User Profile & Actions - Desktop */}
-            <div className="hidden lg:flex items-center space-x-4 flex-shrink-0">
-              {/* User Profile */}
-              <div className="flex items-center space-x-3 px-4 py-2 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-all cursor-default">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                  <User className="w-4 h-4 text-white" strokeWidth={2.5} />
+      {/* Mobile slide-out */}
+      {mobileNavOpen && (
+        <>
+          <button
+            type="button"
+            aria-label="Close menu"
+            className="fixed inset-0 z-50 bg-slate-900/40 lg:hidden"
+            onClick={() => setMobileNavOpen(false)}
+          />
+          <aside className="fixed inset-y-0 left-0 z-50 flex w-[min(100%,20rem)] flex-col bg-white shadow-xl lg:hidden">
+            <div className="flex h-16 items-center justify-between border-b border-slate-200 px-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-right-stay-500 text-white font-bold text-sm">
+                  RS
                 </div>
-                <div className="text-left min-w-0">
-                  <p className="text-sm font-semibold text-white truncate max-w-[200px]">{userEmail}</p>
-                  <p className="text-xs text-gray-400 font-medium">Administrator</p>
+                <div>
+                  <p className="font-semibold text-slate-900">Right Stay Africa</p>
+                  <p className="text-xs text-slate-500">Admin</p>
                 </div>
               </div>
-
-              {/* Sign Out Button */}
               <button
-                onClick={handleSignOut}
-                className="flex items-center space-x-2 px-4 py-2.5 bg-red-600/20 hover:bg-red-600/30 text-red-400 hover:text-red-300 rounded-lg border border-red-500/30 transition-all duration-200 font-medium text-sm"
+                type="button"
+                onClick={() => setMobileNavOpen(false)}
+                className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"
+                aria-label="Close navigation"
               >
-                <LogOut className="w-4 h-4" strokeWidth={2} />
-                <span>Sign Out</span>
+                <X className="w-5 h-5" />
               </button>
             </div>
-            
-            {/* Mobile menu button */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2.5 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all"
-              aria-label="Toggle menu"
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6" strokeWidth={2} /> : <Menu className="w-6 h-6" strokeWidth={2} />}
-            </button>
-          </div>
-
-          {/* Mobile navigation */}
-          {mobileMenuOpen && (
-            <nav className="lg:hidden py-4 border-t border-gray-800/50">
-              {/* Mobile Navigation Tabs */}
-              <div className="space-y-1 mb-4">
-                {tabs.map((tab) => {
-                  const Icon = tab.icon;
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => {
-                        handleTabChange(tab.id);
-                        setMobileMenuOpen(false);
-                      }}
-                      className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-all font-medium ${
-                        activeTab === tab.id
-                          ? 'bg-white/10 text-white'
-                          : 'text-gray-400 hover:text-white hover:bg-white/5'
-                      }`}
-                    >
-                      <Icon className="w-5 h-5" strokeWidth={2} />
-                      <span>{tab.name}</span>
-                    </button>
-                  );
-                })}
-              </div>
-              
-              {/* Mobile user info and sign out */}
-              <div className="pt-4 border-t border-gray-800/50">
-                <div className="flex items-center space-x-3 px-4 py-3 mb-3 bg-white/5 rounded-lg">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
-                    <User className="w-5 h-5 text-white" strokeWidth={2.5} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-white truncate">{userEmail}</p>
-                    <p className="text-xs text-gray-400 font-medium">Administrator</p>
-                  </div>
-                </div>
-                <button
-                  onClick={handleSignOut}
-                  className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-red-600/20 hover:bg-red-600/30 text-red-400 hover:text-red-300 rounded-lg border border-red-500/30 transition-all font-medium"
-                >
-                  <LogOut className="w-5 h-5" strokeWidth={2} />
-                  <span>Sign Out</span>
-                </button>
-              </div>
+            <nav className="flex-1 overflow-y-auto p-3 space-y-1">
+              {tabs.map((tab) => (
+                <NavButton key={tab.id} tab={tab} />
+              ))}
             </nav>
-          )}
-        </div>
-      </header>
+            <div className="border-t border-slate-200 p-4 space-y-3">
+              <div className="flex items-center gap-3 rounded-lg bg-slate-50 px-3 py-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-right-stay-100 text-right-stay-700">
+                  <User className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium truncate">{userEmail}</p>
+                  <p className="text-xs text-slate-500">Administrator</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="flex w-full items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-50 py-2.5 text-sm font-medium text-red-700"
+              >
+                <LogOut className="w-4 h-4" />
+                Sign out
+              </button>
+            </div>
+          </aside>
+        </>
+      )}
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
-        <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden">
-          {activeTab === 'site' && <SiteSettings />}
-          {activeTab === 'properties' && <PropertySettings />}
-          {activeTab === 'pricing' && <PricingDashboard />}
-          {activeTab === 'tours' && <TourPackageSettings />}
-          {activeTab === 'bookings' && <BookingManagement />}
-          {activeTab === 'mapping' && <PropertyMapping />}
-          {activeTab === 'reviews' && (
-            <div className="p-6">
-              <div className="bg-white/5 rounded-lg border border-white/10 p-8 text-center">
-                <MessageSquare className="w-12 h-12 mx-auto mb-4 text-blue-400" />
-                <h2 className="text-xl font-semibold mb-2">Import Reviews</h2>
-                <p className="text-gray-400 mb-6">
-                  Bulk import guest reviews from a markdown file
-                </p>
-                <button
-                  onClick={() => router.push('/admin/reviews/import')}
-                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors font-medium"
-                >
-                  Go to Import Page
-                </button>
+      <div className="lg:pl-64 flex flex-col min-h-screen pb-[4.5rem] lg:pb-0">
+        {/* Sticky header */}
+        <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-md shadow-sm">
+          <div className="flex h-16 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center gap-3 min-w-0">
+              <button
+                type="button"
+                onClick={() => setMobileNavOpen(true)}
+                className="lg:hidden rounded-lg p-2 text-slate-600 hover:bg-slate-100"
+                aria-label="Open menu"
+              >
+                <Menu className="w-6 h-6" />
+              </button>
+              <div className="min-w-0">
+                <h1 className="text-lg font-semibold text-slate-900 truncate">{meta.title}</h1>
+                <p className="text-xs text-slate-500 hidden sm:block truncate">{meta.description}</p>
               </div>
             </div>
-          )}
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="hidden sm:flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 lg:hidden"
+            >
+              <LogOut className="w-4 h-4" />
+              Sign out
+            </button>
+          </div>
+        </header>
+
+        {/* Main */}
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            {activeTab === 'site' && <SiteSettings />}
+            {activeTab === 'properties' && <PropertySettings />}
+            {activeTab === 'pricing' && <PricingDashboard />}
+            {activeTab === 'tours' && <TourPackageSettings />}
+            {activeTab === 'bookings' && <BookingManagement />}
+            {activeTab === 'mapping' && <PropertyMapping />}
+            {activeTab === 'reviews' && (
+              <div className="p-6 lg:p-8">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-8 text-center max-w-lg mx-auto">
+                  <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-right-stay-100">
+                    <MessageSquare className="w-7 h-7 text-right-stay-600" />
+                  </div>
+                  <h2 className="text-xl font-semibold text-slate-900 mb-2">Import Reviews</h2>
+                  <p className="text-slate-500 mb-6 text-sm">
+                    Bulk import guest reviews from a markdown file
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => router.push('/admin/reviews/import')}
+                    className="inline-flex items-center justify-center px-6 py-3 bg-right-stay-500 hover:bg-right-stay-600 text-white font-medium rounded-lg transition-colors"
+                  >
+                    Go to Import Page
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </main>
+      </div>
+
+      {/* Mobile bottom navigation */}
+      <nav
+        className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur-md safe-area-pb"
+        aria-label="Primary"
+      >
+        <div className="flex items-stretch justify-between gap-0.5 px-1 py-1.5 max-w-lg mx-auto sm:max-w-none">
+          {tabs.slice(0, 5).map((tab) => (
+            <NavButton key={tab.id} tab={tab} compact />
+          ))}
+          <button
+            type="button"
+            onClick={() => setMobileNavOpen(true)}
+            className={cn(
+              'flex flex-col items-center justify-center gap-1 flex-1 min-w-0 rounded-lg px-2 py-2 text-[10px] font-medium transition-colors',
+              ['mapping', 'reviews'].includes(activeTab)
+                ? 'text-right-stay-700 bg-right-stay-50'
+                : 'text-slate-600 hover:bg-slate-100'
+            )}
+          >
+            <PanelLeft className="w-5 h-5 shrink-0" />
+            <span className="truncate w-full text-center">More</span>
+          </button>
         </div>
-      </main>
+      </nav>
     </div>
   );
 }
@@ -295,9 +432,8 @@ export default function AdminDashboardPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-black flex items-center justify-center relative">
-          <MatrixBackground />
-          <Loader2 className="w-8 h-8 text-blue-500 animate-spin relative z-10" />
+        <div className="min-h-screen flex items-center justify-center bg-slate-50">
+          <Loader2 className="w-8 h-8 text-right-stay-500 animate-spin" />
         </div>
       }
     >

@@ -143,7 +143,7 @@ export default function TourPackageSettings() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+        <Loader2 className="w-8 h-8 text-right-stay-500 animate-spin" />
       </div>
     );
   }
@@ -152,12 +152,12 @@ export default function TourPackageSettings() {
     <div className="p-6 lg:p-8">
       <div className="flex justify-between items-start mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-white mb-2">Tour Package Management</h2>
-          <p className="text-gray-400">Manage your tour packages and experiences</p>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Tour Package Management</h2>
+          <p className="text-slate-500">Manage your tour packages and experiences</p>
         </div>
         <button
           onClick={() => handleOpenModal()}
-          className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium rounded-lg transition-all"
+          className="flex items-center space-x-2 px-4 py-2 bg-right-stay-500 hover:bg-right-stay-600 text-slate-900 font-medium rounded-lg transition-all"
         >
           <Plus className="w-5 h-5" />
           <span>Add Tour Package</span>
@@ -169,11 +169,11 @@ export default function TourPackageSettings() {
           message.type === 'success' ? 'bg-green-500/10 border border-green-500/20' : 'bg-red-500/10 border border-red-500/20'
         }`}>
           {message.type === 'success' ? (
-            <CheckCircle className="w-5 h-5 text-green-500" />
+            <CheckCircle className="w-5 h-5 text-green-600" />
           ) : (
-            <AlertCircle className="w-5 h-5 text-red-500" />
+            <AlertCircle className="w-5 h-5 text-red-600" />
           )}
-          <span className={message.type === 'success' ? 'text-green-400' : 'text-red-400'}>
+          <span className={message.type === 'success' ? 'text-green-700' : 'text-red-700'}>
             {message.text}
           </span>
         </div>
@@ -184,50 +184,50 @@ export default function TourPackageSettings() {
         {tours.map((tour) => (
           <div
             key={tour.id}
-            className="bg-white/5 rounded-lg p-6 border border-white/10 hover:bg-white/10 transition-all"
+            className="bg-white rounded-lg p-6 border border-slate-200 shadow-sm hover:border-slate-300 hover:shadow-md transition-all"
           >
             <div className="flex justify-between items-start">
               <div className="flex-1">
                 <div className="flex items-center space-x-3 mb-3">
-                  <h3 className="text-xl font-semibold text-white">
+                  <h3 className="text-xl font-semibold text-slate-900">
                     {tour.name}
                   </h3>
                   <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                     tour.is_active 
-                      ? 'bg-green-500/10 text-green-400 border border-green-500/20' 
-                      : 'bg-gray-500/10 text-gray-400 border border-gray-500/20'
+                      ? 'bg-green-500/10 text-green-700 border border-green-500/20' 
+                      : 'bg-gray-500/10 text-slate-500 border border-gray-500/20'
                   }`}>
                     {tour.is_active ? 'Active' : 'Inactive'}
                   </span>
                 </div>
                 
-                <p className="text-gray-400 mb-4">{tour.description}</p>
+                <p className="text-slate-500 mb-4">{tour.description}</p>
                 
                 <div className="grid md:grid-cols-4 gap-4">
                   <div className="flex items-center space-x-2 text-sm">
-                    <MapPin className="w-4 h-4 text-blue-400" />
+                    <MapPin className="w-4 h-4 text-right-stay-600" />
                     <div>
-                      <span className="text-gray-400">Location:</span>
-                      <p className="text-white">{tour.location}</p>
+                      <span className="text-slate-500">Location:</span>
+                      <p className="text-slate-900">{tour.location}</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2 text-sm">
-                    <Clock className="w-4 h-4 text-purple-400" />
+                    <Clock className="w-4 h-4 text-violet-600" />
                     <div>
-                      <span className="text-gray-400">Duration:</span>
-                      <p className="text-white">{tour.duration}</p>
+                      <span className="text-slate-500">Duration:</span>
+                      <p className="text-slate-900">{tour.duration}</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2 text-sm">
-                    <Users className="w-4 h-4 text-green-400" />
+                    <Users className="w-4 h-4 text-green-700" />
                     <div>
-                      <span className="text-gray-400">Max Guests:</span>
-                      <p className="text-white">{tour.max_participants}</p>
+                      <span className="text-slate-500">Max Guests:</span>
+                      <p className="text-slate-900">{tour.max_participants}</p>
                     </div>
                   </div>
                   <div className="text-sm">
-                    <span className="text-gray-400">Price:</span>
-                    <p className="text-white font-semibold text-lg">R{tour.price || 0}</p>
+                    <span className="text-slate-500">Price:</span>
+                    <p className="text-slate-900 font-semibold text-lg">R{tour.price || 0}</p>
                   </div>
                 </div>
               </div>
@@ -235,13 +235,13 @@ export default function TourPackageSettings() {
               <div className="flex space-x-2 ml-4">
                 <button
                   onClick={() => handleOpenModal(tour)}
-                  className="p-2 text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
+                  className="p-2 text-right-stay-600 hover:bg-right-stay-50 rounded-lg transition-colors"
                 >
                   <Edit2 className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => handleDelete(tour.id)}
-                  className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                  className="p-2 text-red-700 hover:bg-red-50 rounded-lg transition-colors"
                 >
                   <Trash2 className="w-5 h-5" />
                 </button>
@@ -251,7 +251,7 @@ export default function TourPackageSettings() {
         ))}
 
         {tours.length === 0 && (
-          <div className="text-center py-12 text-gray-400">
+          <div className="text-center py-12 text-slate-500">
             <p>No tour packages found. Add your first tour package to get started.</p>
           </div>
         )}
@@ -259,15 +259,15 @@ export default function TourPackageSettings() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-gray-900 rounded-2xl border border-white/10 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-gray-900 border-b border-white/10 p-6 flex justify-between items-center">
-              <h3 className="text-xl font-bold text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl border border-slate-200 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-slate-200 p-6 flex justify-between items-center">
+              <h3 className="text-xl font-bold text-slate-900">
                 {editingTour ? 'Edit Tour Package' : 'Add New Tour Package'}
               </h3>
               <button
                 onClick={handleCloseModal}
-                className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -275,7 +275,7 @@ export default function TourPackageSettings() {
 
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-slate-600 mb-2">
                   Tour Name *
                 </label>
                 <input
@@ -284,13 +284,13 @@ export default function TourPackageSettings() {
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                  className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500 transition-colors"
                   placeholder="e.g., Cape Town City Tour"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-slate-600 mb-2">
                   Description *
                 </label>
                 <textarea
@@ -299,14 +299,14 @@ export default function TourPackageSettings() {
                   onChange={handleChange}
                   required
                   rows={4}
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors resize-none"
+                  className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500 transition-colors resize-none"
                   placeholder="Describe the tour experience..."
                 />
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-600 mb-2">
                     Price (ZAR) *
                   </label>
                   <input
@@ -316,13 +316,13 @@ export default function TourPackageSettings() {
                     value={formData.price}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                    className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500 transition-colors"
                     placeholder="0.00"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-600 mb-2">
                     Duration *
                   </label>
                   <input
@@ -331,13 +331,13 @@ export default function TourPackageSettings() {
                     value={formData.duration}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                    className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500 transition-colors"
                     placeholder="e.g., 4 hours, Full day"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-600 mb-2">
                     Max Participants *
                   </label>
                   <input
@@ -347,13 +347,13 @@ export default function TourPackageSettings() {
                     onChange={handleChange}
                     required
                     min="1"
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                    className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500 transition-colors"
                     placeholder="e.g., 12"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-600 mb-2">
                     Location *
                   </label>
                   <input
@@ -362,7 +362,7 @@ export default function TourPackageSettings() {
                     value={formData.location}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                    className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500 transition-colors"
                     placeholder="e.g., Cape Town, South Africa"
                   />
                 </div>
@@ -375,9 +375,9 @@ export default function TourPackageSettings() {
                   name="is_active"
                   checked={formData.is_active}
                   onChange={handleChange}
-                  className="w-4 h-4 text-blue-600 bg-white/5 border-white/10 rounded focus:ring-blue-500 focus:ring-2"
+                  className="w-4 h-4 text-blue-600 bg-slate-50 border-slate-200 rounded focus:ring-right-stay-500 focus:ring-2"
                 />
-                <label htmlFor="is_active" className="text-sm font-medium text-gray-300">
+                <label htmlFor="is_active" className="text-sm font-medium text-slate-600">
                   Active (visible to customers)
                 </label>
               </div>
@@ -386,13 +386,13 @@ export default function TourPackageSettings() {
                 <button
                   type="button"
                   onClick={handleCloseModal}
-                  className="px-6 py-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                  className="px-6 py-2 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex items-center space-x-2 px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium rounded-lg transition-all"
+                  className="flex items-center space-x-2 px-6 py-2 bg-right-stay-500 hover:bg-right-stay-600 text-slate-900 font-medium rounded-lg transition-all"
                 >
                   <Save className="w-5 h-5" />
                   <span>{editingTour ? 'Update' : 'Create'} Tour Package</span>

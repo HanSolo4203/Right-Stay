@@ -7,7 +7,7 @@ const PropertyLocationPickerView = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-[280px] items-center justify-center rounded-xl border border-white/10 bg-white/5">
+      <div className="flex h-[280px] items-center justify-center rounded-xl border border-slate-200 bg-slate-50">
         <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-white/70" aria-hidden="true" />
       </div>
     ),

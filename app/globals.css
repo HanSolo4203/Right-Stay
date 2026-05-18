@@ -177,7 +177,11 @@ input[type="number"] {
 }
 
 .admin-property-map .leaflet-container {
-  background: #1f2937;
+  background: #f1f5f9;
+}
+
+.admin-root .safe-area-pb {
+  padding-bottom: max(0.375rem, env(safe-area-inset-bottom));
 }
 
 .property-map-marker {

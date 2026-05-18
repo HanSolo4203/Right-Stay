@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# Stop all dev servers for this project, clear caches, start a single clean instance.
+# Stop all dev servers, clear caches, start a single clean instance.
 # Use when you see 404 on /_next/static/*, missing layout.css, or broken unstyled pages.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-cd "$ROOT"
+# shellcheck source=scripts/next-env.sh
+source "$ROOT/scripts/next-env.sh"
 LOCKFILE="$ROOT/.next-dev.lock"
 
 cleanup() {
@@ -11,19 +12,7 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 
-if [ -f "$LOCKFILE" ]; then
-  old_pid=$(cat "$LOCKFILE" 2>/dev/null || true)
-  if [ -n "$old_pid" ] && kill -0 "$old_pid" 2>/dev/null; then
-    echo "Stopping existing dev server (PID $old_pid)..."
-    kill -9 "$old_pid" 2>/dev/null || true
-    sleep 0.5
-  fi
-  rm -f "$LOCKFILE"
-fi
-
-# Kill any stray Next.js dev processes for this repo
-pkill -f "$ROOT/node_modules/.bin/next dev" 2>/dev/null || true
-pkill -f "next dev.*$ROOT" 2>/dev/null || true
+next_env_stop_dev "$ROOT"
 for p in 3000 3001 3002; do
   pids=$(lsof -ti ":$p" 2>/dev/null || true)
   if [ -n "$pids" ]; then
@@ -33,8 +22,12 @@ for p in 3000 3001 3002; do
 done
 sleep 0.5
 
-rm -rf .next node_modules/.cache
+next_env_clear_production_next "$ROOT"
 echo "Cleared .next and node_modules/.cache"
 echo "Starting dev server at http://localhost:3000 ..."
 echo "$$" > "$LOCKFILE"
-exec npx next dev --turbopack
+if [ "${1:-}" = "--turbopack" ]; then
+  echo "Warning: Turbopack can hit manifest ENOENT errors in iCloud-synced folders."
+  next_env_run_dev "$ROOT" --turbopack
+fi
+next_env_run_dev "$ROOT"

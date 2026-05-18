@@ -11,7 +11,10 @@
 
 # next.js
 /.next/
-/.next-dev.lock
+/.next-dev/
+/.next-dev*.lock
+/Users/
+/var/
 /out/
 
 # production

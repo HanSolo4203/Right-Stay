@@ -7,7 +7,52 @@ import imageCompression from 'browser-image-compression';
 import type { Property, PropertyFormValues } from '@/types/property';
 import { PricingSection } from './PricingSection';
 import { extractLocationFromAttributes } from '@/lib/property-location';
+import {
+  propertyPhotoSrc,
+  shouldBypassImageOptimizer,
+  type PropertyPhotoVariant,
+} from '@/lib/listing-image';
 import PropertyLocationPicker from './PropertyLocationPicker';
+
+function PropertyPhoto({
+  src,
+  alt,
+  variant = 'thumb',
+  sizes,
+  className = 'object-cover',
+  priority,
+}: {
+  src: string;
+  alt: string;
+  variant?: PropertyPhotoVariant;
+  sizes: string;
+  className?: string;
+  priority?: boolean;
+}) {
+  const [failed, setFailed] = useState(false);
+  const displaySrc = propertyPhotoSrc(src, variant);
+
+  if (failed) {
+    return (
+      <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+        <ImageIcon className="w-10 h-10 text-gray-600" />
+      </div>
+    );
+  }
+
+  return (
+    <Image
+      src={displaySrc}
+      alt={alt}
+      fill
+      className={className}
+      sizes={sizes}
+      priority={priority}
+      unoptimized={shouldBypassImageOptimizer(src)}
+      onError={() => setFailed(true)}
+    />
+  );
+}
 
 interface PropertyPhoto {
   id: string;
@@ -876,23 +921,19 @@ export default function PropertySettings() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+        <Loader2 className="w-8 h-8 text-right-stay-500 animate-spin" />
       </div>
     );
   }
 
   return (
     <div className="p-6 lg:p-8">
-      <div className="flex justify-between items-start mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-white mb-2">Property Management</h2>
-          <p className="text-gray-400">Manage all your rental properties</p>
-        </div>
-        <div className="flex items-center space-x-3">
+      <div className="flex flex-col sm:flex-row sm:justify-end gap-3 mb-6">
+        <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
           <button
             onClick={handleSyncFromUplisting}
             disabled={syncingFromUplisting}
-            className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center space-x-2 px-4 py-2 bg-right-stay-600 hover:bg-right-stay-700 text-white font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {syncingFromUplisting ? (
               <>
@@ -908,7 +949,7 @@ export default function PropertySettings() {
           </button>
           <button
             onClick={() => handleOpenModal()}
-            className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium rounded-lg transition-all"
+            className="flex items-center space-x-2 px-4 py-2 bg-right-stay-500 hover:bg-right-stay-600 text-white font-medium rounded-lg transition-all"
           >
             <Plus className="w-5 h-5" />
             <span>Add Property</span>
@@ -921,11 +962,11 @@ export default function PropertySettings() {
           message.type === 'success' ? 'bg-green-500/10 border border-green-500/20' : 'bg-red-500/10 border border-red-500/20'
         }`}>
           {message.type === 'success' ? (
-            <CheckCircle className="w-5 h-5 text-green-500" />
+            <CheckCircle className="w-5 h-5 text-green-600" />
           ) : (
-            <AlertCircle className="w-5 h-5 text-red-500" />
+            <AlertCircle className="w-5 h-5 text-red-600" />
           )}
-          <span className={message.type === 'success' ? 'text-green-400' : 'text-red-400'}>
+          <span className={message.type === 'success' ? 'text-green-700' : 'text-red-700'}>
             {message.text}
           </span>
         </div>
@@ -938,23 +979,17 @@ export default function PropertySettings() {
           return (
             <div
               key={property.id}
-              className="bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-all overflow-hidden"
+              className="bg-white rounded-lg border border-slate-200 shadow-sm hover:border-slate-300 hover:shadow-md transition-all overflow-hidden"
             >
               <div className="flex">
                 {/* Primary Image */}
                 {primaryPhotoUrl && (
                   <div className="w-48 h-48 flex-shrink-0 relative bg-gray-800">
-                    <Image
+                    <PropertyPhoto
                       src={primaryPhotoUrl}
                       alt={property.name}
-                      fill
-                      className="object-cover"
+                      variant="thumb"
                       sizes="192px"
-                      onError={(e) => {
-                        console.error('Image load error:', primaryPhotoUrl);
-                        const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
-                      }}
                     />
                   </div>
                 )}
@@ -963,86 +998,86 @@ export default function PropertySettings() {
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-3">
-                        <h3 className="text-xl font-semibold text-white">
+                        <h3 className="text-xl font-semibold text-slate-900">
                           {property.name}
                         </h3>
-                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-right-stay-600 border border-blue-500/20">
                           {property.type}
                         </span>
-                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-500/10 text-gray-400 border border-gray-500/20">
+                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-500/10 text-slate-500 border border-gray-500/20">
                           ID: {property.uplisting_id}
                         </span>
                       </div>
                       
                       {property.description && (
-                        <p className="text-gray-400 mb-4 text-sm line-clamp-2">{property.description}</p>
+                        <p className="text-slate-500 mb-4 text-sm line-clamp-2">{property.description}</p>
                       )}
                 
                 <div className="grid md:grid-cols-3 gap-4 text-sm">
                   <div>
-                    <span className="text-gray-400">Bedrooms:</span>
-                    <p className="text-white">{property.bedrooms || 'N/A'}</p>
+                    <span className="text-slate-500">Bedrooms:</span>
+                    <p className="text-slate-900">{property.bedrooms || 'N/A'}</p>
                   </div>
                   <div>
-                    <span className="text-gray-400">Bathrooms:</span>
-                    <p className="text-white">{property.bathrooms || 'N/A'}</p>
+                    <span className="text-slate-500">Bathrooms:</span>
+                    <p className="text-slate-900">{property.bathrooms || 'N/A'}</p>
                   </div>
                   <div>
-                    <span className="text-gray-400">Max Capacity:</span>
-                    <p className="text-white">{property.maximum_capacity || 'N/A'} guests</p>
+                    <span className="text-slate-500">Max Capacity:</span>
+                    <p className="text-slate-900">{property.maximum_capacity || 'N/A'} guests</p>
                   </div>
                   <div>
-                    <span className="text-gray-400">Check-in:</span>
-                    <p className="text-white">{property.check_in_time ? `${property.check_in_time}:00` : 'N/A'}</p>
+                    <span className="text-slate-500">Check-in:</span>
+                    <p className="text-slate-900">{property.check_in_time ? `${property.check_in_time}:00` : 'N/A'}</p>
                   </div>
                   <div>
-                    <span className="text-gray-400">Check-out:</span>
-                    <p className="text-white">{property.check_out_time ? `${property.check_out_time}:00` : 'N/A'}</p>
+                    <span className="text-slate-500">Check-out:</span>
+                    <p className="text-slate-900">{property.check_out_time ? `${property.check_out_time}:00` : 'N/A'}</p>
                   </div>
                   <div>
-                    <span className="text-gray-400">Currency:</span>
-                    <p className="text-white">{property.currency}</p>
+                    <span className="text-slate-500">Currency:</span>
+                    <p className="text-slate-900">{property.currency}</p>
                   </div>
                   {property.pricing?.pricingEnabled && (
                     <div className="md:col-span-3">
-                      <span className="text-gray-400">Dynamic Pricing:</span>
+                      <span className="text-slate-500">Dynamic Pricing:</span>
                       <div className="mt-1 flex flex-wrap items-center gap-4 text-sm">
                         <div className="flex items-baseline gap-1">
-                          <span className="text-orange-400 font-medium">Min</span>
-                          <span className="text-gray-400">·</span>
-                          <span className="text-white">
+                          <span className="text-orange-700 font-medium">Min</span>
+                          <span className="text-slate-500">·</span>
+                          <span className="text-slate-900">
                             {property.currency === 'ZAR' ? 'R' : property.currency}
                             {property.pricing.minPrice?.toFixed(2)}
                           </span>
                         </div>
                         <div className="flex items-baseline gap-1">
-                          <span className="text-yellow-400 font-medium">Base</span>
-                          <span className="text-gray-400">·</span>
-                          <span className="text-white">
+                          <span className="text-amber-700 font-medium">Base</span>
+                          <span className="text-slate-500">·</span>
+                          <span className="text-slate-900">
                             {property.currency === 'ZAR' ? 'R' : property.currency}
                             {property.pricing.basePrice?.toFixed(2)}
                           </span>
                         </div>
                         <div className="flex items-baseline gap-1">
                           <span className="text-emerald-400 font-medium">Max</span>
-                          <span className="text-gray-400">·</span>
-                          <span className="text-white">
+                          <span className="text-slate-500">·</span>
+                          <span className="text-slate-900">
                             {property.currency === 'ZAR' ? 'R' : property.currency}
                             {property.pricing.maxPrice?.toFixed(2)}
                           </span>
                         </div>
                         <div className="flex items-baseline gap-1">
                           <span className="text-sky-400 font-medium">Cleaning</span>
-                          <span className="text-gray-400">·</span>
-                          <span className="text-white">
+                          <span className="text-slate-500">·</span>
+                          <span className="text-slate-900">
                             {property.currency === 'ZAR' ? 'R' : property.currency}
                             {property.pricing.cleaningFee?.toFixed(2)}
                           </span>
                         </div>
                         <div className="flex items-baseline gap-1">
                           <span className="text-violet-400 font-medium">Service</span>
-                          <span className="text-gray-400">·</span>
-                          <span className="text-white">
+                          <span className="text-slate-500">·</span>
+                          <span className="text-slate-900">
                             {property.pricing.serviceFeePercent?.toFixed(2)}%
                           </span>
                         </div>
@@ -1051,7 +1086,7 @@ export default function PropertySettings() {
                   )}
                   {property.pricelabsMapping && (
                     <div className="md:col-span-3">
-                      <span className="text-gray-400">PriceLabs:</span>
+                      <span className="text-slate-500">PriceLabs:</span>
                       <div className="mt-1 flex flex-wrap items-center gap-3 text-xs">
                         <span className="px-2 py-1 rounded bg-indigo-500/10 border border-indigo-500/20 text-indigo-300">
                           ID {property.pricelabsMapping.pricelabsListingId}
@@ -1062,12 +1097,12 @@ export default function PropertySettings() {
                         <span className={`px-2 py-1 rounded border ${
                           property.pricelabsMapping.syncEnabled
                             ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300'
-                            : 'bg-gray-500/10 border-gray-500/20 text-gray-300'
+                            : 'bg-gray-500/10 border-gray-500/20 text-slate-600'
                         }`}>
                           Sync {property.pricelabsMapping.syncEnabled ? 'enabled' : 'disabled'}
                         </span>
                         {property.pricelabsMapping.lastSyncedAt && (
-                          <span className="text-gray-400">
+                          <span className="text-slate-500">
                             Last sync {new Date(property.pricelabsMapping.lastSyncedAt).toLocaleString()}
                           </span>
                         )}
@@ -1081,14 +1116,14 @@ export default function PropertySettings() {
                   )}
                   {property.ical_url && (
                     <div className="md:col-span-3">
-                      <span className="text-gray-400">iCal URL:</span>
-                      <p className="text-white text-xs break-all">{property.ical_url}</p>
+                      <span className="text-slate-500">iCal URL:</span>
+                      <p className="text-slate-700 text-xs break-all">{property.ical_url}</p>
                     </div>
                   )}
                   {property.last_synced && (
                     <div className="md:col-span-3">
-                      <span className="text-gray-400">Last synced:</span>
-                      <p className="text-white text-xs">
+                      <span className="text-slate-500">Last synced:</span>
+                      <p className="text-slate-700 text-xs">
                         {new Date(property.last_synced).toLocaleString()}
                       </p>
                     </div>
@@ -1113,7 +1148,7 @@ export default function PropertySettings() {
                         <button
                           onClick={() => handleSyncCalendar(property.uplisting_id)}
                           disabled={syncingCalendarPropertyId === property.uplisting_id}
-                          className="p-2 text-green-400 hover:bg-green-500/10 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="p-2 text-green-700 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           title="Sync calendar availability"
                         >
                           {syncingCalendarPropertyId === property.uplisting_id ? (
@@ -1125,13 +1160,13 @@ export default function PropertySettings() {
                       )}
                       <button
                         onClick={() => handleOpenModal(property)}
-                        className="p-2 text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
+                        className="p-2 text-right-stay-600 hover:bg-right-stay-50 rounded-lg transition-colors"
                       >
                         <Edit2 className="w-5 h-5" />
                       </button>
                       <button
                         onClick={() => handleDelete(property.id)}
-                        className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                        className="p-2 text-red-700 hover:bg-red-50 rounded-lg transition-colors"
                       >
                         <Trash2 className="w-5 h-5" />
                       </button>
@@ -1144,7 +1179,7 @@ export default function PropertySettings() {
         })}
 
         {properties.length === 0 && (
-          <div className="text-center py-12 text-gray-400">
+          <div className="text-center py-12 text-slate-500">
             <p>No properties found. Add your first property to get started.</p>
           </div>
         )}
@@ -1152,16 +1187,16 @@ export default function PropertySettings() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-sm p-4 sm:p-6">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-sm p-4 sm:p-6">
           <div className="min-h-full flex items-start justify-center pt-4 sm:pt-8">
-            <div className="bg-gray-900 rounded-2xl border border-white/10 w-full max-w-5xl max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-gray-900 border-b border-white/10 p-6 flex justify-between items-center">
-              <h3 className="text-xl font-bold text-white">
+            <div className="bg-white rounded-2xl border border-slate-200 w-full max-w-5xl max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-slate-200 p-6 flex justify-between items-center">
+              <h3 className="text-xl font-bold text-slate-900">
                 {editingProperty ? 'Edit Property' : 'Add New Property'}
               </h3>
               <button
                 onClick={handleCloseModal}
-                className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -1173,21 +1208,15 @@ export default function PropertySettings() {
               const primaryPhotoUrl = primaryPhoto?.url || propertyPrimaryPhotos[editingProperty.uplisting_id];
               return primaryPhotoUrl ? (
                 <div className="w-full h-64 relative bg-gray-800">
-                  <Image
+                  <PropertyPhoto
                     src={primaryPhotoUrl}
                     alt={editingProperty.name}
-                    fill
-                    className="object-cover"
+                    variant="hero"
                     sizes="100vw"
                     priority
-                    onError={(e) => {
-                      console.error('Image load error:', primaryPhotoUrl);
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                    }}
                   />
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                    <p className="text-white text-sm font-medium">{editingProperty.name}</p>
+                    <p className="text-slate-900 text-sm font-medium">{editingProperty.name}</p>
                   </div>
                 </div>
               ) : null;
@@ -1196,7 +1225,7 @@ export default function PropertySettings() {
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-600 mb-2">
                     Uplisting ID *
                   </label>
                   <input
@@ -1205,13 +1234,13 @@ export default function PropertySettings() {
                     value={formData.uplisting_id}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                    className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500 transition-colors"
                     placeholder="e.g., 135133"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-600 mb-2">
                     Property Type *
                   </label>
                   <input
@@ -1220,14 +1249,14 @@ export default function PropertySettings() {
                     value={formData.type}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                    className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500 transition-colors"
                     placeholder="e.g., Villa, Apartment, Lodge"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-slate-600 mb-2">
                   Property Name *
                 </label>
                 <input
@@ -1236,13 +1265,13 @@ export default function PropertySettings() {
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                  className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500 transition-colors"
                   placeholder="e.g., Cape Town Luxury Villa"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-slate-600 mb-2">
                   Description
                 </label>
                 <textarea
@@ -1250,16 +1279,16 @@ export default function PropertySettings() {
                   value={formData.description}
                   onChange={handleChange}
                   rows={4}
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors resize-none"
+                  className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500 transition-colors resize-none"
                   placeholder="Property description..."
                 />
               </div>
 
-              <div className="space-y-4 rounded-lg border border-white/10 bg-white/[0.02] p-4">
-                <h3 className="text-sm font-semibold text-white">Property location</h3>
+              <div className="space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <h3 className="text-sm font-semibold text-slate-900">Property location</h3>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-600 mb-2">
                     Display location
                   </label>
                   <input
@@ -1267,16 +1296,16 @@ export default function PropertySettings() {
                     name="location_display"
                     value={formData.location_display}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                    className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500 transition-colors"
                     placeholder="e.g., Cape Town, South Africa"
                   />
-                  <p className="mt-1 text-xs text-gray-500">
+                  <p className="mt-1 text-xs text-slate-500">
                     Short label shown on the booking page header.
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-600 mb-2">
                     Property address
                   </label>
                   <div className="flex gap-2">
@@ -1285,14 +1314,14 @@ export default function PropertySettings() {
                       name="location_address"
                       value={formData.location_address}
                       onChange={handleChange}
-                      className="flex-1 px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                      className="flex-1 px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500 transition-colors"
                       placeholder="Full street address or area"
                     />
                     <button
                       type="button"
                       onClick={handleGeocodeAddress}
                       disabled={geocodingLocation}
-                      className="shrink-0 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                      className="shrink-0 px-4 py-2 bg-right-stay-500 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2"
                     >
                       {geocodingLocation ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -1311,25 +1340,25 @@ export default function PropertySettings() {
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-slate-600 mb-2">
                       Latitude
                     </label>
                     <input
                       type="text"
                       value={formData.latitude}
                       readOnly
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-gray-400 cursor-default"
+                      className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-500 cursor-default"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-slate-600 mb-2">
                       Longitude
                     </label>
                     <input
                       type="text"
                       value={formData.longitude}
                       readOnly
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-gray-400 cursor-default"
+                      className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-500 cursor-default"
                     />
                   </div>
                 </div>
@@ -1337,7 +1366,7 @@ export default function PropertySettings() {
 
               <div className="grid md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-600 mb-2">
                     Bedrooms
                   </label>
                   <input
@@ -1345,13 +1374,13 @@ export default function PropertySettings() {
                     name="bedrooms"
                     value={formData.bedrooms}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                    className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500 transition-colors"
                     placeholder="0"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-600 mb-2">
                     Bathrooms
                   </label>
                   <input
@@ -1359,13 +1388,13 @@ export default function PropertySettings() {
                     name="bathrooms"
                     value={formData.bathrooms}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                    className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500 transition-colors"
                     placeholder="0"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-600 mb-2">
                     Max Capacity
                   </label>
                   <input
@@ -1373,7 +1402,7 @@ export default function PropertySettings() {
                     name="maximum_capacity"
                     value={formData.maximum_capacity}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                    className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500 transition-colors"
                     placeholder="0"
                   />
                 </div>
@@ -1381,14 +1410,14 @@ export default function PropertySettings() {
 
               <div className="grid md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-600 mb-2">
                     Currency
                   </label>
                   <select
                     name="currency"
                     value={formData.currency}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors"
+                    className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500 transition-colors"
                   >
                     <option value="ZAR">ZAR (South African Rand)</option>
                     <option value="USD">USD (US Dollar)</option>
@@ -1397,7 +1426,7 @@ export default function PropertySettings() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-600 mb-2">
                     Check-in Time
                   </label>
                   <input
@@ -1407,13 +1436,13 @@ export default function PropertySettings() {
                     onChange={handleChange}
                     min="0"
                     max="23"
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                    className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500 transition-colors"
                     placeholder="15"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-600 mb-2">
                     Check-out Time
                   </label>
                   <input
@@ -1423,14 +1452,14 @@ export default function PropertySettings() {
                     onChange={handleChange}
                     min="0"
                     max="23"
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                    className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500 transition-colors"
                     placeholder="11"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-slate-600 mb-2">
                   iCal URL (for availability sync)
                 </label>
                 <input
@@ -1438,7 +1467,7 @@ export default function PropertySettings() {
                   name="ical_url"
                   value={formData.ical_url}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                  className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500 transition-colors"
                   placeholder="https://..."
                 />
               </div>
@@ -1459,7 +1488,7 @@ export default function PropertySettings() {
 
               <div className="grid md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-600 mb-2">
                     PriceLabs Listing ID
                   </label>
                   <input
@@ -1467,12 +1496,12 @@ export default function PropertySettings() {
                     name="pricelabsListingId"
                     value={formData.pricelabsListingId}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                    className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500 transition-colors"
                     placeholder="e.g., 834874"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-600 mb-2">
                     PriceLabs PMS
                   </label>
                   <input
@@ -1480,12 +1509,12 @@ export default function PropertySettings() {
                     name="pricelabsPms"
                     value={formData.pricelabsPms}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+                    className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500 transition-colors"
                     placeholder="e.g., airbnb"
                   />
                 </div>
                 <div className="flex items-end">
-                  <label className="flex items-center gap-3 px-4 py-2 bg-white/5 border border-white/10 rounded-lg w-full">
+                  <label className="flex items-center gap-3 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg w-full">
                     <input
                       type="checkbox"
                       name="pricelabsSyncEnabled"
@@ -1505,15 +1534,15 @@ export default function PropertySettings() {
 
               {/* Photo Management Section */}
               {editingProperty && (
-                <div className="border-t border-white/10 pt-6">
+                <div className="border-t border-slate-200 pt-6">
                   <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-lg font-semibold text-white flex items-center gap-2">
+                    <h4 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                       <ImageIcon className="w-5 h-5" />
                       Property Photos
                     </h4>
                     <label className="flex items-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 rounded-lg cursor-pointer transition-colors">
                       <Upload className="w-4 h-4" />
-                      <span className="text-sm text-blue-400">Upload Photo</span>
+                      <span className="text-sm text-right-stay-600">Upload Photo</span>
                       <input
                         type="file"
                         accept="image/*"
@@ -1526,8 +1555,8 @@ export default function PropertySettings() {
 
                   {uploadingPhoto && (
                     <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg flex items-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin text-blue-400" />
-                      <span className="text-sm text-blue-400">Compressing and uploading photo...</span>
+                      <Loader2 className="w-4 h-4 animate-spin text-right-stay-600" />
+                      <span className="text-sm text-right-stay-600">Compressing and uploading photo...</span>
                     </div>
                   )}
 
@@ -1550,15 +1579,15 @@ export default function PropertySettings() {
                     className={`mb-4 p-6 border-2 border-dashed rounded-lg transition-colors cursor-pointer ${
                       dragActive
                         ? 'border-blue-500 bg-blue-500/10'
-                        : 'border-white/10 bg-white/5 hover:border-blue-500/50 hover:bg-white/10'
+                        : 'border-slate-200 bg-slate-50 hover:border-blue-500/50 hover:bg-slate-50'
                     }`}
                   >
                     <div className="text-center">
-                      <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                      <p className="text-sm text-gray-400 mb-1">
+                      <ImageIcon className="w-12 h-12 text-slate-500 mx-auto mb-3" />
+                      <p className="text-sm text-slate-500 mb-1">
                         Drag and drop images here, or click to browse
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-slate-500">
                         Supports multiple images (max 15MB each, auto-compressed to ~2MB)
                       </p>
                     </div>
@@ -1586,21 +1615,14 @@ export default function PropertySettings() {
                       {photos.map((photo) => (
                         <div
                           key={photo.id}
-                          className="relative group bg-white/5 rounded-lg overflow-hidden border border-white/10"
+                          className="relative group bg-slate-50 rounded-lg overflow-hidden border border-slate-200"
                         >
                           <div className="aspect-video relative">
-                            <Image
+                            <PropertyPhoto
                               src={photo.url}
                               alt={photo.caption || 'Property photo'}
-                              fill
-                              className="object-cover"
+                              variant="gallery"
                               sizes="(max-width: 768px) 50vw, 33vw"
-                              onError={(e) => {
-                                console.error('Image load error:', photo.url);
-                                // Fallback to a placeholder or hide the image
-                                const target = e.target as HTMLImageElement;
-                                target.style.display = 'none';
-                              }}
                             />
                             {photo.is_primary && (
                               <div className="absolute top-2 left-2 bg-yellow-500 text-white px-2 py-1 rounded text-xs font-semibold flex items-center gap-1">
@@ -1612,7 +1634,7 @@ export default function PropertySettings() {
                               {!photo.is_primary && (
                                 <button
                                   onClick={() => handleSetPrimary(photo.id)}
-                                  className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded transition-colors"
+                                  className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-slate-700 text-xs rounded transition-colors"
                                   title="Set as primary"
                                 >
                                   <Star className="w-4 h-4" />
@@ -1620,7 +1642,7 @@ export default function PropertySettings() {
                               )}
                               <button
                                 onClick={() => handleDeletePhoto(photo.id)}
-                                className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-xs rounded transition-colors"
+                                className="px-3 py-1 bg-red-500 hover:bg-red-600 text-slate-700 text-xs rounded transition-colors"
                                 title="Delete photo"
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -1628,18 +1650,18 @@ export default function PropertySettings() {
                             </div>
                           </div>
                           {photo.caption && (
-                            <p className="p-2 text-xs text-gray-400 truncate">{photo.caption}</p>
+                            <p className="p-2 text-xs text-slate-500 truncate">{photo.caption}</p>
                           )}
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-8 border border-dashed border-white/10 rounded-lg">
-                      <ImageIcon className="w-12 h-12 text-gray-500 mx-auto mb-3" />
-                      <p className="text-sm text-gray-400 mb-4">No photos uploaded yet</p>
+                    <div className="text-center py-8 border border-dashed border-slate-200 rounded-lg">
+                      <ImageIcon className="w-12 h-12 text-slate-500 mx-auto mb-3" />
+                      <p className="text-sm text-slate-500 mb-4">No photos uploaded yet</p>
                       <label className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 rounded-lg cursor-pointer transition-colors">
                         <Upload className="w-4 h-4" />
-                        <span className="text-sm text-blue-400">Upload First Photo</span>
+                        <span className="text-sm text-right-stay-600">Upload First Photo</span>
                         <input
                           type="file"
                           accept="image/*"
@@ -1657,14 +1679,14 @@ export default function PropertySettings() {
                 <button
                   type="button"
                   onClick={handleCloseModal}
-                  className="px-6 py-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                  className="px-6 py-2 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={savingProperty}
-                  className="flex items-center space-x-2 px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center space-x-2 px-6 py-2 bg-right-stay-500 hover:bg-right-stay-600 text-slate-900 font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {savingProperty ? (
                     <>

@@ -159,20 +159,13 @@ export default function PricingDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+        <Loader2 className="w-8 h-8 text-right-stay-500 animate-spin" />
       </div>
     );
   }
 
   return (
     <div className="p-6 lg:p-8">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-white mb-2">Dynamic Pricing</h2>
-        <p className="text-gray-400">
-          Review and manage nightly pricing for each property. Click Review Prices to open the calendar.
-        </p>
-      </div>
-
       {/* Search */}
       <div className="mb-6">
         <div className="flex justify-end mb-3">
@@ -186,18 +179,18 @@ export default function PricingDashboard() {
           </button>
         </div>
         <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
           <input
             type="text"
             placeholder="Search listings, IDs, cities, types..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+            className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500"
           />
         </div>
       </div>
 
-      <p className="text-sm text-gray-400 mb-4">
+      <p className="text-sm text-slate-500 mb-4">
         Showing {filteredProperties.length}/{properties.length} listings
       </p>
 
@@ -216,20 +209,20 @@ export default function PricingDashboard() {
       )}
 
       {/* Table - scroll horizontally on small screens */}
-      <div className="overflow-x-auto rounded-lg border border-white/10">
+      <div className="overflow-x-auto rounded-lg border border-slate-200">
         <table className="w-full min-w-[980px]">
           <thead>
-            <tr className="border-b border-white/10 bg-white/5">
-              <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">Listings</th>
-              <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">Calendar</th>
-              <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">PriceLabs</th>
-              <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">Sync Price</th>
-              <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">Min Price</th>
-              <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">Base Price</th>
-              <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">Max Price</th>
-              <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">Cleaning Fee</th>
-              <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">Service Fee %</th>
-              <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">Currency</th>
+            <tr className="border-b border-slate-200 bg-slate-50">
+              <th className="text-left py-3 px-4 text-sm font-medium text-slate-600">Listings</th>
+              <th className="text-left py-3 px-4 text-sm font-medium text-slate-600">Calendar</th>
+              <th className="text-left py-3 px-4 text-sm font-medium text-slate-600">PriceLabs</th>
+              <th className="text-left py-3 px-4 text-sm font-medium text-slate-600">Sync Price</th>
+              <th className="text-left py-3 px-4 text-sm font-medium text-slate-600">Min Price</th>
+              <th className="text-left py-3 px-4 text-sm font-medium text-slate-600">Base Price</th>
+              <th className="text-left py-3 px-4 text-sm font-medium text-slate-600">Max Price</th>
+              <th className="text-left py-3 px-4 text-sm font-medium text-slate-600">Cleaning Fee</th>
+              <th className="text-left py-3 px-4 text-sm font-medium text-slate-600">Service Fee %</th>
+              <th className="text-left py-3 px-4 text-sm font-medium text-slate-600">Currency</th>
             </tr>
           </thead>
           <tbody>
@@ -239,12 +232,12 @@ export default function PricingDashboard() {
               return (
                 <tr
                   key={property.id}
-                  className="border-b border-white/5 hover:bg-white/5 transition-colors"
+                  className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
                 >
                   <td className="py-3 px-4">
                     <div>
-                      <div className="font-medium text-white">{property.name}</div>
-                      <div className="text-xs text-gray-400">
+                      <div className="font-medium text-slate-900">{property.name}</div>
+                      <div className="text-xs text-slate-500">
                         {property.bedrooms ?? '—'} BR · {property.type} · Uplisting (ID: {property.uplisting_id})
                       </div>
                     </div>
@@ -252,19 +245,19 @@ export default function PricingDashboard() {
                   <td className="py-3 px-4">
                     <button
                       onClick={() => handleReviewPrices(property)}
-                      className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg text-sm font-medium transition-colors"
+                      className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 text-right-stay-600 rounded-lg text-sm font-medium transition-colors"
                     >
                       <Calendar className="w-4 h-4" />
                       Review Prices
                     </button>
                   </td>
-                  <td className="py-3 px-4 text-xs text-gray-300">
+                  <td className="py-3 px-4 text-xs text-slate-600">
                     {property.pricelabsMapping ? (
                       <div className="space-y-1">
                         <div>ID {property.pricelabsMapping.pricelabsListingId}</div>
                         <div>PMS {property.pricelabsMapping.pricelabsPms}</div>
                         {property.pricelabsMapping.lastSyncedAt && (
-                          <div className="text-gray-400">
+                          <div className="text-slate-500">
                             {new Date(property.pricelabsMapping.lastSyncedAt).toLocaleString()}
                           </div>
                         )}
@@ -285,7 +278,7 @@ export default function PricingDashboard() {
                         </button>
                       </div>
                     ) : (
-                      <span className="text-gray-500">Not mapped</span>
+                      <span className="text-slate-500">Not mapped</span>
                     )}
                   </td>
                   <td className="py-3 px-4">
@@ -305,25 +298,25 @@ export default function PricingDashboard() {
                         />
                       </button>
                     ) : (
-                      <span className="text-gray-500 text-sm">Not set</span>
+                      <span className="text-slate-500 text-sm">Not set</span>
                     )}
                   </td>
-                  <td className="py-3 px-4 text-sm text-gray-300">
+                  <td className="py-3 px-4 text-sm text-slate-600">
                     {p ? formatPrice(p.minPrice, currency) : '—'}
                   </td>
-                  <td className="py-3 px-4 text-sm text-gray-300">
+                  <td className="py-3 px-4 text-sm text-slate-600">
                     {p ? formatPrice(p.basePrice, currency) : '—'}
                   </td>
-                  <td className="py-3 px-4 text-sm text-gray-300">
+                  <td className="py-3 px-4 text-sm text-slate-600">
                     {p ? formatPrice(p.maxPrice, currency) : '—'}
                   </td>
-                  <td className="py-3 px-4 text-sm text-gray-300">
+                  <td className="py-3 px-4 text-sm text-slate-600">
                     {p ? formatPrice(p.cleaningFee, currency) : '—'}
                   </td>
-                  <td className="py-3 px-4 text-sm text-gray-300">
+                  <td className="py-3 px-4 text-sm text-slate-600">
                     {p?.serviceFeePercent != null ? `${p.serviceFeePercent.toFixed(2)}%` : '—'}
                   </td>
-                  <td className="py-3 px-4 text-sm text-gray-400">{currency}</td>
+                  <td className="py-3 px-4 text-sm text-slate-500">{currency}</td>
                 </tr>
               );
             })}
@@ -332,7 +325,7 @@ export default function PricingDashboard() {
       </div>
 
       {filteredProperties.length === 0 && (
-        <div className="text-center py-12 text-gray-400">
+        <div className="text-center py-12 text-slate-500">
           <DollarSign className="w-12 h-12 mx-auto mb-4 opacity-50" />
           <p>No properties found. Add properties in the Properties tab to manage pricing.</p>
         </div>

@@ -62,3 +62,42 @@ export function listingImageSrc(
     return src;
   }
 }
+
+export type PropertyPhotoVariant = 'thumb' | 'gallery' | 'hero';
+
+const PROPERTY_PHOTO_WIDTHS: Record<PropertyPhotoVariant, number> = {
+  thumb: 384,
+  gallery: 640,
+  hero: 1280,
+};
+
+/** Resize Uplisting CloudFront URLs via their `width` query param (avoids heavy originals). */
+export function propertyPhotoSrc(
+  src: string | undefined | null,
+  variant: PropertyPhotoVariant = 'thumb'
+): string {
+  if (!src) return '';
+  if (!src.startsWith('http')) return src;
+
+  try {
+    const u = new URL(src);
+    if (u.hostname.endsWith('.cloudfront.net')) {
+      u.searchParams.set('width', String(PROPERTY_PHOTO_WIDTHS[variant]));
+      return u.toString();
+    }
+  } catch {
+    return src;
+  }
+
+  return src;
+}
+
+/** CloudFront URLs are already resized by the CDN — skip Next.js optimizer to prevent timeouts. */
+export function shouldBypassImageOptimizer(src: string | undefined | null): boolean {
+  if (!src?.startsWith('http')) return false;
+  try {
+    return new URL(src).hostname.endsWith('.cloudfront.net');
+  } catch {
+    return false;
+  }
+}

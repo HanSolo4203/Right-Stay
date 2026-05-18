@@ -125,10 +125,10 @@ export default function PropertyLocationPickerView({
 
   return (
     <div className="space-y-2">
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-slate-500">
         Click the map or drag the pin to set the exact property location.
       </p>
-      <div className="property-map-frame admin-property-map h-[280px] overflow-hidden rounded-xl border border-white/10">
+      <div className="property-map-frame admin-property-map h-[280px] overflow-hidden rounded-xl border border-slate-200">
         <div ref={containerRef} className="h-full w-full" />
       </div>
     </div>

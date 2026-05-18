@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Dev uses NEXT_DIST_DIR (see scripts/dev-start.sh) so production .next is never touched.
+  distDir: process.env.NEXT_DIST_DIR || '.next',
   reactStrictMode: true,
   transpilePackages: ['leaflet', 'react-leaflet'],
   // Smaller dev + prod bundles when importing many icons from lucide-react.
