@@ -1,16 +1,29 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense, type ComponentType } from 'react';
+import dynamic from 'next/dynamic';
 import { Settings, Building2, Map, Menu, X, Calendar, Link, LogOut, Loader2, User, MessageSquare, DollarSign } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useRouter, useSearchParams } from 'next/navigation';
-import SiteSettings from '@/components/admin/SiteSettings';
-import PropertySettings from '@/components/admin/PropertySettings';
-import TourPackageSettings from '@/components/admin/TourPackageSettings';
-import BookingManagement from '@/components/admin/BookingManagement';
-import PropertyMapping from '@/components/admin/PropertyMapping';
-import PricingDashboard from '@/components/admin/PricingDashboard';
 import MatrixBackground from '@/components/admin/MatrixBackground';
+
+function TabLoader() {
+  return (
+    <div className="flex items-center justify-center py-24">
+      <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+    </div>
+  );
+}
+
+const dynamicTab = (loader: () => Promise<{ default: ComponentType }>) =>
+  dynamic(loader, { loading: TabLoader });
+
+const SiteSettings = dynamicTab(() => import('@/components/admin/SiteSettings'));
+const PropertySettings = dynamicTab(() => import('@/components/admin/PropertySettings'));
+const PricingDashboard = dynamicTab(() => import('@/components/admin/PricingDashboard'));
+const TourPackageSettings = dynamicTab(() => import('@/components/admin/TourPackageSettings'));
+const BookingManagement = dynamicTab(() => import('@/components/admin/BookingManagement'));
+const PropertyMapping = dynamicTab(() => import('@/components/admin/PropertyMapping'));
 
 type TabType = 'site' | 'properties' | 'pricing' | 'tours' | 'bookings' | 'mapping' | 'reviews';
 
@@ -29,7 +42,13 @@ function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<TabType>(() => parseTab(searchParams.get('tab')));
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const loadingRef = useRef(true);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  const finishLoading = () => {
+    loadingRef.current = false;
+    setLoading(false);
+  };
 
   useEffect(() => {
     setActiveTab(parseTab(searchParams.get('tab')));
@@ -48,7 +67,7 @@ function AdminDashboard() {
         
         if (error) {
           console.error('Auth error:', error);
-          setLoading(false);
+          finishLoading();
           router.push('/admin/login');
           return;
         }
@@ -57,20 +76,20 @@ function AdminDashboard() {
           router.push('/admin/login');
         } else {
           setUserEmail(session.user.email || null);
-          setLoading(false);
+          finishLoading();
         }
       } catch (error) {
         console.error('Error checking auth:', error);
-        setLoading(false);
+        finishLoading();
         router.push('/admin/login');
       }
     };
 
     // Set a timeout to prevent infinite loading
     const timeout = setTimeout(() => {
-      if (loading) {
+      if (loadingRef.current) {
         console.warn('Auth check timeout, redirecting to login');
-        setLoading(false);
+        finishLoading();
         router.push('/admin/login');
       }
     }, 5000);
@@ -83,7 +102,7 @@ function AdminDashboard() {
         router.push('/admin/login');
       } else if (session) {
         setUserEmail(session.user.email || null);
-        setLoading(false);
+        finishLoading();
       }
     });
 
@@ -91,7 +110,7 @@ function AdminDashboard() {
       clearTimeout(timeout);
       subscription.unsubscribe();
     };
-  }, [router, loading]);
+  }, [router]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
