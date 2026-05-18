@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from 'react';
-import Image from 'next/image';
+import ListingImage from '@/components/ui/ListingImage';
 import { X, ChevronLeft, ChevronRight, Grid, Wifi, Car, Coffee, Shield, MapPin, Star, Users, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { listingImageSrc } from '@/lib/listing-image';
@@ -150,15 +150,13 @@ export default function QuickViewModal({ isOpen, onClose, property }: QuickViewM
                   className="col-span-4 md:col-span-2 relative group cursor-pointer rounded-lg overflow-hidden" 
                   onClick={() => setShowPhotoModal(true)}
                 >
-                  <Image
+                  <ListingImage
                     key={mainPhoto?.id ?? `main-${selectedPhotoIndex}`}
-                    src={listingImageSrc(mainPhoto?.url || propertyImage, 'modalMain')}
+                    src={mainPhoto?.url || propertyImage}
                     alt={property.title}
+                    variant="modalMain"
                     fill
                     className="object-cover"
-                    priority
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    quality={78}
                   />
                   {hasMultiplePhotos && (
                     <>
@@ -205,13 +203,13 @@ export default function QuickViewModal({ isOpen, onClose, property }: QuickViewM
                             setShowPhotoModal(true);
                           }}
                         >
-                          <Image
-                            src={listingImageSrc(photo.url, 'modalTile')}
+                          <ListingImage
+                            src={photo.url}
                             alt={`${property.title} - Photo ${actualIndex + 1}`}
+                            variant="modalTile"
                             fill
                             className="object-cover"
-                            sizes="(max-width: 768px) 50vw, 25vw"
-                            quality={72}
+                            loading="lazy"
                           />
                           {/* Show All Photos Overlay */}
                           {showAllButton && (
@@ -244,13 +242,13 @@ export default function QuickViewModal({ isOpen, onClose, property }: QuickViewM
                           </div>
                         </button>
                         {galleryPhotos[4] && (
-                          <Image
-                            src={listingImageSrc(galleryPhotos[4].url, 'modalTile')}
+                          <ListingImage
+                            src={galleryPhotos[4].url}
                             alt={`${property.title} - Photo 5`}
+                            variant="modalTile"
                             fill
                             className="object-cover"
-                            sizes="50vw"
-                            quality={72}
+                            loading="lazy"
                           />
                         )}
                       </div>
@@ -262,14 +260,12 @@ export default function QuickViewModal({ isOpen, onClose, property }: QuickViewM
           ) : (
             <div className="p-4">
               <div className="relative h-[300px] md:h-[400px] rounded-2xl overflow-hidden bg-gray-200">
-                <Image
-                  src={listingImageSrc(propertyImage, 'modalMain')}
+                <ListingImage
+                  src={propertyImage}
                   alt={property.title}
+                  variant="modalMain"
                   fill
                   className="object-cover"
-                  priority
-                  sizes="100vw"
-                  quality={78}
                 />
               </div>
             </div>
@@ -405,18 +401,16 @@ export default function QuickViewModal({ isOpen, onClose, property }: QuickViewM
                       <Loader2 className="h-10 w-10 animate-spin text-white/80" aria-hidden />
                     </div>
                   )}
-                  <Image
+                  <ListingImage
                     key={`lb-${photos[selectedPhotoIndex].id ?? selectedPhotoIndex}`}
-                    src={listingImageSrc(photos[selectedPhotoIndex].url, 'lightbox')}
+                    src={photos[selectedPhotoIndex].url}
                     alt={`${property.title} - Photo ${selectedPhotoIndex + 1}`}
+                    variant="lightbox"
                     fill
                     className={`object-contain transition-opacity duration-300 ${
                       lightboxMainLoaded ? 'opacity-100' : 'opacity-0'
                     }`}
                     priority
-                    fetchPriority="high"
-                    sizes="(max-width: 1280px) 90vw, 1152px"
-                    quality={78}
                     onLoad={() => setLightboxMainLoaded(true)}
                     onError={() => setLightboxMainLoaded(true)}
                   />
@@ -461,13 +455,14 @@ export default function QuickViewModal({ isOpen, onClose, property }: QuickViewM
                       : 'border-transparent hover:border-white/50'
                   }`}
                 >
-                  <Image
-                    src={listingImageSrc(photo.url, 'thumbnail')}
+                  <ListingImage
+                    src={photo.url}
                     alt={`Thumbnail ${index + 1}`}
+                    variant="thumbnail"
+                    sizes="96px"
                     fill
                     className="object-cover"
-                    sizes="96px"
-                    quality={68}
+                    loading="lazy"
                   />
                 </button>
               ))}

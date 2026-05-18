@@ -3,6 +3,8 @@ import Header from '@/components/sections/Header';
 import Footer from '@/components/sections/Footer';
 import Link from 'next/link';
 import Image from 'next/image';
+import HeroBackgroundImage from '@/components/ui/HeroBackgroundImage';
+import { IMAGE_SIZES } from '@/lib/image-sizes';
 import { ArrowLeft, ArrowRight, TrendingUp, DollarSign, Shield, BarChart3, Calendar, Users } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -57,13 +59,13 @@ export default function AssetManagementPage() {
   return (
     <>
       <section className="isolate min-h-[500px] overflow-hidden relative">
-        <Image
-          src="/images/d953ad7f-2dd7-42f7-8f74-593d55181036_3840w_1.jpg"
-          alt="Asset Management"
-          fill
-          sizes="100vw"
-          className="pointer-events-none object-cover"
-        />
+        <div className="absolute inset-0">
+          <HeroBackgroundImage
+            src="/images/d953ad7f-2dd7-42f7-8f74-593d55181036_800w_1.jpg"
+            alt="Asset Management"
+            className="pointer-events-none object-cover"
+          />
+        </div>
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-black/70 to-black/50"></div>
         
         <Header />
@@ -137,7 +139,7 @@ export default function AssetManagementPage() {
                   src="/images/993d5154-c104-4507-8c0a-55364d2a948c_800w_1.jpg"
                   alt="Property Management"
                   fill
-                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  sizes={IMAGE_SIZES.half}
                   className="object-cover"
                 />
               </div>

@@ -23,7 +23,7 @@ const Footer = dynamic(() => import('@/components/sections/Footer'));
 export default function Home() {
   return (
     <>
-      <section className="isolate h-screen overflow-hidden relative">
+      <section className="isolate min-h-screen overflow-x-hidden relative">
         <Header />
         <HeroSection />
       </section>

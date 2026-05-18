@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import Image from 'next/image';
+import HeroBackgroundImage from '@/components/ui/HeroBackgroundImage';
 import { Quote, User, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
@@ -94,13 +94,13 @@ export default function TestimonialSection() {
 
   return (
     <section className="isolate overflow-hidden min-h-[600px] py-16 md:py-24 relative">
-      <Image
-        src="/images/6b428a64-0de1-4837-bab2-9729ce2e28c2_3840w_1.jpg"
-        alt="Atmospheric mountain landscape"
-        fill
-        sizes="100vw"
-        className="pointer-events-none object-cover"
-      />
+      <div className="absolute inset-0">
+        <HeroBackgroundImage
+          src="/images/6b428a64-0de1-4837-bab2-9729ce2e28c2_800w_1.jpg"
+          alt="Atmospheric mountain landscape"
+          className="pointer-events-none object-cover"
+        />
+      </div>
       <div className="z-10 flex min-h-[600px] relative items-center overflow-hidden">
         {/* Navigation Arrows */}
         {reviews.length > 1 && (

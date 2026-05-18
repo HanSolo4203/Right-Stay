@@ -6,7 +6,7 @@ import Header from '@/components/sections/Header';
 import AccommodationCards from '@/components/sections/AccommodationCards';
 import Footer from '@/components/sections/Footer';
 import Link from 'next/link';
-import Image from 'next/image';
+import HeroBackgroundImage from '@/components/ui/HeroBackgroundImage';
 import { ArrowLeft, Search, Calendar, Users, MapPin, ChevronDown, ChevronRight } from 'lucide-react';
 
 function StayWithUsContent() {
@@ -114,17 +114,14 @@ function StayWithUsContent() {
       <section className="isolate min-h-[600px] overflow-hidden relative">
         {/* Background Image */}
         <div className="absolute inset-0">
-          <Image
+          <HeroBackgroundImage
             src="/cpt-lions-head-1.jpg"
-            alt=""
-            fill
-            sizes="100vw"
+            priority
             className="pointer-events-none object-cover motion-safe:[animation:cloudDrift_5s_ease-out_forwards]"
             style={{
               maskImage: 'linear-gradient(to bottom, black 85%, transparent)',
               WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent)',
             }}
-            priority
           />
         </div>
 
@@ -153,7 +150,7 @@ function StayWithUsContent() {
 
             {/* Right Side - Search Card */}
             <div className="lg:col-span-5 flex items-center justify-center w-full" style={{ animation: 'fadeSlideIn 1s ease-out 0.4s both' }}>
-              <div className="w-full max-w-2xl border-white/10 border rounded-3xl pt-8 pr-8 pb-8 pl-8 shadow-[0_2.8px_2.2px_rgba(0,_0,_0,_0.034),_0_6.7px_5.3px_rgba(0,_0,_0,_0.048),_0_12.5px_10px_rgba(0,_0,_0,_0.06),_0_22.3px_17.9px_rgba(0,_0,_0,_0.072),_0_41.8px_33.4px_rgba(0,_0,_0,_0.086),_0_100px_80px_rgba(0,_0,_0,_0.12)] backdrop-blur-xl bg-white/5">
+              <div className="w-full max-w-2xl min-w-0 border-white/10 border rounded-3xl p-4 sm:p-8 shadow-[0_2.8px_2.2px_rgba(0,_0,_0,_0.034),_0_6.7px_5.3px_rgba(0,_0,_0,_0.048),_0_12.5px_10px_rgba(0,_0,_0,_0.06),_0_22.3px_17.9px_rgba(0,_0,_0,_0.072),_0_41.8px_33.4px_rgba(0,_0,_0,_0.086),_0_100px_80px_rgba(0,_0,_0,_0.12)] backdrop-blur-xl bg-white/5 overflow-hidden">
                 <p className="leading-relaxed text-lg font-normal text-white/90 tracking-tight mb-6">
                   Accommodations<span className="text-white/60 mx-2">•</span>Tours & Experiences
                 </p>
@@ -182,9 +179,9 @@ function StayWithUsContent() {
                   </div>
 
                   {/* Date and Guest Inputs */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
                     {/* Check In Date */}
-                    <div className="relative">
+                    <div className="relative min-w-0 overflow-hidden">
                       <Calendar 
                         className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/60 z-10 cursor-pointer hover:text-white/80 transition-colors" 
                         onClick={() => openDatePicker(checkInInputRef)}
@@ -196,7 +193,7 @@ function StayWithUsContent() {
                         onChange={(e) => setFormData(prev => ({ ...prev, checkIn: e.target.value }))}
                         min={today}
                         required
-                        className="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/20 rounded-2xl text-white focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent cursor-pointer [color-scheme:dark] hide-native-calendar-icon"
+                        className="w-full min-w-0 max-w-full box-border pl-12 pr-4 py-4 bg-white/10 border border-white/20 rounded-2xl text-white focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent cursor-pointer [color-scheme:dark] hide-native-calendar-icon"
                         style={{ 
                           color: formData.checkIn ? 'white' : 'transparent',
                         }}
@@ -208,7 +205,7 @@ function StayWithUsContent() {
                       )}
                     </div>
                     {/* Check Out Date */}
-                    <div className="relative">
+                    <div className="relative min-w-0 overflow-hidden">
                       <Calendar 
                         className={`absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/60 z-10 transition-colors ${!formData.checkIn ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:text-white/80'}`}
                         onClick={() => {
@@ -225,7 +222,7 @@ function StayWithUsContent() {
                         min={formData.checkIn ? minCheckOutDate : today}
                         required
                         disabled={!formData.checkIn}
-                        className="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/20 rounded-2xl text-white focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer [color-scheme:dark] hide-native-calendar-icon"
+                        className="w-full min-w-0 max-w-full box-border pl-12 pr-4 py-4 bg-white/10 border border-white/20 rounded-2xl text-white focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer [color-scheme:dark] hide-native-calendar-icon"
                         style={{ 
                           color: formData.checkOut ? 'white' : 'transparent',
                         }}

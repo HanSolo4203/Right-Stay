@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Header from '@/components/sections/Header';
 import Footer from '@/components/sections/Footer';
 import Link from 'next/link';
-import Image from 'next/image';
+import HeroBackgroundImage from '@/components/ui/HeroBackgroundImage';
 import { ArrowLeft, ArrowRight, Heart, Target, Award, Users } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -60,14 +60,13 @@ export default function AboutPage() {
   return (
     <>
       <section className="isolate min-h-[500px] overflow-hidden relative">
-        <Image
-          src="/cpt-lions-head-1.jpg"
-          alt="About Right Stay Africa"
-          fill
-          sizes="100vw"
-          className="pointer-events-none object-cover"
-          priority
-        />
+        <div className="absolute inset-0">
+          <HeroBackgroundImage
+            src="/cpt-lions-head-1.jpg"
+            alt="About Right Stay Africa"
+            className="pointer-events-none object-cover"
+          />
+        </div>
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-black/70 to-black/50" />
 
         <Header />

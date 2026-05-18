@@ -3,6 +3,7 @@ import Header from '@/components/sections/Header';
 import Footer from '@/components/sections/Footer';
 import Link from 'next/link';
 import Image from 'next/image';
+import { IMAGE_SIZES } from '@/lib/image-sizes';
 import { ArrowLeft, ArrowRight, MapPin, Clock, Users, Star } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -125,7 +126,7 @@ export default function ToursPage() {
                     src={tour.image}
                     alt={tour.title}
                     fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    sizes={IMAGE_SIZES.gridThird}
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                   <div className="absolute top-4 right-4">

@@ -1,23 +1,20 @@
 "use client";
 
-import Image from 'next/image';
+import HeroBackgroundImage from '@/components/ui/HeroBackgroundImage';
 import { Mail, MapPin, Phone } from 'lucide-react';
 
 export default function ContactHero() {
   return (
     <section className="isolate min-h-[600px] overflow-hidden relative">
-      <Image
-        src="/images/6b428a64-0de1-4837-bab2-9729ce2e28c2_3840w_1.jpg"
-        alt=""
-        fill
-        sizes="100vw"
-        className="pointer-events-none object-cover"
-        style={{ 
-          maskImage: 'linear-gradient(to bottom, black 85%, transparent)',
-          WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent)'
-        }}
-        priority
-      />
+      <div className="absolute inset-0">
+        <HeroBackgroundImage
+          src="/images/6b428a64-0de1-4837-bab2-9729ce2e28c2_800w_1.jpg"
+          style={{
+            maskImage: 'linear-gradient(to bottom, black 85%, transparent)',
+            WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent)',
+          }}
+        />
+      </div>
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_60%_at_50%_40%,rgba(0,0,0,0.3),rgba(0,0,0,0.7)),linear-gradient(to_top,rgba(0,0,0,0.85),rgba(0,0,0,0.35))]"></div>
 
       <div className="z-10 relative">
@@ -63,4 +60,3 @@ export default function ContactHero() {
     </section>
   );
 }
-

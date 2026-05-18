@@ -1,6 +1,7 @@
 "use client";
 
 import Image from 'next/image';
+import { IMAGE_SIZES } from '@/lib/image-sizes';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { DollarSign, MessageSquare, Users, Shield } from 'lucide-react';
 
@@ -78,7 +79,7 @@ export default function TrustSection() {
                 src="/images/993d5154-c104-4507-8c0a-55364d2a948c_800w_1.jpg"
                 alt="Modern African luxury accommodation"
                 fill
-                sizes="(max-width: 1024px) 100vw, 50vw"
+                sizes={IMAGE_SIZES.half}
                 className="object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>

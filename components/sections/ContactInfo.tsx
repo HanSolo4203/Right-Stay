@@ -1,6 +1,8 @@
 "use client";
 
 import Image from 'next/image';
+import HeroBackgroundImage from '@/components/ui/HeroBackgroundImage';
+import { IMAGE_SIZES } from '@/lib/image-sizes';
 import { Clock, MapPin, Globe, Users } from 'lucide-react';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
@@ -9,13 +11,12 @@ export default function ContactInfo() {
 
   return (
     <section className="isolate overflow-hidden py-24 relative">
-      <Image
-        src="/images/d953ad7f-2dd7-42f7-8f74-593d55181036_3840w_1.jpg"
-        alt=""
-        fill
-        sizes="100vw"
-        className="pointer-events-none object-cover opacity-30"
-      />
+      <div className="absolute inset-0">
+        <HeroBackgroundImage
+          src="/images/d953ad7f-2dd7-42f7-8f74-593d55181036_800w_1.jpg"
+          className="pointer-events-none object-cover opacity-30"
+        />
+      </div>
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black via-black/95 to-black"></div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 md:px-8">
@@ -81,7 +82,7 @@ export default function ContactInfo() {
               src="/images/993d5154-c104-4507-8c0a-55364d2a948c_800w_1.jpg"
               alt="Office location"
               fill
-              sizes="(max-width: 1024px) 100vw, 50vw"
+              sizes={IMAGE_SIZES.half}
               className="object-cover opacity-40"
             />
             <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm">

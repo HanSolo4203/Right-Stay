@@ -6,7 +6,7 @@ export default function SecondHero() {
   useScrollAnimation();
 
   return (
-    <section className="isolate overflow-hidden py-24 relative bg-white">
+    <section className="isolate overflow-hidden pt-12 pb-24 sm:pt-16 sm:pb-24 relative bg-white">
       <div className="relative z-10 mx-auto max-w-7xl px-6 md:px-8">
         <div className="text-center">
           <h2 

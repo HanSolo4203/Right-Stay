@@ -3,13 +3,12 @@ const nextConfig = {
   // Dev uses NEXT_DIST_DIR (see scripts/dev-start.sh) so production .next is never touched.
   distDir: process.env.NEXT_DIST_DIR || '.next',
   reactStrictMode: true,
-  transpilePackages: ['leaflet', 'react-leaflet'],
+  transpilePackages: ['leaflet'],
   // Smaller dev + prod bundles when importing many icons from lucide-react.
   experimental: {
     optimizePackageImports: [
       'lucide-react',
       '@supabase/supabase-js',
-      'react-leaflet',
       'leaflet',
     ],
   },

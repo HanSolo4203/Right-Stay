@@ -1212,8 +1212,7 @@ export default function PropertySettings() {
                     src={primaryPhotoUrl}
                     alt={editingProperty.name}
                     variant="hero"
-                    sizes="100vw"
-                    priority
+                    sizes="(max-width: 1024px) 100vw, 640px"
                   />
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
                     <p className="text-slate-900 text-sm font-medium">{editingProperty.name}</p>

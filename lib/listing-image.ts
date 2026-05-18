@@ -71,7 +71,16 @@ const PROPERTY_PHOTO_WIDTHS: Record<PropertyPhotoVariant, number> = {
   hero: 1280,
 };
 
-/** Resize Uplisting CloudFront URLs via their `width` query param (avoids heavy originals). */
+const PROPERTY_TO_LISTING_VARIANT: Record<
+  PropertyPhotoVariant,
+  ListingImageVariant
+> = {
+  thumb: 'thumbnail',
+  gallery: 'modalTile',
+  hero: 'modalMain',
+};
+
+/** Resize remote property photos (CloudFront width param or Supabase render). */
 export function propertyPhotoSrc(
   src: string | undefined | null,
   variant: PropertyPhotoVariant = 'thumb'
@@ -84,6 +93,9 @@ export function propertyPhotoSrc(
     if (u.hostname.endsWith('.cloudfront.net')) {
       u.searchParams.set('width', String(PROPERTY_PHOTO_WIDTHS[variant]));
       return u.toString();
+    }
+    if (u.hostname.endsWith('.supabase.co')) {
+      return listingImageSrc(src, PROPERTY_TO_LISTING_VARIANT[variant]);
     }
   } catch {
     return src;

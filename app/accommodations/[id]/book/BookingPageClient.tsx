@@ -7,7 +7,7 @@ import Header from '@/components/sections/Header';
 import Footer from '@/components/sections/Footer';
 import AvailabilityCalendar from '@/components/AvailabilityCalendar';
 import Link from 'next/link';
-import Image from 'next/image';
+import ListingImage from '@/components/ui/ListingImage';
 import { getNextAvailableNightlyPrice } from '@/lib/pricing';
 import {
   extractLocationFromAttributes,
@@ -442,7 +442,7 @@ export default function BookingPageClient() {
 
   return (
     <>
-      <section className="isolate min-h-screen overflow-hidden relative bg-white">
+      <section className="isolate min-h-screen overflow-x-hidden relative bg-white">
         {/* Header with background */}
         <div className="relative bg-gradient-to-br from-right-stay-500 to-right-stay-600">
           <Header />
@@ -450,7 +450,7 @@ export default function BookingPageClient() {
         
         <div className="relative z-10 bg-white">
           {/* Back Button */}
-          <div className="mx-auto max-w-7xl px-6 md:px-8 pt-6 pb-4">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 pt-6 pb-4">
             <Link
               href="/accommodations"
               className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
@@ -474,17 +474,17 @@ export default function BookingPageClient() {
 
           {/* Photo Gallery Section - Airbnb Style */}
           {photos.length > 0 ? (
-            <div className="mx-auto max-w-7xl px-6 md:px-8 mb-8">
-              <div className="grid grid-cols-4 gap-2 rounded-2xl overflow-hidden h-[400px] md:h-[600px]">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 mb-8">
+              <div className="grid grid-cols-4 gap-2 rounded-2xl overflow-hidden h-[280px] sm:h-[400px] md:h-[600px]">
                 {/* Main Large Photo */}
                 <div className="col-span-4 md:col-span-2 relative group cursor-pointer" onClick={() => setShowPhotoModal(true)}>
-                  <Image
+                  <ListingImage
                     src={mainPhoto.url}
                     alt={propertyData?.name || "Property"}
+                    variant="modalMain"
                     fill
                     className="object-cover"
                     priority
-                    sizes="(max-width: 768px) 100vw, 50vw"
                   />
                   {photos.length > 1 && (
                     <>
@@ -530,12 +530,13 @@ export default function BookingPageClient() {
                             setShowPhotoModal(true);
                           }}
                         >
-                          <Image
+                          <ListingImage
                             src={photo.url}
                             alt={`${propertyData?.name || "Property"} - Photo ${index + 2}`}
+                            variant="modalTile"
                             fill
                             className="object-cover"
-                            sizes="(max-width: 768px) 50vw, 25vw"
+                            loading="lazy"
                           />
                           {/* Show All Photos Overlay */}
                           {showAllButton && (
@@ -568,12 +569,13 @@ export default function BookingPageClient() {
                           </div>
                         </button>
                         {galleryPhotos[4] && (
-                          <Image
+                          <ListingImage
                             src={galleryPhotos[4].url}
                             alt={`${propertyData?.name || "Property"} - Photo 5`}
+                            variant="modalTile"
                             fill
                             className="object-cover"
-                            sizes="50vw"
+                            loading="lazy"
                           />
                         )}
                       </div>
@@ -585,53 +587,56 @@ export default function BookingPageClient() {
           ) : (
             <div className="mx-auto max-w-7xl px-6 md:px-8 mb-8">
               <div className="relative h-[400px] md:h-[600px] rounded-2xl overflow-hidden bg-gray-200">
-                <Image
+                <ListingImage
                   src={propertyImage}
                   alt={propertyData?.name || "Property"}
+                  variant="modalMain"
                   fill
                   className="object-cover"
                   priority
-                  sizes="100vw"
                 />
               </div>
             </div>
           )}
 
           {/* Property Title and Actions */}
-          <div className="mx-auto max-w-7xl px-6 md:px-8 mb-6">
-            <div className="flex items-start justify-between">
-              <div>
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 mb-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0 flex-1">
                 <h1 
-                  className="text-3xl md:text-4xl font-semibold text-gray-900 mb-2"
+                  className="text-2xl sm:text-3xl md:text-4xl font-semibold text-gray-900 mb-3 break-words leading-tight"
                   style={{ fontFamily: 'Manrope, sans-serif' }}
                 >
                   {propertyData?.name || propertyData?.nickname}
                 </h1>
-                <div className="flex items-center gap-4 text-gray-600 text-sm">
-                  <div className="flex items-center gap-1">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-gray-600 text-sm">
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 shrink-0" />
                     <span className="font-medium">4.8</span>
-                    <span>({Math.floor(Math.random() * 100) + 50} reviews)</span>
+                    <span className="whitespace-nowrap">({Math.floor(Math.random() * 100) + 50} reviews)</span>
                   </div>
-                  <span>•</span>
-                  <span>{propertyData?.maximum_capacity || 2} guests</span>
-                  <span>•</span>
-                  <span>{propertyData?.bedrooms || 1} bed</span>
-                  <span>•</span>
-                  <span>{propertyData?.bathrooms || 1} bath</span>
-                  <span>•</span>
-                  <span>{propertyData?.type || 'Entire place'}</span>
-                  <span>•</span>
-                  <MapPin className="h-4 w-4" />
-                  <span>{locationDisplayLabel}</span>
+                  <span className="text-gray-400" aria-hidden="true">•</span>
+                  <span className="whitespace-nowrap">{propertyData?.maximum_capacity || 2} guests</span>
+                  <span className="text-gray-400" aria-hidden="true">•</span>
+                  <span className="whitespace-nowrap">{propertyData?.bedrooms || 1} bed</span>
+                  <span className="text-gray-400" aria-hidden="true">•</span>
+                  <span className="whitespace-nowrap">{propertyData?.bathrooms || 1} bath</span>
+                  <span className="text-gray-400" aria-hidden="true">•</span>
+                  <span className="whitespace-nowrap">{propertyData?.type || 'Entire place'}</span>
+                  {locationDisplayLabel && (
+                    <span className="flex items-center gap-1 min-w-0 basis-full sm:basis-auto">
+                      <MapPin className="h-4 w-4 shrink-0" />
+                      <span className="truncate">{locationDisplayLabel}</span>
+                    </span>
+                  )}
                 </div>
               </div>
-              <div className="flex items-center gap-4">
-                <button className="p-2 rounded-full hover:bg-gray-100 transition-colors flex items-center gap-2 text-gray-700">
+              <div className="flex items-center gap-2 shrink-0 sm:gap-4">
+                <button type="button" className="p-2 rounded-full hover:bg-gray-100 transition-colors flex items-center gap-2 text-gray-700">
                   <Share2 className="h-5 w-5" />
                   <span className="hidden md:inline text-sm font-medium">Share</span>
                 </button>
-                <button className="p-2 rounded-full hover:bg-gray-100 transition-colors flex items-center gap-2 text-gray-700">
+                <button type="button" className="p-2 rounded-full hover:bg-gray-100 transition-colors flex items-center gap-2 text-gray-700">
                   <Heart className="h-5 w-5" />
                   <span className="hidden md:inline text-sm font-medium">Save</span>
                 </button>
@@ -640,7 +645,7 @@ export default function BookingPageClient() {
           </div>
 
           {/* Main Content Layout */}
-          <div className="mx-auto max-w-7xl px-6 md:px-8 pb-12">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 pb-16 sm:pb-12">
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
             {/* Property Details and Booking Form - Left Side */}
             <div className="lg:col-span-3 space-y-8">
@@ -943,13 +948,13 @@ export default function BookingPageClient() {
               {/* Main Photo Display */}
               <div className="relative aspect-video bg-gray-900 rounded-2xl overflow-hidden mb-4">
                 {photos[selectedPhotoIndex] && (
-                  <Image
+                  <ListingImage
                     src={photos[selectedPhotoIndex].url}
                     alt={`${propertyData?.name || "Property"} - Photo ${selectedPhotoIndex + 1}`}
+                    variant="lightbox"
                     fill
                     className="object-contain"
                     priority
-                    sizes="90vw"
                   />
                 )}
                 
@@ -991,12 +996,14 @@ export default function BookingPageClient() {
                         : 'border-transparent hover:border-white/50'
                     }`}
                   >
-                    <Image
+                    <ListingImage
                       src={photo.url}
                       alt={`Thumbnail ${index + 1}`}
+                      variant="thumbnail"
+                      sizes="96px"
                       fill
                       className="object-cover"
-                      sizes="96px"
+                      loading="lazy"
                     />
                   </button>
                 ))}

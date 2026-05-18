@@ -1,6 +1,7 @@
 "use client";
 
 import Image from 'next/image';
+import { IMAGE_SIZES } from '@/lib/image-sizes';
 import Link from 'next/link';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { Home, Compass, TrendingUp, ArrowRight } from 'lucide-react';
@@ -23,7 +24,7 @@ export default function ServicesSection() {
       description: "Discover Africa's hidden gems with our expertly designed tours. From cultural experiences to adventure excursions, we create unforgettable journeys tailored to your interests.",
       link: "/tours",
       linkText: "Explore Tours",
-      image: "/images/6d30fe29-43aa-4fc2-a513-6aa41d38a7d0_3840w_1.jpg"
+      image: "/images/6d30fe29-43aa-4fc2-a513-6aa41d38a7d0_800w_1.jpg"
     },
     {
       icon: TrendingUp,
@@ -31,7 +32,7 @@ export default function ServicesSection() {
       description: "Comprehensive property management services for owners. We handle everything from bookings and cleaning to maintenance and financial reporting with complete transparency.",
       link: "/asset-management",
       linkText: "Learn More",
-      image: "/images/d953ad7f-2dd7-42f7-8f74-593d55181036_3840w_1.jpg"
+      image: "/images/d953ad7f-2dd7-42f7-8f74-593d55181036_800w_1.jpg"
     }
   ];
 
@@ -69,7 +70,7 @@ export default function ServicesSection() {
                   src={service.image}
                   alt={service.title}
                   fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  sizes={IMAGE_SIZES.gridThird}
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>

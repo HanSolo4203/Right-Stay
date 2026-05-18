@@ -3,11 +3,10 @@
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { useSearchParams } from 'next/navigation';
-import Image from 'next/image';
+import ListingImage from '@/components/ui/ListingImage';
 import Link from 'next/link';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { Star, MapPin, Users, Calendar, Wifi, Car, Coffee, Shield, Eye, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
-import { listingImageSrc } from '@/lib/listing-image';
 
 const QuickViewModal = dynamic(() => import('@/components/QuickViewModal'), {
   ssr: false,
@@ -626,18 +625,14 @@ function AccommodationCardsContent() {
                         className="relative w-full h-full cursor-pointer"
                         onClick={() => setQuickViewProperty(accommodation)}
                       >
-                        <Image
-                          src={listingImageSrc(
-                            currentPhoto.url || accommodation.image,
-                            'card'
-                          )}
+                        <ListingImage
+                          src={currentPhoto.url || accommodation.image}
                           alt={accommodation.title}
+                          variant="card"
                           fill
-                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           className="object-cover transition-opacity duration-300"
                           key={currentPhoto.id}
-                          priority={index < 6}
-                          quality={78}
+                          loading={index === 0 ? 'eager' : 'lazy'}
                         />
                         
                         {/* Rating Badge */}
@@ -712,16 +707,13 @@ function AccommodationCardsContent() {
                         }`}
                         aria-label={`Go to photo ${thumbIndex + 1}`}
                       >
-                        <Image
-                          src={listingImageSrc(
-                            photo.url || accommodation.image,
-                            'thumbnail'
-                          )}
+                        <ListingImage
+                          src={photo.url || accommodation.image}
                           alt={`${accommodation.title} - Photo ${thumbIndex + 1}`}
+                          variant="thumbnail"
                           fill
-                          sizes="32px"
                           className="object-cover"
-                          quality={65}
+                          loading="lazy"
                         />
                       </button>
                     ))}
