@@ -4,7 +4,12 @@ const nextConfig = {
   transpilePackages: ['leaflet', 'react-leaflet'],
   // Smaller dev + prod bundles when importing many icons from lucide-react.
   experimental: {
-    optimizePackageImports: ['lucide-react'],
+    optimizePackageImports: [
+      'lucide-react',
+      '@supabase/supabase-js',
+      'react-leaflet',
+      'leaflet',
+    ],
   },
   images: {
     // Serve responsive sizes via the Next.js optimizer (respects `sizes` on <Image />).
