@@ -119,11 +119,10 @@ function StayWithUsContent() {
             alt=""
             fill
             sizes="100vw"
-            className="pointer-events-none object-cover"
-            style={{ 
+            className="pointer-events-none object-cover motion-safe:[animation:cloudDrift_5s_ease-out_forwards]"
+            style={{
               maskImage: 'linear-gradient(to bottom, black 85%, transparent)',
               WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent)',
-              animation: 'cloudDrift 5s ease-out forwards'
             }}
             priority
           />

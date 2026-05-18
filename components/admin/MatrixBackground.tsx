@@ -1,84 +1,127 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
+/** Decorative admin backdrop. Pauses when tab is hidden and respects reduced motion. */
 export default function MatrixBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setReducedMotion(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
+
+  useEffect(() => {
+    if (reducedMotion) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas size
+    let drops: number[] = [];
+    let intervalId: ReturnType<typeof setInterval> | null = null;
+    let running = false;
+
+    const chars =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()_+-=[]{}|;:,.<>?';
+    const charArray = chars.split('');
+    const fontSize = 14;
+
+    const initColumns = () => {
+      const maxColumns = window.innerWidth < 768 ? 48 : 120;
+      const columns = Math.min(Math.floor(canvas.width / fontSize), maxColumns);
+      drops = Array.from({ length: columns }, () => Math.random() * -100);
+    };
+
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
+      initColumns();
     };
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
 
-    // Matrix characters - mix of letters, numbers, and symbols
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()_+-=[]{}|;:,.<>?アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
-    const charArray = chars.split('');
-
-    // Column properties
-    const fontSize = 14;
-    const columns = Math.floor(canvas.width / fontSize);
-    const drops: number[] = [];
-
-    // Initialize drops
-    for (let i = 0; i < columns; i++) {
-      drops[i] = Math.random() * -100;
-    }
-
-    // Animation function
     const draw = () => {
-      // Semi-transparent black background for trail effect
+      if (!running) return;
+
       ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Green color with varying brightness
-      ctx.fillStyle = '#00ff41'; // Matrix green
+      ctx.fillStyle = '#00ff41';
       ctx.font = `${fontSize}px monospace`;
 
-      // Draw characters
       for (let i = 0; i < drops.length; i++) {
         const text = charArray[Math.floor(Math.random() * charArray.length)];
         const x = i * fontSize;
         const y = drops[i] * fontSize;
-
-        // Varying opacity for depth effect
         const opacity = Math.min(1, (drops[i] * fontSize) / (canvas.height * 0.3));
         ctx.globalAlpha = opacity;
         ctx.fillText(text, x, y);
-
-        // Reset drop if it reaches bottom or randomly
         if (y > canvas.height && Math.random() > 0.975) {
           drops[i] = 0;
         }
         drops[i]++;
       }
-
       ctx.globalAlpha = 1;
     };
 
-    // Animation loop
-    const interval = setInterval(draw, 35);
+    const start = () => {
+      if (running) return;
+      running = true;
+      if (!intervalId) {
+        intervalId = setInterval(draw, 80);
+      }
+    };
+
+    const stop = () => {
+      running = false;
+      if (intervalId) {
+        clearInterval(intervalId);
+        intervalId = null;
+      }
+    };
+
+    const onVisibility = () => {
+      if (document.hidden) stop();
+      else start();
+    };
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    document.addEventListener('visibilitychange', onVisibility);
+
+    if (!document.hidden) start();
 
     return () => {
-      clearInterval(interval);
+      stop();
       window.removeEventListener('resize', resizeCanvas);
+      document.removeEventListener('visibilitychange', onVisibility);
     };
-  }, []);
+  }, [reducedMotion]);
+
+  if (reducedMotion) {
+    return <StaticAdminBackdrop />;
+  }
 
   return (
     <canvas
       ref={canvasRef}
       className="fixed inset-0 w-full h-full pointer-events-none z-0"
       style={{ background: '#000000' }}
+      aria-hidden
+    />
+  );
+}
+
+function StaticAdminBackdrop() {
+  return (
+    <div
+      className="fixed inset-0 w-full h-full pointer-events-none z-0"
+      style={{ background: 'radial-gradient(ellipse at 50% 0%, #0a1f0a 0%, #000 70%)' }}
+      aria-hidden
     />
   );
 }
