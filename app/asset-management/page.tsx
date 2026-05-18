@@ -1,13 +1,17 @@
-"use client";
-
+import type { Metadata } from 'next';
 import Header from '@/components/sections/Header';
 import Footer from '@/components/sections/Footer';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, ArrowRight, TrendingUp, DollarSign, Shield, BarChart3, Calendar, Users } from 'lucide-react';
 
-export default function AssetManagementPage() {
-  const services = [
+export const metadata: Metadata = {
+  title: 'Asset Management — Right Stay Africa',
+  description:
+    'Full-service property management for owners — bookings, guest services, maintenance, and transparent financial reporting.',
+};
+
+const services = [
     {
       icon: Calendar,
       title: "Booking Management",
@@ -37,18 +41,19 @@ export default function AssetManagementPage() {
       icon: TrendingUp,
       title: "Revenue Optimization",
       description: "Dynamic pricing strategies, seasonal adjustments, and promotional campaigns to maximize your returns throughout the year."
-    }
-  ];
+    },
+];
 
-  const benefits = [
+const benefits = [
     "Comprehensive property management with zero hassle",
     "Transparent monthly reporting and financial statements",
     "Professional cleaning and maintenance coordination",
     "Marketing across major booking platforms",
     "Legal compliance and guest vetting",
-    "Insurance and risk management"
-  ];
+    'Insurance and risk management',
+];
 
+export default function AssetManagementPage() {
   return (
     <>
       <section className="isolate min-h-[500px] overflow-hidden relative">
@@ -104,7 +109,10 @@ export default function AssetManagementPage() {
                 className="rounded-2xl border border-gray-200 bg-gray-50 p-8 hover:bg-white hover:shadow-lg transition-all duration-300"
               >
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-right-stay-100 mb-5">
-                  <service.icon className="h-6 w-6 text-right-stay-500" strokeWidth={1.5} />
+                  {(() => {
+                    const Icon = service.icon;
+                    return <Icon className="h-6 w-6 text-right-stay-500" strokeWidth={1.5} />;
+                  })()}
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">
                   {service.title}

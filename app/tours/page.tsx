@@ -1,13 +1,17 @@
-"use client";
-
+import type { Metadata } from 'next';
 import Header from '@/components/sections/Header';
 import Footer from '@/components/sections/Footer';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, ArrowRight, MapPin, Clock, Users, Star } from 'lucide-react';
 
-export default function ToursPage() {
-  const tours = [
+export const metadata: Metadata = {
+  title: 'Tours — Right Stay Africa',
+  description:
+    'Discover curated African tours — cultural experiences, safaris, wine routes, and custom journeys across the continent.',
+};
+
+const tours = [
     {
       id: 1,
       title: "Cape Town City & Table Mountain Tour",
@@ -79,9 +83,10 @@ export default function ToursPage() {
       reviews: 203,
       image: "/images/d953ad7f-2dd7-42f7-8f74-593d55181036_3840w_1.jpg",
       description: "Witness the majestic Southern Right Whales during season (June-November) with expert marine guides."
-    }
-  ];
+    },
+];
 
+export default function ToursPage() {
   return (
     <>
       <section className="isolate min-h-[400px] overflow-hidden relative bg-gradient-to-br from-emerald-600 to-teal-700">

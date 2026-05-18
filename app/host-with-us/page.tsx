@@ -1,12 +1,14 @@
+import dynamic from 'next/dynamic';
 import Header from '@/components/sections/Header';
-import Footer from '@/components/sections/Footer';
 import HostHero from '@/components/sections/HostHero';
-import LogoStripSection from '@/components/sections/LogoStripSection';
-import HostWhyPartner from '@/components/sections/HostWhyPartner';
-import ChannelPartnersSection from '@/components/sections/ChannelPartnersSection';
-import HostBenefitsSection from '@/components/sections/HostBenefitsSection';
-import EarningsEstimator from '@/components/sections/EarningsEstimator';
-import HostCTASection from '@/components/sections/HostCTASection';
+
+const LogoStripSection = dynamic(() => import('@/components/sections/LogoStripSection'));
+const HostWhyPartner = dynamic(() => import('@/components/sections/HostWhyPartner'));
+const ChannelPartnersSection = dynamic(() => import('@/components/sections/ChannelPartnersSection'));
+const HostBenefitsSection = dynamic(() => import('@/components/sections/HostBenefitsSection'));
+const EarningsEstimator = dynamic(() => import('@/components/sections/EarningsEstimator'));
+const HostCTASection = dynamic(() => import('@/components/sections/HostCTASection'));
+const Footer = dynamic(() => import('@/components/sections/Footer'));
 
 export default function HostWithUsPage() {
   return (
