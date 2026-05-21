@@ -33,6 +33,9 @@ yarn-error.log*
 .env*.local
 .env
 
+# MCP config (contains Supabase tokens / service role keys)
+mcp.json
+
 # vercel
 .vercel
 

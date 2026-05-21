@@ -4,8 +4,8 @@ This project is configured to use Supabase with Model Context Protocol (MCP) for
 
 ## Configuration Files
 
-### 1. `mcp.json`
-The MCP configuration file that connects to your Supabase database through the MCP server.
+### 1. MCP config (not in git)
+Copy `mcp.json.example` to **`~/.cursor/mcp.json`** (recommended) or to a local `mcp.json` in the project root. **`mcp.json` is gitignored** — never commit real tokens or service role keys.
 
 ### 2. Environment Variables
 Create a `.env.local` file in the project root with the following variables:
@@ -29,32 +29,19 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 
 ## Important Security Notes
 
-- ⚠️ **NEVER commit `.env.local` to version control**
+- ⚠️ **NEVER commit `.env.local` or `mcp.json` to version control**
+- ⚠️ **NEVER put `SUPABASE_SERVICE_ROLE_KEY` in `mcp.json`** — use a [Supabase access token](https://supabase.com/dashboard/account/tokens) with `mcp.json.example` instead
 - ⚠️ The `service_role` key bypasses Row Level Security - only use it server-side
 - ✅ The `anon` key is safe to use client-side (it respects RLS policies)
+- If `mcp.json` with secrets was ever pushed to GitHub, **rotate the service role key** in Supabase → Project Settings → API
 
 ## MCP Configuration
 
-The `mcp.json` file is configured to use the official Supabase MCP server:
-
-```json
-{
-  "mcpServers": {
-    "supabase": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-supabase"],
-      "env": {
-        "SUPABASE_URL": "your-project-url",
-        "SUPABASE_SERVICE_ROLE_KEY": "your-service-role-key"
-      }
-    }
-  }
-}
-```
+Use `mcp.json.example` as a template (access token + project ref — no service role key in MCP config).
 
 ## Using MCP with Cursor/Claude
 
-1. **Update `mcp.json`** with your actual Supabase credentials
+1. **Copy `mcp.json.example` to `~/.cursor/mcp.json`** and add your [access token](https://supabase.com/dashboard/account/tokens) and project ref
 2. **Restart Cursor** to load the MCP configuration
 3. **Use natural language** to interact with your database through the AI assistant
 
@@ -108,7 +95,7 @@ const { data, error } = await supabaseServer
 ## Troubleshooting
 
 ### MCP Connection Issues:
-1. Verify your credentials are correct in `mcp.json`
+1. Verify your credentials are correct in `~/.cursor/mcp.json`
 2. Restart Cursor to reload MCP configuration
 3. Check that `@modelcontextprotocol/server-supabase` is accessible
 
@@ -122,7 +109,7 @@ const { data, error } = await supabaseServer
 1. ✅ Supabase client installed
 2. ✅ Configuration files created
 3. ⏳ Add your credentials to `.env.local`
-4. ⏳ Update `mcp.json` with your credentials
+4. ⏳ Copy `mcp.json.example` to `~/.cursor/mcp.json` with your access token
 5. ⏳ Restart Cursor to enable MCP
 6. ✅ Start querying your database through AI!
 
