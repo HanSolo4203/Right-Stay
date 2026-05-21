@@ -49,7 +49,8 @@ function StayWithUsContent() {
     }
 
     fetchLocations();
-  }, [formData.location]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount
+  }, []);
 
   useEffect(() => {
     setFormData({
@@ -137,10 +138,7 @@ function StayWithUsContent() {
                 <ArrowLeft className="h-4 w-4" />
                 Back to Home
               </Link>
-              <h1
-                className="sm:text-6xl lg:text-7xl text-5xl font-medium text-white tracking-tight mb-6"
-                style={{ fontFamily: 'Manrope, sans-serif' }}
-              >
+              <h1 className="font-display sm:text-6xl lg:text-7xl text-4xl sm:text-5xl font-medium text-white tracking-tight mb-6">
                 Premium Accommodations
               </h1>
               <p className="sm:text-xl text-lg leading-relaxed text-white/90 max-w-3xl">

@@ -8,7 +8,11 @@ import Footer from '@/components/sections/Footer';
 import AvailabilityCalendar from '@/components/AvailabilityCalendar';
 import Link from 'next/link';
 import ListingImage from '@/components/ui/ListingImage';
-import { getNextAvailableNightlyPrice } from '@/lib/pricing';
+import {
+  calculateNightsBetween,
+  DEFAULT_MINIMUM_STAY_NIGHTS,
+  getNextAvailableNightlyPrice,
+} from '@/lib/pricing';
 import {
   extractLocationFromAttributes,
   hasValidMapCoordinates,
@@ -92,6 +96,7 @@ interface Property {
     basePrice: number | null;
     maxPrice: number | null;
     pricingEnabled: boolean;
+    minimumStayNights?: number;
     startingNightlyPrice?: number;
   } | null;
 }
@@ -152,6 +157,7 @@ export default function BookingPageClient() {
   const [pricing, setPricing] = useState<PricingBreakdown | null>(null);
   const [checkingAvailability, setCheckingAvailability] = useState(false);
   const [availabilityError, setAvailabilityError] = useState<string | null>(null);
+  const [minimumStayError, setMinimumStayError] = useState<string | null>(null);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [calendarData, setCalendarData] = useState<CalendarDataState>({
@@ -190,17 +196,29 @@ export default function BookingPageClient() {
     }
   }, [propertyId]);
 
+  const minimumStayNights =
+    property?.pricing?.minimumStayNights ?? DEFAULT_MINIMUM_STAY_NIGHTS;
+
   // Calculate pricing and check availability when dates change
   useEffect(() => {
     if (formData.checkInDate && formData.checkOutDate) {
+      const nights = calculateNightsBetween(formData.checkInDate, formData.checkOutDate);
+      if (nights > 0 && nights < minimumStayNights) {
+        setMinimumStayError(
+          `This property has a minimum stay of ${minimumStayNights} nights.`
+        );
+      } else {
+        setMinimumStayError(null);
+      }
       calculatePricing();
       checkAvailability();
     } else {
       setPricing(null);
       setAvailabilityError(null);
+      setMinimumStayError(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData.checkInDate, formData.checkOutDate]);
+  }, [formData.checkInDate, formData.checkOutDate, minimumStayNights]);
 
   const calculatePricing = async () => {
     if (!formData.checkInDate || !formData.checkOutDate) {
@@ -465,8 +483,10 @@ export default function BookingPageClient() {
               <div className="bg-green-50 border border-green-200 rounded-2xl p-6 flex items-start gap-4">
                 <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <h3 className="text-lg font-semibold text-green-900 mb-1">Booking Submitted!</h3>
-                  <p className="text-green-700">Your booking request has been submitted successfully. Redirecting to confirmation page...</p>
+                  <h3 className="text-lg font-semibold text-green-900 mb-1">Request received</h3>
+                  <p className="text-green-700">
+                    Thank you. Your booking request has been received. This is not yet a confirmed booking. Our team will review availability and contact you shortly.
+                  </p>
                 </div>
               </div>
             </div>
@@ -776,7 +796,18 @@ export default function BookingPageClient() {
                   <button
                     type="button"
                     onClick={handleSubmit}
-                    disabled={submitting || success || !pricing || checkingAvailability || !!availabilityError || !formData.checkInDate || !formData.checkOutDate}
+                    disabled={
+                      submitting ||
+                      success ||
+                      !pricing ||
+                      checkingAvailability ||
+                      !!availabilityError ||
+                      !!minimumStayError ||
+                      !formData.checkInDate ||
+                      !formData.checkOutDate ||
+                      !formData.guestName ||
+                      !formData.guestEmail
+                    }
                     className="w-full bg-right-stay-500 text-white font-semibold py-4 px-6 rounded-xl hover:bg-right-stay-600 transition-all duration-200 flex items-center justify-center gap-2 disabled:bg-gray-300 disabled:cursor-not-allowed"
                   >
                     {checkingAvailability ? (
@@ -800,6 +831,12 @@ export default function BookingPageClient() {
                       </>
                     )}
                   </button>
+
+                  {minimumStayError && (
+                    <div className="mt-4 bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-800">
+                      {minimumStayError}
+                    </div>
+                  )}
 
                   {availabilityError && (
                     <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-sm text-yellow-800">

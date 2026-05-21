@@ -41,6 +41,7 @@ export default function ListingImage({
   quality,
   priority = false,
   rawSrc = false,
+  alt = '',
   ...props
 }: ListingImageProps) {
   const displaySrc = rawSrc ? src : listingImageSrc(src, variant);
@@ -49,6 +50,7 @@ export default function ListingImage({
   return (
     <Image
       src={displaySrc}
+      alt={alt}
       sizes={sizes ?? VARIANT_SIZES[variant]}
       quality={resolvedQuality}
       priority={priority}

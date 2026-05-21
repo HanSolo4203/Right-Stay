@@ -300,7 +300,7 @@ export default function SiteSettings() {
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center space-x-2 px-6 py-3 bg-right-stay-500 hover:bg-right-stay-600 text-slate-900 font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center space-x-2 px-6 py-3 bg-right-stay-500 hover:bg-right-stay-600 text-white font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? (
               <>

@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import "@fontsource-variable/inter";
-import "@fontsource-variable/manrope";
+import { inter, manrope } from "@/lib/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -18,8 +17,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="min-h-screen bg-black font-sans text-white antialiased">
+    <html lang="en" className={`${inter.variable} ${manrope.variable}`}>
+      <body className={`${inter.className} min-h-screen bg-black font-sans text-white antialiased overflow-x-hidden`}>
         {children}
       </body>
     </html>

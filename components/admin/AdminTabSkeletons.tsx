@@ -115,6 +115,10 @@ export function BookingManagementSkeleton() {
   );
 }
 
+export function BookingRequestManagementSkeleton() {
+  return <BookingManagementSkeleton />;
+}
+
 export function PropertyMappingSkeleton() {
   return (
     <TabShell>

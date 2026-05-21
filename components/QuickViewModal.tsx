@@ -388,13 +388,14 @@ export default function QuickViewModal({ isOpen, onClose, property }: QuickViewM
               {photos[selectedPhotoIndex] && (
                 <>
                   {/* Instant preview from cached thumbnail while the main image decodes */}
-                  <img
-                    src={listingImageSrc(photos[selectedPhotoIndex].url, 'thumbnail')}
-                    alt=""
+                  <div
                     aria-hidden
-                    className={`pointer-events-none absolute inset-0 h-full w-full object-contain transition-opacity duration-300 ${
+                    className={`pointer-events-none absolute inset-0 bg-center bg-contain bg-no-repeat transition-opacity duration-300 blur-sm scale-[1.02] ${
                       lightboxMainLoaded ? 'opacity-0' : 'opacity-100'
-                    } blur-sm scale-[1.02]`}
+                    }`}
+                    style={{
+                      backgroundImage: `url(${listingImageSrc(photos[selectedPhotoIndex].url, 'thumbnail')})`,
+                    }}
                   />
                   {!lightboxMainLoaded && (
                     <div className="pointer-events-none absolute inset-0 z-[5] flex items-center justify-center">

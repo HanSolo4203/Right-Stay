@@ -543,7 +543,7 @@ function AccommodationCardsContent() {
   // Show loading state when fetching properties or checking availability
   if (loading || (checkIn && checkOut && checkingAvailability)) {
     return (
-      <section className="isolate py-16 sm:py-20 lg:py-24 relative bg-gray-50">
+      <section id="accommodations" className="isolate py-16 sm:py-20 lg:py-24 relative bg-gray-50 scroll-mt-24">
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 text-right-stay-500 animate-spin" />
@@ -561,7 +561,7 @@ function AccommodationCardsContent() {
   });
 
   return (
-    <section className="isolate py-16 sm:py-20 lg:py-24 relative bg-gray-50">
+    <section id="accommodations" className="isolate py-16 sm:py-20 lg:py-24 relative bg-gray-50 scroll-mt-24">
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
         <div className="text-center mb-8 sm:mb-12 lg:mb-16">
           <p 
@@ -836,7 +836,7 @@ function AccommodationCardsContent() {
 
 function AccommodationCardsFallback() {
   return (
-    <section className="isolate py-16 sm:py-20 lg:py-24 relative bg-gray-50">
+    <section id="accommodations" className="isolate py-16 sm:py-20 lg:py-24 relative bg-gray-50 scroll-mt-24">
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 text-right-stay-500 animate-spin" />

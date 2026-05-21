@@ -208,7 +208,7 @@ export default function AboutPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/accommodations"
+              href="/stay-with-us"
               className="inline-flex items-center justify-center gap-2 bg-white text-right-stay-500 font-semibold py-4 px-8 rounded-2xl hover:bg-gray-100 transition-colors duration-200"
             >
               Browse Properties

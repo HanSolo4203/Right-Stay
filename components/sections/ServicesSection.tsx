@@ -14,7 +14,7 @@ export default function ServicesSection() {
       icon: Home,
       title: "Luxury Accommodations",
       description: "Experience premium short-term rentals across Africa's most vibrant cities. Each property is carefully curated to ensure comfort, style, and authentic local experiences.",
-      link: "/accommodations",
+      link: "/stay-with-us",
       linkText: "Browse Properties",
       image: "/images/993d5154-c104-4507-8c0a-55364d2a948c_800w_1.jpg"
     },

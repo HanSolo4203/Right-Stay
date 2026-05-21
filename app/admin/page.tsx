@@ -9,6 +9,7 @@ import {
   Menu,
   X,
   Calendar,
+  Inbox,
   Link,
   LogOut,
   Loader2,
@@ -26,6 +27,7 @@ import {
   PricingDashboardSkeleton,
   TourPackageSettingsSkeleton,
   BookingManagementSkeleton,
+  BookingRequestManagementSkeleton,
   PropertyMappingSkeleton,
 } from '@/components/admin/AdminTabSkeletons';
 
@@ -54,14 +56,35 @@ const BookingManagement = dynamicTab(
   () => import('@/components/admin/BookingManagement'),
   BookingManagementSkeleton
 );
+const BookingRequestManagement = dynamicTab(
+  () => import('@/components/admin/BookingRequestManagement'),
+  BookingRequestManagementSkeleton
+);
 const PropertyMapping = dynamicTab(
   () => import('@/components/admin/PropertyMapping'),
   PropertyMappingSkeleton
 );
 
-type TabType = 'site' | 'properties' | 'pricing' | 'tours' | 'bookings' | 'mapping' | 'reviews';
+type TabType =
+  | 'site'
+  | 'properties'
+  | 'pricing'
+  | 'tours'
+  | 'bookings'
+  | 'booking-requests'
+  | 'mapping'
+  | 'reviews';
 
-const VALID_TABS: TabType[] = ['site', 'properties', 'pricing', 'tours', 'bookings', 'mapping', 'reviews'];
+const VALID_TABS: TabType[] = [
+  'site',
+  'properties',
+  'pricing',
+  'tours',
+  'bookings',
+  'booking-requests',
+  'mapping',
+  'reviews',
+];
 
 const TAB_META: Record<TabType, { title: string; description: string }> = {
   site: {
@@ -83,6 +106,10 @@ const TAB_META: Record<TabType, { title: string; description: string }> = {
   bookings: {
     title: 'Bookings',
     description: 'View and manage all property bookings',
+  },
+  'booking-requests': {
+    title: 'Booking Requests',
+    description: 'Review and respond to pending direct website booking requests',
   },
   mapping: {
     title: 'Property Mapping',
@@ -205,6 +232,12 @@ function AdminDashboard() {
     { id: 'pricing' as TabType, name: 'Dynamic Pricing', shortName: 'Pricing', icon: DollarSign },
     { id: 'tours' as TabType, name: 'Tour Packages', shortName: 'Tours', icon: Map },
     { id: 'bookings' as TabType, name: 'Bookings', shortName: 'Bookings', icon: Calendar },
+    {
+      id: 'booking-requests' as TabType,
+      name: 'Booking Requests',
+      shortName: 'Requests',
+      icon: Inbox,
+    },
     { id: 'mapping' as TabType, name: 'Property Mapping', shortName: 'Mapping', icon: Link },
     { id: 'reviews' as TabType, name: 'Import Reviews', shortName: 'Reviews', icon: MessageSquare },
   ];
@@ -243,9 +276,9 @@ function AdminDashboard() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Desktop sidebar */}
-      <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:flex lg:w-64 lg:flex-col border-r border-slate-200 bg-white">
-        <div className="flex h-16 items-center gap-3 border-b border-slate-200 px-5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-right-stay-500 text-white font-bold text-sm">
+      <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:flex lg:w-64 lg:flex-col border-r border-slate-200 bg-white shadow-sm">
+        <div className="flex h-16 items-center gap-3 border-b border-slate-200 px-5 bg-gradient-to-r from-right-stay-50 to-white">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-right-stay-500 text-white font-bold text-sm shadow-sm shadow-right-stay-500/30">
             RS
           </div>
           <div className="min-w-0">
@@ -291,9 +324,9 @@ function AdminDashboard() {
             onClick={() => setMobileNavOpen(false)}
           />
           <aside className="fixed inset-y-0 left-0 z-50 flex w-[min(100%,20rem)] flex-col bg-white shadow-xl lg:hidden">
-            <div className="flex h-16 items-center justify-between border-b border-slate-200 px-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-right-stay-500 text-white font-bold text-sm">
+            <div className="flex h-16 items-center justify-between border-b border-slate-200 px-4 bg-gradient-to-r from-right-stay-50 to-white">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-right-stay-500 text-white font-bold text-sm shadow-sm">
                   RS
                 </div>
                 <div>
@@ -375,6 +408,7 @@ function AdminDashboard() {
             {activeTab === 'pricing' && <PricingDashboard />}
             {activeTab === 'tours' && <TourPackageSettings />}
             {activeTab === 'bookings' && <BookingManagement />}
+            {activeTab === 'booking-requests' && <BookingRequestManagement />}
             {activeTab === 'mapping' && <PropertyMapping />}
             {activeTab === 'reviews' && (
               <div className="p-6 lg:p-8">
@@ -414,7 +448,7 @@ function AdminDashboard() {
             onClick={() => setMobileNavOpen(true)}
             className={cn(
               'flex flex-col items-center justify-center gap-1 flex-1 min-w-0 rounded-lg px-2 py-2 text-[10px] font-medium transition-colors',
-              ['mapping', 'reviews'].includes(activeTab)
+              ['booking-requests', 'mapping', 'reviews'].includes(activeTab)
                 ? 'text-right-stay-700 bg-right-stay-50'
                 : 'text-slate-600 hover:bg-slate-100'
             )}

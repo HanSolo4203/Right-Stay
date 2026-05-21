@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase-server';
-import { formatDateLocal, getNextAvailableNightlyPrice } from '@/lib/pricing';
+import {
+  DEFAULT_MINIMUM_STAY_NIGHTS,
+  formatDateLocal,
+  getNextAvailableNightlyPrice,
+} from '@/lib/pricing';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,6 +16,7 @@ type PricingConfig = {
   pricingEnabled: boolean;
   cleaningFee: number | null;
   serviceFeePercent: number | null;
+  minimumStayNights: number;
   startingNightlyPrice?: number;
 };
 
@@ -31,6 +36,10 @@ function buildPricingObject(row: any): PricingConfig | null {
       row.service_fee_percent !== null && row.service_fee_percent !== undefined
         ? Number(row.service_fee_percent)
         : null,
+    minimumStayNights:
+      row.minimum_stay_nights != null
+        ? Number(row.minimum_stay_nights)
+        : DEFAULT_MINIMUM_STAY_NIGHTS,
   };
 }
 

@@ -25,7 +25,7 @@ export default function BookingConfirmationPage() {
                 Booking Request Submitted!
               </h1>
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Thank you for choosing Right Stay Africa. Your booking request has been received and is being processed.
+                Thank you. Your booking request has been received. This is not yet a confirmed booking. Our team will review availability and contact you shortly.
               </p>
             </div>
 
@@ -42,10 +42,10 @@ export default function BookingConfirmationPage() {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                      1. Confirmation Email
+                      1. Request confirmation email
                     </h3>
                     <p className="text-gray-600">
-                      You&apos;ll receive a confirmation email shortly with your booking details and reference number.
+                      You&apos;ll receive an email shortly confirming we received your request — not a final booking confirmation.
                     </p>
                   </div>
                 </div>

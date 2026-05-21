@@ -44,7 +44,8 @@ export default function Footer() {
               <h4 className="text-sm font-medium text-white/90">Quick Links</h4>
               <ul className="mt-4 space-y-3">
                 {[
-                  { name: 'Accommodations', href: '/accommodations' },
+                  { name: 'Accommodations', href: '/stay-with-us' },
+                  { name: 'Terms of Service', href: '/terms' },
                   { name: 'Tours', href: '/tours' },
                   { name: 'Asset Management', href: '/asset-management' },
                   { name: 'Host With Us', href: '/host-with-us' },

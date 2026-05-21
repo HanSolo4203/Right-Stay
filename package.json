@@ -18,8 +18,6 @@
     "sync:ical:all": "node scripts/sync-ical.mjs --all"
   },
   "dependencies": {
-    "@fontsource-variable/inter": "^5.2.8",
-    "@fontsource-variable/manrope": "^5.2.8",
     "@supabase/supabase-js": "^2.75.0",
     "browser-image-compression": "^2.0.2",
     "clsx": "^2.1.0",
@@ -30,6 +28,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-dropzone": "^14.3.8",
+    "resend": "^6.12.3",
     "tailwind-merge": "^2.2.0",
     "tailwindcss-animate": "^1.0.7"
   },

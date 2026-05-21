@@ -136,6 +136,7 @@ export default function PropertySettings() {
     maxPrice: '',
     cleaningFee: '450',
     serviceFeePercent: '5',
+    minimumStayNights: '2',
     pricelabsListingId: '',
     pricelabsPms: '',
     pricelabsSyncEnabled: true,
@@ -147,6 +148,7 @@ export default function PropertySettings() {
     maxPrice?: string;
     cleaningFee?: string;
     serviceFeePercent?: string;
+    minimumStayNights?: string;
   }>({});
 
   const fetchPrimaryPhotosForProperties = async (properties: Property[]) => {
@@ -289,6 +291,10 @@ export default function PropertySettings() {
           property.pricing?.serviceFeePercent != null
             ? property.pricing.serviceFeePercent.toString()
             : '5',
+        minimumStayNights:
+          property.pricing?.minimumStayNights != null
+            ? property.pricing.minimumStayNights.toString()
+            : '2',
         pricelabsListingId: property.pricelabsMapping?.pricelabsListingId || '',
         pricelabsPms: property.pricelabsMapping?.pricelabsPms || '',
         pricelabsSyncEnabled: property.pricelabsMapping?.syncEnabled ?? true,
@@ -318,6 +324,7 @@ export default function PropertySettings() {
         maxPrice: '',
         cleaningFee: '450',
         serviceFeePercent: '5',
+        minimumStayNights: '2',
         pricelabsListingId: '',
         pricelabsPms: '',
         pricelabsSyncEnabled: true,
@@ -371,13 +378,14 @@ export default function PropertySettings() {
       basePrice: '',
       maxPrice: '',
       cleaningFee: '450',
-      serviceFeePercent: '5',
-      pricelabsListingId: '',
-      pricelabsPms: '',
-      pricelabsSyncEnabled: true,
-      ...emptyLocationFields,
-    });
-    setPricingErrors({});
+        serviceFeePercent: '5',
+        minimumStayNights: '2',
+        pricelabsListingId: '',
+        pricelabsPms: '',
+        pricelabsSyncEnabled: true,
+        ...emptyLocationFields,
+      });
+      setPricingErrors({});
   };
 
   const handleGeocodeAddress = async () => {
@@ -637,7 +645,13 @@ export default function PropertySettings() {
       maxPrice?: string;
       cleaningFee?: string;
       serviceFeePercent?: string;
+      minimumStayNights?: string;
     } = {};
+
+    const minStay = Number(values.minimumStayNights);
+    if (!Number.isFinite(minStay) || !Number.isInteger(minStay) || minStay < 1) {
+      errors.minimumStayNights = 'Minimum stay must be a whole number of at least 1';
+    }
 
     if (!values.pricingEnabled) {
       return errors;
@@ -691,6 +705,7 @@ export default function PropertySettings() {
       | 'maxPrice'
       | 'cleaningFee'
       | 'serviceFeePercent'
+      | 'minimumStayNights'
     >,
     value: string | boolean
   ) => {
@@ -735,6 +750,9 @@ export default function PropertySettings() {
         maxPrice: formData.maxPrice ? parseFloat(formData.maxPrice) : null,
         cleaningFee: formData.cleaningFee ? parseFloat(formData.cleaningFee) : 450,
         serviceFeePercent: formData.serviceFeePercent ? parseFloat(formData.serviceFeePercent) : 5,
+        minimumStayNights: formData.minimumStayNights
+          ? Math.max(1, parseInt(formData.minimumStayNights, 10))
+          : 2,
         pricingEnabled: formData.pricingEnabled,
         pricelabsListingId: formData.pricelabsListingId.trim(),
         pricelabsPms: formData.pricelabsPms.trim(),
@@ -1479,6 +1497,7 @@ export default function PropertySettings() {
                   maxPrice: formData.maxPrice,
                   cleaningFee: formData.cleaningFee,
                   serviceFeePercent: formData.serviceFeePercent,
+                  minimumStayNights: formData.minimumStayNights,
                 }}
                 currency={formData.currency}
                 errors={pricingErrors}

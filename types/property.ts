@@ -6,6 +6,7 @@ export interface PropertyPricing {
   pricingEnabled: boolean;
   cleaningFee: number | null;
   serviceFeePercent: number | null;
+  minimumStayNights: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -67,6 +68,7 @@ export interface PropertyFormValues {
   maxPrice: string;
   cleaningFee: string;
   serviceFeePercent: string;
+  minimumStayNights: string;
   pricelabsListingId: string;
   pricelabsPms: string;
   pricelabsSyncEnabled: boolean;

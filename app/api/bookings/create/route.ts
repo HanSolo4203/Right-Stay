@@ -3,10 +3,13 @@ import { createClient } from '@supabase/supabase-js';
 import {
   buildDatePriceMap,
   calculateBookingPricingFromMap,
+  calculateNightsBetween,
+  DEFAULT_MINIMUM_STAY_NIGHTS,
   DEFAULT_NIGHTLY_PRICE,
   DEFAULT_CLEANING_FEE,
   DEFAULT_SERVICE_FEE_PERCENT,
 } from '@/lib/pricing';
+import { sendBookingRequestEmails } from '@/lib/booking-email';
 
 // Create Supabase client with better error handling
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -45,17 +48,39 @@ interface BookingRequest {
   };
 }
 
+async function getMinimumStayNights(propertyId: string): Promise<number> {
+  const { data: property } = await supabase
+    .from('cached_properties')
+    .select('id')
+    .eq('uplisting_id', propertyId)
+    .maybeSingle();
+
+  if (!property?.id) {
+    return DEFAULT_MINIMUM_STAY_NIGHTS;
+  }
+
+  const { data: pricingRow } = await supabase
+    .from('property_pricing')
+    .select('minimum_stay_nights')
+    .eq('property_id', property.id)
+    .maybeSingle();
+
+  if (pricingRow?.minimum_stay_nights != null) {
+    return Math.max(1, Number(pricingRow.minimum_stay_nights));
+  }
+
+  return DEFAULT_MINIMUM_STAY_NIGHTS;
+}
+
 async function calculateServerPricing(propertyId: string, checkInDate: string, checkOutDate: string) {
-  const start = new Date(checkInDate);
-  const end = new Date(checkOutDate);
-  const nights = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  const nights = calculateNightsBetween(checkInDate, checkOutDate);
   if (nights <= 0) {
     throw new Error('Invalid booking date range');
   }
 
   const { data: property } = await supabase
     .from('cached_properties')
-    .select('id')
+    .select('id, data')
     .eq('uplisting_id', propertyId)
     .maybeSingle();
 
@@ -152,6 +177,22 @@ export async function POST(request: Request) {
     if (!propertyId || !checkInDate || !checkOutDate || !guestName || !guestEmail) {
       return NextResponse.json(
         { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
+    const nights = calculateNightsBetween(checkInDate, checkOutDate);
+    if (nights <= 0) {
+      return NextResponse.json(
+        { error: 'Invalid date selection' },
+        { status: 400 }
+      );
+    }
+
+    const minimumStayNights = await getMinimumStayNights(propertyId);
+    if (nights < minimumStayNights) {
+      return NextResponse.json(
+        { error: `This property has a minimum stay of ${minimumStayNights} nights.` },
         { status: 400 }
       );
     }
@@ -256,9 +297,13 @@ export async function POST(request: Request) {
         );
       }
       
+      const mappedApartment = mapping.apartments as unknown as {
+        id: string;
+        apartment_number: string;
+      };
       apartment = {
-        id: (mapping.apartments as any).id,
-        apartment_number: (mapping.apartments as any).apartment_number
+        id: mappedApartment.id,
+        apartment_number: mappedApartment.apartment_number,
       };
       
       console.log(`Mapped Uplisting property ${propertyId} to apartment ${apartment.apartment_number}`);
@@ -317,6 +362,19 @@ export async function POST(request: Request) {
       return date.toISOString().split('T')[0];
     };
 
+    const { data: cachedProperty } = await supabase
+      .from('cached_properties')
+      .select('data')
+      .eq('uplisting_id', propertyId)
+      .maybeSingle();
+
+    const propertyName =
+      (cachedProperty?.data as { attributes?: { name?: string; nickname?: string } })?.attributes
+        ?.name ||
+      (cachedProperty?.data as { attributes?: { name?: string; nickname?: string } })?.attributes
+        ?.nickname ||
+      apartment.apartment_number;
+
     // Debug logging for booking data
     console.log('Creating booking with:', {
       propertyId,
@@ -329,7 +387,8 @@ export async function POST(request: Request) {
       service_fee: serverPricing.serviceFee || 0,
       total: serverPricing.total,
       guest_name: guestName,
-      guest_email: guestEmail
+      guest_email: guestEmail,
+      number_of_guests: numberOfGuests,
     });
 
     // Create the booking with pending status and payment tracking
@@ -353,6 +412,7 @@ export async function POST(request: Request) {
         booking_status: 'pending',
         payment_status: 'pending',
         notes: specialRequests || null,
+        number_of_guests: numberOfGuests || null,
       })
       .select()
       .single();
@@ -363,6 +423,25 @@ export async function POST(request: Request) {
         { error: 'Failed to create booking', details: bookingError.message },
         { status: 500 }
       );
+    }
+
+    try {
+      await sendBookingRequestEmails({
+        bookingReference,
+        propertyName,
+        apartmentNumber: apartment.apartment_number,
+        guestName,
+        guestEmail,
+        guestPhone: guestPhone || '',
+        checkInDate: formatDate(checkInDate),
+        checkOutDate: formatDate(checkOutDate),
+        numberOfNights: serverPricing.numberOfNights,
+        numberOfGuests: numberOfGuests || 1,
+        estimatedTotal: serverPricing.total,
+        specialRequests: specialRequests || null,
+      });
+    } catch (emailError) {
+      console.error('Booking created but email notification failed:', emailError);
     }
 
     return NextResponse.json({
@@ -384,4 +463,3 @@ export async function POST(request: Request) {
     );
   }
 }
-

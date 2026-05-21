@@ -75,7 +75,14 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { booking_status, payment_status, payment_date, payment_method, payment_notes } = body;
+    const {
+      booking_status,
+      payment_status,
+      payment_date,
+      payment_method,
+      payment_notes,
+      confirmRequest,
+    } = body;
 
     // Normalize payment_date to ISO (handles formats like DD/MM/YYYY or YYYY-MM-DD)
     const normalizeDateToISO = (input: string | null | undefined): string | null => {
@@ -104,8 +111,12 @@ export async function PUT(request: NextRequest) {
       return isNaN(d.getTime()) ? null : d.toISOString();
     };
 
-    // Only allow status update to confirmed if payment is received
-    if (booking_status === 'confirmed' && payment_status !== 'paid') {
+    // Only allow status update to confirmed if payment is received (except direct booking requests)
+    if (
+      booking_status === 'confirmed' &&
+      payment_status !== 'paid' &&
+      !confirmRequest
+    ) {
       return NextResponse.json(
         { error: 'Cannot confirm booking without payment confirmation' },
         { status: 400 }

@@ -6,21 +6,23 @@ import ContactInfo from '@/components/sections/ContactInfo';
 import Footer from '@/components/sections/Footer';
 
 export const metadata: Metadata = {
-  title: "Contact Us — Axiom Intelligence",
-  description: "Get in touch with Axiom. Let's discuss how we can help you build intelligent systems that scale.",
+  title: "Contact Us — Right Stay Africa",
+  description:
+    "Get in touch with Right Stay Africa for bookings, hosting, tours, and property management across South Africa.",
 };
 
 export default function ContactPage() {
   return (
     <>
-      <section className="isolate min-h-[600px] overflow-hidden relative">
+      <section className="isolate min-h-[600px] overflow-hidden relative bg-black">
         <Header />
         <ContactHero />
       </section>
-      <ContactForm />
-      <ContactInfo />
+      <div className="bg-black">
+        <ContactForm />
+        <ContactInfo />
+      </div>
       <Footer />
     </>
   );
 }
-

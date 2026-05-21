@@ -7,12 +7,19 @@ interface PricingErrors {
   maxPrice?: string;
   cleaningFee?: string;
   serviceFeePercent?: string;
+  minimumStayNights?: string;
 }
 
 interface PricingSectionProps {
   values: Pick<
     PropertyFormValues,
-    'pricingEnabled' | 'minPrice' | 'basePrice' | 'maxPrice' | 'cleaningFee' | 'serviceFeePercent'
+    | 'pricingEnabled'
+    | 'minPrice'
+    | 'basePrice'
+    | 'maxPrice'
+    | 'cleaningFee'
+    | 'serviceFeePercent'
+    | 'minimumStayNights'
   >;
   currency: string;
   errors?: PricingErrors;
@@ -20,7 +27,15 @@ interface PricingSectionProps {
 }
 
 export function PricingSection({ values, currency, errors, onChange }: PricingSectionProps) {
-  const { pricingEnabled, minPrice, basePrice, maxPrice, cleaningFee, serviceFeePercent } = values;
+  const {
+    pricingEnabled,
+    minPrice,
+    basePrice,
+    maxPrice,
+    cleaningFee,
+    serviceFeePercent,
+    minimumStayNights,
+  } = values;
 
   const parsedMin = parseFloat(minPrice || '');
   const parsedBase = parseFloat(basePrice || '');
@@ -144,6 +159,35 @@ export function PricingSection({ values, currency, errors, onChange }: PricingSe
             />
           </div>
         )}
+      </div>
+
+      <div className="mt-6 border-t border-slate-200 pt-6">
+        <h4 className="text-base font-semibold text-slate-900 mb-1">Booking settings</h4>
+        <p className="text-xs text-slate-500 mb-4">
+          Minimum nights required for direct website booking requests.
+        </p>
+        <div className="max-w-xs">
+          <label className="block text-sm font-medium text-slate-700 mb-1">
+            Minimum Stay Nights
+          </label>
+          <input
+            type="number"
+            inputMode="numeric"
+            step="1"
+            min={1}
+            name="minimumStayNights"
+            value={minimumStayNights}
+            onChange={(e) => onChange('minimumStayNights', e.target.value)}
+            className={`w-full rounded-lg border px-4 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500 ${
+              errors?.minimumStayNights ? 'border-red-500' : 'border-slate-200'
+            }`}
+            placeholder="2"
+          />
+          <p className="text-xs text-slate-500 mt-1">Whole number, at least 1. Usually 2.</p>
+          {errors?.minimumStayNights && (
+            <p className="text-xs text-red-700 mt-1">{errors.minimumStayNights}</p>
+          )}
+        </div>
       </div>
 
       <div className="mt-4 grid gap-4 md:grid-cols-2">

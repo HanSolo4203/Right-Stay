@@ -37,36 +37,34 @@ export default function ContactForm() {
     <section className="isolate overflow-hidden py-24 relative">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_80%_at_50%_0%,rgba(255,255,255,0.05),transparent_60%)]"></div>
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6 md:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 items-start">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
           <div className="animate-on-scroll" style={{ animation: 'fadeSlideIn 1s ease-out 0.2s both' }}>
-            <h2 
-              className="sm:text-4xl text-3xl font-medium text-white tracking-tight"
-              style={{ fontFamily: 'Manrope, sans-serif' }}
-            >
-              Let&apos;s Build Something Amazing
+            <h2 className="font-display sm:text-4xl text-3xl font-medium text-white tracking-tight">
+              How Can We Help?
             </h2>
             <p className="mt-4 text-base leading-relaxed text-white/75 max-w-xl">
-              Whether you&apos;re looking to deploy your first AI model or scale enterprise-wide intelligent systems, we&apos;re here to help you succeed.
+              Reach out for guest bookings, property management, curated tours, or partnership opportunities across South
+              Africa.
             </p>
 
             <div className="mt-12 space-y-8">
               {[
                 {
-                  title: 'Sales Inquiries',
-                  description: 'Interested in our platform? Let&apos;s discuss how Axiom can help your business.',
-                  contact: 'sales@axiom.ai'
+                  title: 'Guest & Booking Enquiries',
+                  description: 'Questions about availability, amenities, or your upcoming stay.',
+                  contact: 'info@rightstayafrica.com',
                 },
                 {
-                  title: 'Technical Support',
-                  description: 'Need help with implementation or have technical questions?',
-                  contact: 'support@axiom.ai'
+                  title: 'Host & Property Owners',
+                  description: 'List your property or discuss asset management with our team.',
+                  contact: 'info@rightstayafrica.com',
                 },
                 {
-                  title: 'Partnership',
-                  description: 'Want to partner with us? We&apos;d love to explore opportunities.',
-                  contact: 'partners@axiom.ai'
-                }
+                  title: 'Tours & Partnerships',
+                  description: 'Plan a curated experience or explore collaboration opportunities.',
+                  contact: 'info@rightstayafrica.com',
+                },
               ].map((item, index) => (
                 <div key={index} className="border-l-2 border-white/20 pl-4">
                   <h3 className="text-base font-medium text-white/90">{item.title}</h3>
@@ -151,8 +149,9 @@ export default function ContactForm() {
                       className="w-full rounded-lg border border-white/15 bg-white/5 px-4 py-3 text-sm text-white backdrop-blur focus:border-white/30 focus:outline-none focus:ring-1 focus:ring-white/20"
                     >
                       <option value="" className="bg-black">Select a subject</option>
-                      <option value="sales" className="bg-black">Sales Inquiry</option>
-                      <option value="support" className="bg-black">Technical Support</option>
+                      <option value="booking" className="bg-black">Booking Enquiry</option>
+                      <option value="hosting" className="bg-black">Host / Property</option>
+                      <option value="tours" className="bg-black">Tours</option>
                       <option value="partnership" className="bg-black">Partnership</option>
                       <option value="other" className="bg-black">Other</option>
                     </select>

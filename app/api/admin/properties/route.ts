@@ -4,6 +4,7 @@ import {
   extractLocationFromAttributes,
   locationFieldsForAttributes,
 } from '@/lib/property-location';
+import { DEFAULT_MINIMUM_STAY_NIGHTS } from '@/lib/pricing';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,6 +31,10 @@ function buildPricingObject(row: any) {
       row.service_fee_percent !== null && row.service_fee_percent !== undefined
         ? Number(row.service_fee_percent)
         : null,
+    minimumStayNights:
+      row.minimum_stay_nights != null
+        ? Number(row.minimum_stay_nights)
+        : DEFAULT_MINIMUM_STAY_NIGHTS,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   };
@@ -205,7 +210,8 @@ export async function POST(request: NextRequest) {
       body.maxPrice !== undefined ||
       body.cleaningFee !== undefined ||
       body.serviceFeePercent !== undefined ||
-      body.pricingEnabled !== undefined;
+      body.pricingEnabled !== undefined ||
+      body.minimumStayNights !== undefined;
 
     if (hasPricingFields) {
       const min_price =
@@ -229,6 +235,10 @@ export async function POST(request: NextRequest) {
         body.serviceFeePercent !== undefined && body.serviceFeePercent !== null
           ? Number(body.serviceFeePercent)
           : 5;
+      const minimum_stay_nights =
+        body.minimumStayNights !== undefined && body.minimumStayNights !== null
+          ? Math.max(1, Math.round(Number(body.minimumStayNights)))
+          : DEFAULT_MINIMUM_STAY_NIGHTS;
 
       const { data: pricingData, error: pricingError } = await supabase
         .from('property_pricing')
@@ -241,6 +251,7 @@ export async function POST(request: NextRequest) {
             pricing_enabled,
             cleaning_fee,
             service_fee_percent,
+            minimum_stay_nights,
           },
           { onConflict: 'property_id' }
         )
@@ -384,7 +395,8 @@ export async function PUT(request: NextRequest) {
       body.maxPrice !== undefined ||
       body.cleaningFee !== undefined ||
       body.serviceFeePercent !== undefined ||
-      body.pricingEnabled !== undefined;
+      body.pricingEnabled !== undefined ||
+      body.minimumStayNights !== undefined;
 
     if (hasPricingFields) {
       const min_price =
@@ -408,6 +420,10 @@ export async function PUT(request: NextRequest) {
         body.serviceFeePercent !== undefined && body.serviceFeePercent !== null
           ? Number(body.serviceFeePercent)
           : 5;
+      const minimum_stay_nights =
+        body.minimumStayNights !== undefined && body.minimumStayNights !== null
+          ? Math.max(1, Math.round(Number(body.minimumStayNights)))
+          : DEFAULT_MINIMUM_STAY_NIGHTS;
 
       const { data: pricingData, error: pricingError } = await supabase
         .from('property_pricing')
@@ -420,6 +436,7 @@ export async function PUT(request: NextRequest) {
             pricing_enabled,
             cleaning_fee,
             service_fee_percent,
+            minimum_stay_nights,
           },
           { onConflict: 'property_id' }
         )

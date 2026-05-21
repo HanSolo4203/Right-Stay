@@ -40,7 +40,8 @@ export default function HeroSection() {
     }
 
     fetchLocations();
-  }, [formData.location]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount
+  }, []);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -117,8 +118,8 @@ export default function HeroSection() {
         <div className="grid grid-cols-1 grid-rows-[minmax(0,1fr)] gap-12 md:px-8 md:pb-24 md:pt-16 lg:grid-cols-12 lg:gap-8 lg:pb-28 lg:pt-20 min-h-[calc(100vh-96px)] max-w-7xl mr-auto ml-auto pt-8 pr-6 pb-28 sm:pb-32 pl-6 gap-x-12 gap-y-12 items-center">
           <div className="col-span-7 flex flex-col justify-center items-start lg:items-center text-left lg:text-center" style={{ animation: 'fadeSlideIn 1.2s ease-out forwards' }}>
             <h1
-              className="sm:text-4xl lg:font-normal lg:text-5xl text-3xl font-medium text-white tracking-tighter drop-shadow-xl"
-              style={{ animation: 'fadeSlideIn 1s ease-out 0.2s both', fontFamily: 'Manrope, sans-serif' }}
+              className="font-display sm:text-4xl lg:font-normal lg:text-5xl text-3xl font-medium text-white tracking-tighter drop-shadow-xl"
+              style={{ animation: 'fadeSlideIn 1s ease-out 0.2s both' }}
             >
               Turn left and come right
               <br className="hidden sm:block" />
@@ -145,7 +146,7 @@ export default function HeroSection() {
                 <ArrowRight className="h-4 w-4" strokeWidth={1.5} />
               </Link>
               <Link
-                href="#about"
+                href="/about"
                 className="inline-flex items-center justify-center gap-2 hover:bg-white/10 text-sm text-white/90 tracking-tight bg-white/5 border-white/15 border rounded-xl pt-3 pr-5 pb-3 pl-5 shadow-[0_2.8px_2.2px_rgba(0,_0,_0,_0.034),_0_6.7px_5.3px_rgba(0,_0,_0,_0.048),_0_12.5px_10px_rgba(0,_0,_0,_0.06),_0_22.3px_17.9px_rgba(0,_0,_0,_0.072),_0_41.8px_33.4px_rgba(0,_0,_0,_0.086),_0_100px_80px_rgba(0,_0,_0,_0.12)]"
               >
                 Learn More

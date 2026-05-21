@@ -20,8 +20,7 @@ const config = {
     extend: {
       fontFamily: {
         sans: [
-          '"Inter Variable"',
-          "Inter",
+          "var(--font-inter)",
           "ui-sans-serif",
           "system-ui",
           "-apple-system",
@@ -32,8 +31,7 @@ const config = {
           "sans-serif",
         ],
         display: [
-          '"Manrope Variable"',
-          "Manrope",
+          "var(--font-manrope)",
           "ui-sans-serif",
           "system-ui",
           "sans-serif",

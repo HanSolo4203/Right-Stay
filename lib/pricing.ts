@@ -12,6 +12,14 @@ interface PriceData {
 export const DEFAULT_NIGHTLY_PRICE = 1500;
 export const DEFAULT_CLEANING_FEE = 450;
 export const DEFAULT_SERVICE_FEE_PERCENT = 5;
+export const DEFAULT_MINIMUM_STAY_NIGHTS = 2;
+
+/** Nights between check-in and check-out (checkout day excluded). */
+export function calculateNightsBetween(checkInDate: string, checkOutDate: string): number {
+  const start = new Date(checkInDate);
+  const end = new Date(checkOutDate);
+  return Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+}
 export const SERVICE_FEE_RATE = 0.05;
 
 export function formatDateLocal(date: Date): string {
