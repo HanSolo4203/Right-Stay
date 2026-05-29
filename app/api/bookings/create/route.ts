@@ -200,17 +200,26 @@ export async function POST(request: Request) {
     // First, find or create the guest
     let guestId;
     
-    // Check if guest already exists
+    // Check if guest already exists (case-insensitive email)
+    const normalizedEmail = guestEmail.trim().toLowerCase();
     const { data: existingGuest, error: guestSearchError } = await supabase
       .from('guests')
       .select('id')
-      .eq('email', guestEmail)
-      .single();
+      .ilike('email', normalizedEmail)
+      .maybeSingle();
 
-    if (guestSearchError && guestSearchError.code !== 'PGRST116') {
+    if (guestSearchError) {
       console.error('Error searching for guest:', guestSearchError);
+      const isMissingTable =
+        guestSearchError.code === '42P01' ||
+        guestSearchError.message?.includes('does not exist');
       return NextResponse.json(
-        { error: 'Failed to search for guest' },
+        {
+          error: isMissingTable
+            ? 'Booking system is not configured. Please contact support.'
+            : 'Failed to search for guest',
+          details: guestSearchError.message,
+        },
         { status: 500 }
       );
     }
@@ -236,7 +245,7 @@ export async function POST(request: Request) {
         .from('guests')
         .insert({
           name: guestName,
-          email: guestEmail,
+          email: normalizedEmail,
           phone: guestPhone || null,
         })
         .select()
