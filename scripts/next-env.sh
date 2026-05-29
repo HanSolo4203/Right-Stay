@@ -32,6 +32,11 @@ next_env_exclude_dev_dist_from_icloud() {
 # rm/build does not hang on a synced .next folder.
 next_env_production_dist_dir() {
   local root="$1"
+  # Vercel/CI must emit .next — the platform looks for routes-manifest.json there.
+  if [ -n "${VERCEL:-}" ] || [ -n "${CI:-}" ]; then
+    echo "$root/.next"
+    return
+  fi
   if [ "$(uname -s)" = "Darwin" ] && [[ "$root" == "$HOME/Documents/"* ]]; then
     echo "$root/.next-build"
   else

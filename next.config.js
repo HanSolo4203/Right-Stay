@@ -1,7 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Dev uses NEXT_DIST_DIR (see scripts/dev-start.sh) so production .next is never touched.
-  distDir: process.env.NEXT_DIST_DIR || '.next',
+  // Dev/local macOS use NEXT_DIST_DIR (see scripts/dev-start.sh, build:local).
+  // Vercel always reads routes-manifest.json from .next — never override there.
+  distDir: process.env.VERCEL ? '.next' : (process.env.NEXT_DIST_DIR || '.next'),
   reactStrictMode: true,
   transpilePackages: ['leaflet'],
   // Smaller dev + prod bundles when importing many icons from lucide-react.
