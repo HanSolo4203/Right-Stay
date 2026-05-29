@@ -40,7 +40,7 @@ export default function ContactInfo() {
     <section id="offices" className="isolate overflow-hidden py-16 sm:py-24 relative scroll-mt-24">
       <div className="absolute inset-0">
         <HeroBackgroundImage
-          src="/images/d953ad7f-2dd7-42f7-8f74-593d55181036_800w_1.jpg"
+          src="/images/d953ad7f-2dd7-42f7-8f74-593d55181036_3840w_1.jpg"
           className="pointer-events-none object-cover opacity-30"
         />
       </div>

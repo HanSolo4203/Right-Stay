@@ -11,6 +11,9 @@ next_env_stop_dev "$ROOT"
 next_env_clear_dev_dist "$ROOT"
 next_env_clear_production_next "$ROOT"
 
-unset NEXT_DIST_DIR
+PROD_DIST="$(next_env_production_dist_dir "$ROOT")"
+next_env_exclude_from_icloud "$PROD_DIST"
+export NEXT_DIST_DIR="$PROD_DIST"
+echo "Production build output: $NEXT_DIST_DIR"
 npx next build
 next_env_mark_production_build "$ROOT"

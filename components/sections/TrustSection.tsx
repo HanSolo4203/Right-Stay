@@ -41,7 +41,7 @@ export default function TrustSection() {
       <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16 items-center">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {trustFeatures.map((feature, index) => (
-            <PremiumFeatureCard key={feature.title} {...feature} index={index} className="!w-full" />
+            <PremiumFeatureCard key={feature.title} {...feature} index={index} />
           ))}
         </div>
 

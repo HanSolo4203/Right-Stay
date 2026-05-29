@@ -5,10 +5,12 @@ import PremiumSectionBackground from "@/components/premium/PremiumSectionBackgro
 import PremiumStatsStrip from "@/components/premium/PremiumStatsStrip";
 
 const INTRO_STATS = [
-  { value: "R58m+", label: "Assets Under Management", note: "Portfolio value" },
-  { value: "~75%", label: "Avg. Occupancy", note: "Consistent performance" },
+  { value: "R58M+", label: "Assets Under Management", note: "Portfolio value" },
   { value: "500+", label: "Happy Guests", note: "Across our stays" },
   { value: "4.9/5", label: "Guest Rating", note: "Verified reviews" },
+  { value: "~75%", label: "Avg. Occupancy", note: "Consistent performance" },
+  { value: "100%", label: "Verified Properties", note: "Personally inspected" },
+  { value: "24/7", label: "Guest Support", note: "Always available" },
 ];
 
 export default function SecondHero() {
@@ -50,7 +52,7 @@ export default function SecondHero() {
           </p>
         </div>
 
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <PremiumStatsStrip stats={INTRO_STATS} className="!mt-12 sm:!mt-14" />
         </div>
       </div>

@@ -3,15 +3,6 @@
 import { ShieldCheck, Star, MapPin, DollarSign, Zap, Heart } from "lucide-react";
 import PremiumWhySection from "@/components/premium/PremiumWhySection";
 
-const GUEST_STATS = [
-  { value: "R58M+", label: "Assets Under Management", note: "Portfolio value" },
-  { value: "500+", label: "Happy Guests", note: "Across our stays" },
-  { value: "4.9/5", label: "Guest Rating", note: "Verified reviews" },
-  { value: "~75%", label: "Avg. Occupancy", note: "Consistent performance" },
-  { value: "100%", label: "Verified Properties", note: "Personally inspected" },
-  { value: "24/7", label: "Guest Support", note: "Always available" },
-];
-
 const GUEST_FEATURES = [
   {
     icon: ShieldCheck,
@@ -59,9 +50,6 @@ export default function WhyChooseSection() {
       ctaLabel="Explore Stays"
       ctaHref="/stay-with-us"
       features={GUEST_FEATURES}
-      stats={GUEST_STATS}
-      collageBadge="Guest Satisfaction"
-      collageBadgeValue="4.9/5 Rating"
     />
   );
 }

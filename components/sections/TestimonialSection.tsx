@@ -96,7 +96,7 @@ export default function TestimonialSection() {
     <section className="isolate overflow-hidden min-h-[600px] py-12 md:py-16 relative">
       <div className="absolute inset-0">
         <HeroBackgroundImage
-          src="/images/6b428a64-0de1-4837-bab2-9729ce2e28c2_800w_1.jpg"
+          src="/images/6b428a64-0de1-4837-bab2-9729ce2e28c2_3840w_1.jpg"
           alt="Atmospheric mountain landscape"
           className="pointer-events-none object-cover"
         />

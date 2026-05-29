@@ -5,7 +5,7 @@ import type { LucideIcon } from "lucide-react";
 import { ArrowRight } from "lucide-react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import PremiumSectionBackground from "./PremiumSectionBackground";
-import PremiumFeatureCard from "./PremiumFeatureCard";
+import PremiumFeatureCardGrid from "./PremiumFeatureCardGrid";
 import PremiumStatsStrip, { type PremiumStat } from "./PremiumStatsStrip";
 import PremiumVisualCollage from "./PremiumVisualCollage";
 
@@ -21,7 +21,7 @@ type PremiumWhySectionProps = {
   ctaLabel: string;
   ctaHref: string;
   features: PremiumFeature[];
-  stats: PremiumStat[];
+  stats?: PremiumStat[];
   collageBadge?: string;
   collageBadgeValue?: string;
   eyebrow?: string;
@@ -87,39 +87,42 @@ export default function PremiumWhySection({
           <PremiumVisualCollage badge={collageBadge} badgeValue={collageBadgeValue} />
         </div>
 
-        {/* Stats strip */}
-        {(statsEyebrow || statsTitle || statsSubtitle) && (
-          <div className="mt-16 sm:mt-20 text-center max-w-2xl mx-auto">
-            {statsEyebrow && (
-              <p
-                className="animate-on-scroll text-xs font-medium uppercase tracking-[0.28em] text-right-stay-400/90"
-                style={{ animation: "fadeSlideIn 0.8s ease-out 0.05s both" }}
-              >
-                {statsEyebrow}
-              </p>
+        {stats && stats.length > 0 && (
+          <>
+            {(statsEyebrow || statsTitle || statsSubtitle) && (
+              <div className="mt-16 sm:mt-20 text-center max-w-2xl mx-auto">
+                {statsEyebrow && (
+                  <p
+                    className="animate-on-scroll text-xs font-medium uppercase tracking-[0.28em] text-right-stay-400/90"
+                    style={{ animation: "fadeSlideIn 0.8s ease-out 0.05s both" }}
+                  >
+                    {statsEyebrow}
+                  </p>
+                )}
+                {statsTitle && (
+                  <h3
+                    className={`animate-on-scroll font-display text-2xl font-medium tracking-tight text-white sm:text-3xl lg:text-4xl ${statsEyebrow ? "mt-3" : ""}`}
+                    style={{ animation: "fadeSlideIn 0.9s ease-out 0.1s both" }}
+                  >
+                    {statsTitle}
+                  </h3>
+                )}
+                {statsSubtitle && (
+                  <p
+                    className="animate-on-scroll mt-3 text-base leading-relaxed text-white/60 sm:text-lg"
+                    style={{ animation: "fadeSlideIn 0.9s ease-out 0.15s both" }}
+                  >
+                    {statsSubtitle}
+                  </p>
+                )}
+              </div>
             )}
-            {statsTitle && (
-              <h3
-                className={`animate-on-scroll font-display text-2xl font-medium tracking-tight text-white sm:text-3xl lg:text-4xl ${statsEyebrow ? "mt-3" : ""}`}
-                style={{ animation: "fadeSlideIn 0.9s ease-out 0.1s both" }}
-              >
-                {statsTitle}
-              </h3>
-            )}
-            {statsSubtitle && (
-              <p
-                className="animate-on-scroll mt-3 text-base leading-relaxed text-white/60 sm:text-lg"
-                style={{ animation: "fadeSlideIn 0.9s ease-out 0.15s both" }}
-              >
-                {statsSubtitle}
-              </p>
-            )}
-          </div>
+            <PremiumStatsStrip
+              stats={stats}
+              className={statsTitle || statsSubtitle ? "!mt-8 sm:!mt-10" : undefined}
+            />
+          </>
         )}
-        <PremiumStatsStrip
-          stats={stats}
-          className={statsTitle || statsSubtitle ? "!mt-8 sm:!mt-10" : undefined}
-        />
 
         {/* Feature cards */}
         <div className="mt-16 sm:mt-20">
@@ -130,31 +133,7 @@ export default function PremiumWhySection({
             How we deliver
           </p>
 
-          {/* Mobile: horizontal scroll */}
-          <div className="flex gap-4 overflow-x-auto pb-4 -mx-6 px-6 snap-x snap-mandatory scrollbar-hide sm:mx-0 sm:px-0 lg:hidden">
-            {features.map((feature, index) => (
-              <PremiumFeatureCard
-                key={feature.title}
-                {...feature}
-                index={index}
-                className="snap-center"
-              />
-            ))}
-          </div>
-
-          {/* Desktop: 3-column grid */}
-          <div className="hidden lg:grid lg:grid-cols-3 lg:gap-6">
-            {features.map((feature, index) => (
-              <PremiumFeatureCard key={feature.title} {...feature} index={index} />
-            ))}
-          </div>
-
-          {/* Tablet: 2-column */}
-          <div className="hidden sm:grid sm:grid-cols-2 sm:gap-5 lg:hidden">
-            {features.map((feature, index) => (
-              <PremiumFeatureCard key={feature.title} {...feature} index={index} />
-            ))}
-          </div>
+          <PremiumFeatureCardGrid features={features} />
         </div>
       </div>
     </PremiumSectionBackground>

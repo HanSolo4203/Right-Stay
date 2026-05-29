@@ -14,7 +14,7 @@ export default function ContactHero() {
     <section className="isolate min-h-[500px] sm:min-h-[600px] overflow-hidden relative">
       <div className="absolute inset-0">
         <HeroBackgroundImage
-          src="/images/6b428a64-0de1-4837-bab2-9729ce2e28c2_800w_1.jpg"
+          src="/images/6b428a64-0de1-4837-bab2-9729ce2e28c2_3840w_1.jpg"
           className="pointer-events-none object-cover"
           style={{
             maskImage: 'linear-gradient(to bottom, black 85%, transparent)',

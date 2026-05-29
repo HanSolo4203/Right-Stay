@@ -72,7 +72,10 @@ interface CachedProperty {
   } | null;
 }
 
-function AccommodationCardsContent() {
+type AccommodationCardsVariant = 'dark' | 'light';
+
+function AccommodationCardsContent({ variant = 'dark' }: { variant?: AccommodationCardsVariant }) {
+  const isLight = variant === 'light';
   useScrollAnimation();
   const searchParams = useSearchParams();
   const [properties, setProperties] = useState<CachedProperty[]>([]);
@@ -543,10 +546,15 @@ function AccommodationCardsContent() {
   // Show loading state when fetching properties or checking availability
   if (loading || (checkIn && checkOut && checkingAvailability)) {
     return (
-      <section id="accommodations" className="isolate py-12 sm:py-14 lg:py-16 relative bg-transparent scroll-mt-24">
+      <section
+        id="accommodations"
+        className={`isolate py-12 sm:py-14 lg:py-16 relative scroll-mt-24 ${
+          isLight ? 'bg-gray-50' : 'bg-transparent'
+        }`}
+      >
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 text-right-stay-400 animate-spin" />
+            <Loader2 className={`h-8 w-8 animate-spin ${isLight ? 'text-right-stay-500' : 'text-right-stay-400'}`} />
           </div>
         </div>
       </section>
@@ -561,17 +569,32 @@ function AccommodationCardsContent() {
   });
 
   return (
-    <section id="accommodations" className="isolate py-12 sm:py-14 lg:py-16 relative bg-transparent scroll-mt-24">
+    <section
+      id="accommodations"
+      className={`isolate py-12 sm:py-14 lg:py-16 relative scroll-mt-24 ${
+        isLight ? 'bg-gray-50' : 'bg-transparent'
+      }`}
+    >
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
         <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-          <p className="text-xs font-medium uppercase tracking-[0.28em] text-right-stay-400/90 mb-3">
+          <p
+            className={`text-xs font-medium uppercase tracking-[0.28em] mb-3 ${
+              isLight ? 'text-right-stay-600' : 'text-right-stay-400/90'
+            }`}
+          >
             Curated Collection
           </p>
-          <h2 className="font-display text-3xl font-medium tracking-tight text-white sm:text-4xl lg:text-5xl mb-4">
+          <h2
+            className={`font-display text-3xl font-medium tracking-tight sm:text-4xl lg:text-5xl mb-4 ${
+              isLight ? 'text-gray-900' : 'text-white'
+            }`}
+          >
             Premium Stays
           </h2>
-          <p 
-            className="text-sm sm:text-base leading-relaxed text-white/60 max-w-3xl mx-auto"
+          <p
+            className={`text-sm sm:text-base leading-relaxed max-w-3xl mx-auto ${
+              isLight ? 'text-gray-600' : 'text-white/60'
+            }`}
           >
             {locationFilter || checkIn || guestsFilter ? (
               <>
@@ -817,15 +840,17 @@ function AccommodationCardsContent() {
         </div>
 
         {/* View All Button */}
-        <div className="text-center mt-8 sm:mt-10 lg:mt-12">
-          <Link
-            href="/accommodations"
-            className="inline-flex items-center gap-2 bg-gray-900 text-white font-semibold py-3 px-6 sm:py-4 sm:px-8 rounded-2xl hover:bg-gray-800 transition-colors duration-200 min-h-11"
-          >
-            View All Accommodations
-            <Calendar className="h-5 w-5" />
-          </Link>
-        </div>
+        {!isLight && (
+          <div className="text-center mt-8 sm:mt-10 lg:mt-12">
+            <Link
+              href="/accommodations"
+              className="inline-flex items-center gap-2 bg-gray-900 text-white font-semibold py-3 px-6 sm:py-4 sm:px-8 rounded-2xl hover:bg-gray-800 transition-colors duration-200 min-h-11"
+            >
+              View All Accommodations
+              <Calendar className="h-5 w-5" />
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Quick View Modal */}
@@ -840,9 +865,15 @@ function AccommodationCardsContent() {
   );
 }
 
-function AccommodationCardsFallback() {
+function AccommodationCardsFallback({ variant = 'dark' }: { variant?: AccommodationCardsVariant }) {
+  const isLight = variant === 'light';
   return (
-    <section id="accommodations" className="isolate py-12 sm:py-14 lg:py-16 relative bg-transparent scroll-mt-24">
+    <section
+      id="accommodations"
+      className={`isolate py-12 sm:py-14 lg:py-16 relative scroll-mt-24 ${
+        isLight ? 'bg-gray-50' : 'bg-transparent'
+      }`}
+    >
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 text-right-stay-400 animate-spin" />
@@ -852,10 +883,14 @@ function AccommodationCardsFallback() {
   );
 }
 
-export default function AccommodationCards() {
+type AccommodationCardsProps = {
+  variant?: AccommodationCardsVariant;
+};
+
+export default function AccommodationCards({ variant = 'dark' }: AccommodationCardsProps) {
   return (
-    <Suspense fallback={<AccommodationCardsFallback />}>
-      <AccommodationCardsContent />
+    <Suspense fallback={<AccommodationCardsFallback variant={variant} />}>
+      <AccommodationCardsContent variant={variant} />
     </Suspense>
   );
 }

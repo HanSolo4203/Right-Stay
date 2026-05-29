@@ -2,7 +2,7 @@
 
 import { Calendar, Users, Shield, DollarSign, BarChart3, TrendingUp } from "lucide-react";
 import PremiumContentBlock from "@/components/premium/PremiumContentBlock";
-import PremiumFeatureCard from "@/components/premium/PremiumFeatureCard";
+import PremiumFeatureCardGrid from "@/components/premium/PremiumFeatureCardGrid";
 
 const services = [
   {
@@ -52,26 +52,7 @@ export default function HostAssetServicesSection() {
       centered
       variant="darker"
     >
-      <div className="flex gap-4 overflow-x-auto pb-4 -mx-6 px-6 snap-x snap-mandatory scrollbar-hide lg:hidden">
-        {services.map((service, index) => (
-          <PremiumFeatureCard
-            key={service.title}
-            {...service}
-            index={index}
-            className="snap-center"
-          />
-        ))}
-      </div>
-      <div className="hidden lg:grid lg:grid-cols-3 lg:gap-6">
-        {services.map((service, index) => (
-          <PremiumFeatureCard key={service.title} {...service} index={index} />
-        ))}
-      </div>
-      <div className="hidden sm:grid sm:grid-cols-2 sm:gap-5 lg:hidden">
-        {services.map((service, index) => (
-          <PremiumFeatureCard key={service.title} {...service} index={index} className="!w-full" />
-        ))}
-      </div>
+      <PremiumFeatureCardGrid features={services} />
     </PremiumContentBlock>
   );
 }

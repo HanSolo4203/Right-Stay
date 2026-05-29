@@ -24,7 +24,7 @@ export default function ServicesSection() {
         "Discover what Africa has to offer with our expertly managed tours. From cultural experiences to adventure excursions, we create unforgettable journeys.",
       link: "/tours",
       linkText: "Explore Tours",
-      image: "/images/6d30fe29-43aa-4fc2-a513-6aa41d38a7d0_800w_1.jpg",
+      image: "/images/6d30fe29-43aa-4fc2-a513-6aa41d38a7d0_3840w_1.jpg",
     },
     {
       icon: TrendingUp,
@@ -33,7 +33,7 @@ export default function ServicesSection() {
         "Comprehensive management covering bookings, cleaning, maintenance and reporting delivered with complete transparency and zero oversight gaps.",
       link: "/host-with-us",
       linkText: "Learn More",
-      image: "/images/d953ad7f-2dd7-42f7-8f74-593d55181036_800w_1.jpg",
+      image: "/images/d953ad7f-2dd7-42f7-8f74-593d55181036_3840w_1.jpg",
     },
   ];
 

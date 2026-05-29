@@ -11,7 +11,7 @@
     "dev:fresh": "bash scripts/dev-fresh.sh",
     "dev:fresh:turbo": "bash scripts/dev-fresh.sh --turbopack",
     "build": "bash scripts/build-clean.sh",
-    "start": "next start",
+    "start": "bash scripts/start-prod.sh",
     "lint": "next lint",
     "migrate:supabase-data": "node scripts/migrate-supabase-data.mjs",
     "sync:ical": "node scripts/sync-ical.mjs",

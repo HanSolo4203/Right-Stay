@@ -15,12 +15,27 @@ next_env_dev_dist_dir() {
   echo "${NEXT_DIST_DIR:-$root/.next-dev}"
 }
 
-next_env_exclude_dev_dist_from_icloud() {
-  local dev_dist="$1"
-  mkdir -p "$dev_dist"
+next_env_exclude_from_icloud() {
+  local dir="$1"
+  mkdir -p "$dir"
   # Prevent iCloud from syncing/evicting manifest .tmp files (common cause of ENOENT in ~/Documents).
   if [ "$(uname -s)" = "Darwin" ]; then
-    xattr -w com.apple.fileprovider.ignore#P 1 "$dev_dist" 2>/dev/null || true
+    xattr -w com.apple.fileprovider.ignore#P 1 "$dir" 2>/dev/null || true
+  fi
+}
+
+next_env_exclude_dev_dist_from_icloud() {
+  next_env_exclude_from_icloud "$1"
+}
+
+# Production output: use .next-build (iCloud-excluded) in ~/Documents on macOS so
+# rm/build does not hang on a synced .next folder.
+next_env_production_dist_dir() {
+  local root="$1"
+  if [ "$(uname -s)" = "Darwin" ] && [[ "$root" == "$HOME/Documents/"* ]]; then
+    echo "$root/.next-build"
+  else
+    echo "$root/.next"
   fi
 }
 
@@ -59,7 +74,23 @@ next_env_is_mixed_next() {
 
 next_env_clear_production_next() {
   local root="$1"
-  rm -rf "$root/.next" "$root/node_modules/.cache"
+  local prod_dist
+  prod_dist="$(next_env_production_dist_dir "$root")"
+
+  rm -rf "$root/node_modules/.cache"
+
+  if [ "$prod_dist" != "$root/.next" ]; then
+    next_env_exclude_from_icloud "$prod_dist"
+    rm -rf "$prod_dist"
+    # Stale .next in iCloud can block rm/mv indefinitely; clear in background only.
+    if [ -d "$root/.next" ]; then
+      echo "Note: leaving stale .next in place (iCloud may block deletion). Build uses $prod_dist"
+      ( rm -rf "$root/.next" 2>/dev/null || true ) &
+    fi
+    return
+  fi
+
+  rm -rf "$root/.next"
 }
 
 next_env_clear_dev_dist() {
@@ -69,8 +100,10 @@ next_env_clear_dev_dist() {
 
 next_env_mark_production_build() {
   local root="$1"
-  mkdir -p "$root/.next"
-  echo "production" > "$root/.next/.production-build"
+  local prod_dist
+  prod_dist="$(next_env_production_dist_dir "$root")"
+  mkdir -p "$prod_dist"
+  echo "production" > "$prod_dist/.production-build"
 }
 
 next_env_run_dev() {
