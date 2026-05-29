@@ -1,12 +1,12 @@
 import dynamic from 'next/dynamic';
 import Header from '@/components/sections/Header';
 import HeroSection from '@/components/sections/HeroSection';
+import PremiumBackgroundProvider from '@/components/premium/PremiumBackgroundProvider';
+import PremiumPageBackdrop from '@/components/premium/PremiumPageBackdrop';
 
 const SecondHero = dynamic(() => import('@/components/sections/SecondHero'));
-const StatsSection = dynamic(() => import('@/components/sections/StatsSection'));
 const ServicesSection = dynamic(() => import('@/components/sections/ServicesSection'));
 const WhyChooseSection = dynamic(() => import('@/components/sections/WhyChooseSection'));
-const HowItWorksSection = dynamic(() => import('@/components/sections/HowItWorksSection'));
 const TrustSection = dynamic(() => import('@/components/sections/TrustSection'));
 const AccommodationCards = dynamic(
   () => import('@/components/sections/AccommodationCards'),
@@ -23,20 +23,23 @@ const Footer = dynamic(() => import('@/components/sections/Footer'));
 export default function Home() {
   return (
     <>
-      <section className="isolate min-h-screen overflow-x-hidden relative">
+      <section className="isolate relative z-[1] min-h-screen overflow-x-hidden overflow-y-visible">
         <Header />
         <HeroSection />
       </section>
-      <SecondHero />
-      <StatsSection />
-      <ServicesSection />
-      <WhyChooseSection />
-      <HowItWorksSection />
-      <TrustSection />
-      <AccommodationCards />
-      <TestimonialSection />
-      <CTASection />
-      <Footer />
+      <PremiumPageBackdrop />
+      <PremiumBackgroundProvider className="premium-content-stack">
+        <SecondHero />
+        <ServicesSection />
+        <WhyChooseSection />
+        <TrustSection />
+        <AccommodationCards />
+        <TestimonialSection />
+        <CTASection />
+      </PremiumBackgroundProvider>
+      <div className="relative z-[1]">
+        <Footer />
+      </div>
     </>
   );
 }

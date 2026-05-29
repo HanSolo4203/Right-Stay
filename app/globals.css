@@ -96,6 +96,16 @@
   }
 }
 
+@keyframes iconGlow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 4px rgba(139, 200, 130, 0.4));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(139, 200, 130, 0.75));
+  }
+}
+
 /* Subtle cloud animation for hero image */
 @keyframes cloudDrift {
   0% {
@@ -237,4 +247,138 @@ input[type="date"].hide-native-calendar-icon {
 
 input[type="date"].hide-native-calendar-icon::-webkit-date-and-time-value {
   text-align: left;
+}
+
+/* Premium marketing surface — shared by fixed backdrop + hero fade (must stay in sync) */
+:root {
+  --premium-surface-gradient: linear-gradient(
+    to bottom,
+    #121816 0%,
+    #101a17 28%,
+    #0f1a16 52%,
+    #0d1f16 78%,
+    #0c1a14 100%
+  );
+  --premium-texture-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --premium-hero-overlap: clamp(6rem, 14vh, 11rem);
+}
+
+/* Premium marketing sections — single continuous surface when wrapped in PremiumBackgroundProvider */
+.premium-page-backdrop {
+  position: fixed;
+  inset: 0;
+  /* Below hero/footer (z-[1]); above default in-flow content for transparent premium sections */
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.premium-page-backdrop__gradient {
+  position: absolute;
+  inset: 0;
+  background: var(--premium-surface-gradient);
+  background-attachment: fixed;
+}
+
+.premium-page-backdrop__texture {
+  position: absolute;
+  inset: 0;
+  opacity: 0.04;
+  background-image: var(--premium-texture-image);
+  background-size: 256px 256px;
+  background-repeat: repeat;
+  background-attachment: fixed;
+}
+
+/*
+ * Hero → premium blend: same fixed surface as .premium-page-backdrop, masked in at the
+ * hero bottom so colours/textures align with the section below at every scroll position.
+ */
+.hero-premium-fade-wrap {
+  height: min(58vh, 32rem);
+}
+
+@media (min-width: 640px) {
+  .hero-premium-fade-wrap {
+    height: min(52vh, 34rem);
+  }
+}
+
+.hero-premium-fade-gradient,
+.hero-premium-fade-texture {
+  position: absolute;
+  inset: 0;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 0, 0, 0.35) 32%,
+    rgba(0, 0, 0, 0.82) 58%,
+    #000 82%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 0, 0, 0.35) 32%,
+    rgba(0, 0, 0, 0.82) 58%,
+    #000 82%
+  );
+}
+
+.hero-premium-fade-gradient {
+  background: var(--premium-surface-gradient);
+  background-attachment: fixed;
+}
+
+.hero-premium-fade-texture {
+  background-image: var(--premium-texture-image);
+  background-size: 256px 256px;
+  background-repeat: repeat;
+  background-attachment: fixed;
+  opacity: 0.04;
+}
+
+/* Pull premium content into hero fade zone — removes the hard section box seam */
+.premium-content-stack {
+  margin-top: calc(-1 * var(--premium-hero-overlap));
+}
+
+.premium-page-backdrop__vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(51, 126, 47, 0.12), transparent);
+}
+
+.premium-page-backdrop__glow {
+  position: absolute;
+}
+
+.premium-page-backdrop__glow--tl {
+  top: -8rem;
+  left: -8rem;
+  width: 24rem;
+  height: 24rem;
+  border-radius: 9999px;
+  background: rgba(51, 126, 47, 0.1);
+  filter: blur(120px);
+}
+
+.premium-page-backdrop__glow--r {
+  top: 50%;
+  right: -6rem;
+  width: 20rem;
+  height: 20rem;
+  margin-top: -10rem;
+  border-radius: 9999px;
+  background: rgba(74, 154, 68, 0.08);
+  filter: blur(100px);
+}
+
+.premium-page-backdrop__glow--b {
+  bottom: -5rem;
+  left: 33%;
+  width: 18rem;
+  height: 18rem;
+  border-radius: 9999px;
+  background: rgba(6, 78, 59, 0.2);
+  filter: blur(90px);
 }

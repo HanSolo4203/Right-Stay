@@ -543,10 +543,10 @@ function AccommodationCardsContent() {
   // Show loading state when fetching properties or checking availability
   if (loading || (checkIn && checkOut && checkingAvailability)) {
     return (
-      <section id="accommodations" className="isolate py-16 sm:py-20 lg:py-24 relative bg-gray-50 scroll-mt-24">
+      <section id="accommodations" className="isolate py-12 sm:py-14 lg:py-16 relative bg-transparent scroll-mt-24">
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 text-right-stay-500 animate-spin" />
+            <Loader2 className="h-8 w-8 text-right-stay-400 animate-spin" />
           </div>
         </div>
       </section>
@@ -561,11 +561,17 @@ function AccommodationCardsContent() {
   });
 
   return (
-    <section id="accommodations" className="isolate py-16 sm:py-20 lg:py-24 relative bg-gray-50 scroll-mt-24">
+    <section id="accommodations" className="isolate py-12 sm:py-14 lg:py-16 relative bg-transparent scroll-mt-24">
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
         <div className="text-center mb-8 sm:mb-12 lg:mb-16">
+          <p className="text-xs font-medium uppercase tracking-[0.28em] text-right-stay-400/90 mb-3">
+            Curated Collection
+          </p>
+          <h2 className="font-display text-3xl font-medium tracking-tight text-white sm:text-4xl lg:text-5xl mb-4">
+            Premium Stays
+          </h2>
           <p 
-            className="text-sm sm:text-base leading-relaxed text-gray-600 max-w-3xl mx-auto"
+            className="text-sm sm:text-base leading-relaxed text-white/60 max-w-3xl mx-auto"
           >
             {locationFilter || checkIn || guestsFilter ? (
               <>
@@ -836,10 +842,10 @@ function AccommodationCardsContent() {
 
 function AccommodationCardsFallback() {
   return (
-    <section id="accommodations" className="isolate py-16 sm:py-20 lg:py-24 relative bg-gray-50 scroll-mt-24">
+    <section id="accommodations" className="isolate py-12 sm:py-14 lg:py-16 relative bg-transparent scroll-mt-24">
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 text-right-stay-500 animate-spin" />
+          <Loader2 className="h-8 w-8 text-right-stay-400 animate-spin" />
         </div>
       </div>
     </section>

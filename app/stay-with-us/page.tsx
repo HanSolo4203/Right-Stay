@@ -4,9 +4,12 @@ import { useState, useEffect, FormEvent, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '@/components/sections/Header';
 import AccommodationCards from '@/components/sections/AccommodationCards';
+import PremiumBackgroundProvider from '@/components/premium/PremiumBackgroundProvider';
+import PremiumPageBackdrop from '@/components/premium/PremiumPageBackdrop';
 import Footer from '@/components/sections/Footer';
 import Link from 'next/link';
 import HeroBackgroundImage from '@/components/ui/HeroBackgroundImage';
+import HeroPremiumFadeOverlay from '@/components/ui/HeroPremiumFadeOverlay';
 import { ArrowLeft, Search, Calendar, Users, MapPin, ChevronDown, ChevronRight } from 'lucide-react';
 
 function StayWithUsContent() {
@@ -112,7 +115,7 @@ function StayWithUsContent() {
 
   return (
     <>
-      <section className="isolate min-h-[600px] overflow-hidden relative">
+      <section className="isolate relative z-[1] min-h-[600px] overflow-x-hidden overflow-y-visible">
         {/* Background Image */}
         <div className="absolute inset-0">
           <HeroBackgroundImage
@@ -120,8 +123,10 @@ function StayWithUsContent() {
             priority
             className="pointer-events-none object-cover motion-safe:[animation:cloudDrift_5s_ease-out_forwards]"
             style={{
-              maskImage: 'linear-gradient(to bottom, black 85%, transparent)',
-              WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent)',
+              maskImage:
+                'linear-gradient(to bottom, black 48%, rgba(0,0,0,0.75) 68%, rgba(0,0,0,0.25) 86%, transparent 100%)',
+              WebkitMaskImage:
+                'linear-gradient(to bottom, black 48%, rgba(0,0,0,0.75) 68%, rgba(0,0,0,0.25) 86%, transparent 100%)',
             }}
           />
         </div>
@@ -280,11 +285,16 @@ function StayWithUsContent() {
           </div>
         </div>
 
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black to-transparent"></div>
+        <HeroPremiumFadeOverlay />
       </section>
-      <Suspense fallback={<div className="py-16 text-center">Loading accommodations...</div>}>
-        <AccommodationCards />
-      </Suspense>
+      <PremiumPageBackdrop />
+      <PremiumBackgroundProvider className="premium-content-stack">
+        <div className="pt-[var(--premium-hero-overlap)]">
+          <Suspense fallback={<div className="py-16 text-center">Loading accommodations...</div>}>
+            <AccommodationCards />
+          </Suspense>
+        </div>
+      </PremiumBackgroundProvider>
       <Footer />
     </>
   );

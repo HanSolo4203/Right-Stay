@@ -1,120 +1,104 @@
 "use client";
 
-import Image from 'next/image';
-import { IMAGE_SIZES } from '@/lib/image-sizes';
-import Link from 'next/link';
-import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-import { Home, Compass, TrendingUp, ArrowRight } from 'lucide-react';
+import Image from "next/image";
+import { IMAGE_SIZES } from "@/lib/image-sizes";
+import Link from "next/link";
+import { Home, Compass, TrendingUp, ArrowRight } from "lucide-react";
+import PremiumContentBlock from "@/components/premium/PremiumContentBlock";
 
 export default function ServicesSection() {
-  useScrollAnimation();
-
   const services = [
     {
       icon: Home,
-      title: "Luxury Accommodations",
-      description: "Experience premium short-term rentals across Africa's most vibrant cities. Each property is carefully curated to ensure comfort, style, and authentic local experiences.",
+      title: "Premium Accommodation",
+      description:
+        "Experience premium short-term rentals across Africa's most vibrant cities. Each property ensuring comfort, style and authentic local experiences.",
       link: "/stay-with-us",
       linkText: "Browse Properties",
-      image: "/images/993d5154-c104-4507-8c0a-55364d2a948c_800w_1.jpg"
+      image: "/images/993d5154-c104-4507-8c0a-55364d2a948c_800w_1.jpg",
     },
     {
       icon: Compass,
-      title: "Curated Tours",
-      description: "Discover Africa's hidden gems with our expertly designed tours. From cultural experiences to adventure excursions, we create unforgettable journeys tailored to your interests.",
+      title: "Experiences",
+      description:
+        "Discover what Africa has to offer with our expertly managed tours. From cultural experiences to adventure excursions, we create unforgettable journeys.",
       link: "/tours",
       linkText: "Explore Tours",
-      image: "/images/6d30fe29-43aa-4fc2-a513-6aa41d38a7d0_800w_1.jpg"
+      image: "/images/6d30fe29-43aa-4fc2-a513-6aa41d38a7d0_800w_1.jpg",
     },
     {
       icon: TrendingUp,
       title: "Asset Management",
-      description: "Comprehensive property management services for owners. We handle everything from bookings and cleaning to maintenance and financial reporting with complete transparency.",
-      link: "/asset-management",
+      description:
+        "Comprehensive management covering bookings, cleaning, maintenance and reporting delivered with complete transparency and zero oversight gaps.",
+      link: "/host-with-us",
       linkText: "Learn More",
-      image: "/images/d953ad7f-2dd7-42f7-8f74-593d55181036_800w_1.jpg"
-    }
+      image: "/images/d953ad7f-2dd7-42f7-8f74-593d55181036_800w_1.jpg",
+    },
   ];
 
   return (
-    <section className="isolate overflow-hidden py-24 relative bg-gray-50">
-      <div className="relative z-10 mx-auto max-w-7xl px-6 md:px-8">
-        <div className="text-center mb-16">
-          <span className="inline-flex items-center gap-2 text-xs uppercase ring-gray-200 ring-1 animate-on-scroll text-gray-600 tracking-[0.18em] bg-white rounded-full pt-1 pr-3 pb-1 pl-3 mb-6" style={{ animation: 'fadeSlideIn 1.0s ease-out 0.1s both' }}>
-            What We Offer
-          </span>
-          <h2 
-            className="sm:text-5xl lg:text-6xl text-4xl font-medium text-gray-900 tracking-tight animate-on-scroll"
-            style={{ animation: 'fadeSlideIn 1s ease-out 0.2s both', fontFamily: 'Manrope, sans-serif' }}
+    <PremiumContentBlock
+      eyebrow="What We Offer"
+      title="Three Ways to Experience Africa, Done Right"
+      subtitle="From premium stays to curated experiences and full asset management — end-to-end solutions from one trusted partner."
+      centered
+    >
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-8">
+        {services.map((service, index) => (
+          <article
+            key={service.title}
+            className="group relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.06] to-transparent shadow-xl transition-all duration-500 hover:-translate-y-1 hover:border-right-stay-400/25 animate-on-scroll"
+            style={{ animation: `fadeSlideIn 0.9s ease-out ${0.2 + index * 0.1}s both` }}
           >
-            Our Premium Services
-          </h2>
-          <p 
-            className="sm:text-xl text-lg leading-relaxed text-gray-600 max-w-3xl mx-auto mt-6 animate-on-scroll"
-            style={{ animation: 'fadeSlideIn 1s ease-out 0.3s both' }}
-          >
-            From luxurious stays to expertly curated experiences, we provide end-to-end solutions for unforgettable African adventures
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 lg:gap-8">
-          {services.map((service, index) => (
-            <div
-              key={service.title}
-              className="group rounded-3xl border border-gray-200 bg-white shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden animate-on-scroll"
-              style={{ animation: `fadeSlideIn 1s ease-out ${0.5 + index * 0.1}s both` }}
-            >
-              {/* Image */}
-              <div className="relative h-64 overflow-hidden">
-                <Image
-                  src={service.image}
-                  alt={service.title}
-                  fill
-                  sizes={IMAGE_SIZES.gridThird}
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                <div className="absolute bottom-4 left-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm">
-                    <service.icon className="h-6 w-6 text-gray-900" strokeWidth={1.5} />
-                  </div>
-                </div>
-              </div>
-
-              {/* Content */}
-              <div className="p-8">
-                <h3 className="text-2xl font-semibold text-gray-900 mb-3">
-                  {service.title}
-                </h3>
-                <p className="text-gray-600 text-base mb-6 leading-relaxed">
-                  {service.description}
-                </p>
-                <Link
-                  href={service.link}
-                  className="inline-flex items-center gap-2 text-right-stay-500 font-semibold hover:gap-3 transition-all duration-200"
-                >
-                  {service.linkText}
-                  <ArrowRight className="h-4 w-4" strokeWidth={2} />
-                </Link>
+            <div className="relative h-56 overflow-hidden sm:h-64">
+              <Image
+                src={service.image}
+                alt={service.title}
+                fill
+                sizes={IMAGE_SIZES.gridThird}
+                className="object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0a1210] via-black/40 to-transparent" />
+              <div className="absolute bottom-4 left-4 flex h-11 w-11 items-center justify-center rounded-xl border border-white/20 bg-white/10 backdrop-blur-md">
+                <service.icon className="h-5 w-5 text-white" strokeWidth={1.5} />
               </div>
             </div>
-          ))}
-        </div>
-
-        <div className="text-center mt-12 animate-on-scroll" style={{ animation: 'fadeSlideIn 1s ease-out 1.0s both' }}>
-          <p className="text-gray-600 text-lg">
-            Can&apos;t find what you&apos;re looking for? We&apos;re here to help create your perfect experience.
-          </p>
-          <Link
-            href="/contact"
-            className="inline-flex items-center gap-2 mt-6 bg-gray-900 text-white font-semibold py-4 px-8 rounded-2xl hover:bg-gray-800 transition-colors duration-200"
-          >
-            Get in Touch
-            <ArrowRight className="h-5 w-5" />
-          </Link>
-        </div>
+            <div className="p-6 sm:p-8">
+              <h3 className="font-display text-xl font-semibold text-white sm:text-2xl">
+                {service.title}
+              </h3>
+              <p className="mt-3 text-sm leading-relaxed text-white/60 sm:text-base">
+                {service.description}
+              </p>
+              <Link
+                href={service.link}
+                className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-right-stay-300 transition-all duration-200 hover:gap-3 hover:text-right-stay-200"
+              >
+                {service.linkText}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </article>
+        ))}
       </div>
-    </section>
+
+      <div
+        className="mt-12 text-center animate-on-scroll"
+        style={{ animation: "fadeSlideIn 0.9s ease-out 0.5s both" }}
+      >
+        <p className="text-white/55 text-base sm:text-lg">
+          Can&apos;t find what you&apos;re looking for? We&apos;re here to help create your perfect
+          experience.
+        </p>
+        <Link
+          href="/contact"
+          className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-8 py-4 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:border-right-stay-400/40 hover:bg-white/10"
+        >
+          Get in Touch
+          <ArrowRight className="h-5 w-5" />
+        </Link>
+      </div>
+    </PremiumContentBlock>
   );
 }
-

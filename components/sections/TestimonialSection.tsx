@@ -93,7 +93,7 @@ export default function TestimonialSection() {
   const currentReview = reviews[currentIndex];
 
   return (
-    <section className="isolate overflow-hidden min-h-[600px] py-16 md:py-24 relative">
+    <section className="isolate overflow-hidden min-h-[600px] py-12 md:py-16 relative">
       <div className="absolute inset-0">
         <HeroBackgroundImage
           src="/images/6b428a64-0de1-4837-bab2-9729ce2e28c2_800w_1.jpg"

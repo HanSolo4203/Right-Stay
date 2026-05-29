@@ -1,86 +1,67 @@
 "use client";
 
-import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-import { Search, CheckCircle, Star } from 'lucide-react';
+import { Search, CheckCircle, Star } from "lucide-react";
+import PremiumContentBlock from "@/components/premium/PremiumContentBlock";
+
+const steps = [
+  {
+    number: "01",
+    icon: Search,
+    title: "Search & Discover",
+    description:
+      "Browse our curated collection of premium properties across Africa. Filter by location, amenities, and price to find your perfect match.",
+  },
+  {
+    number: "02",
+    icon: CheckCircle,
+    title: "Book with Confidence",
+    description:
+      "Secure your dates with instant confirmation. Transparent pricing and flexible policies ensure a worry-free booking experience.",
+  },
+  {
+    number: "03",
+    icon: Star,
+    title: "Experience Excellence",
+    description:
+      "Arrive to a spotlessly clean, fully equipped property. Enjoy 24/7 support throughout your stay and create lasting memories.",
+  },
+];
 
 export default function HowItWorksSection() {
-  useScrollAnimation();
-
-  const steps = [
-    {
-      number: "01",
-      icon: Search,
-      emoji: "🔍",
-      title: "Search & Discover",
-      description: "Browse our curated collection of premium properties across Africa. Filter by location, amenities, and price to find your perfect match."
-    },
-    {
-      number: "02",
-      icon: CheckCircle,
-      emoji: "✓",
-      title: "Book with Confidence",
-      description: "Secure your dates with instant confirmation. Our transparent pricing and flexible policies ensure a worry-free booking experience."
-    },
-    {
-      number: "03",
-      icon: Star,
-      emoji: "⭐",
-      title: "Experience Excellence",
-      description: "Arrive to a spotlessly clean, fully equipped property. Enjoy 24/7 support throughout your stay and create lasting memories."
-    }
-  ];
-
   return (
-    <section className="isolate overflow-hidden py-24 relative bg-gray-50">
-      <div className="relative z-10 mx-auto max-w-7xl px-6 md:px-8">
-        <div className="text-center mb-16">
-          <h2 
-            className="sm:text-5xl lg:text-6xl text-4xl font-medium text-gray-900 tracking-tight animate-on-scroll"
-            style={{ animation: 'fadeSlideIn 1s ease-out 0.1s both', fontFamily: 'Manrope, sans-serif' }}
+    <PremiumContentBlock
+      eyebrow="Simple Process"
+      title="How It Works"
+      subtitle="Your journey to an unforgettable African stay is just three simple steps away"
+      centered
+      variant="darker"
+    >
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 lg:gap-10">
+        {steps.map((step, index) => (
+          <article
+            key={step.number}
+            className="relative text-center animate-on-scroll"
+            style={{ animation: `fadeSlideIn 0.9s ease-out ${0.2 + index * 0.12}s both` }}
           >
-            How It Works
-          </h2>
-          <p 
-            className="sm:text-xl text-lg leading-relaxed text-gray-600 max-w-3xl mx-auto mt-6 animate-on-scroll"
-            style={{ animation: 'fadeSlideIn 1s ease-out 0.2s both' }}
-          >
-            Your journey to an unforgettable African stay is just three simple steps away
-          </p>
-        </div>
+            {index < steps.length - 1 && (
+              <div className="pointer-events-none absolute top-14 left-[calc(50%+4rem)] hidden h-px w-[calc(100%-8rem)] bg-gradient-to-r from-right-stay-500/50 to-transparent lg:block" />
+            )}
 
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-3 lg:gap-8">
-          {steps.map((step, index) => (
-            <div
-              key={step.number}
-              className="relative text-center animate-on-scroll"
-              style={{ animation: `fadeSlideIn 1s ease-out ${0.3 + index * 0.2}s both` }}
-            >
-              {/* Connector line for desktop */}
-              {index < steps.length - 1 && (
-                <div className="hidden lg:block absolute top-16 left-1/2 w-full h-0.5 bg-gradient-to-r from-right-stay-200 via-right-stay-300 to-transparent"></div>
-              )}
-              
-              <div className="relative z-10">
-                <div className="flex items-center justify-center mb-6">
-                  <div className="flex h-32 w-32 items-center justify-center rounded-full bg-white border-2 border-right-stay-200 shadow-lg">
-                    <span className="text-6xl">{step.emoji}</span>
-                  </div>
-                </div>
-                <div className="text-sm font-semibold text-right-stay-500 tracking-wider mb-3">
-                  {step.number}
-                </div>
-                <h3 className="text-2xl font-semibold text-gray-900 mb-4">
-                  {step.title}
-                </h3>
-                <p className="text-gray-600 text-base leading-relaxed max-w-sm mx-auto">
-                  {step.description}
-                </p>
-              </div>
+            <div className="mx-auto mb-6 flex h-28 w-28 items-center justify-center rounded-2xl border border-white/15 bg-gradient-to-br from-white/[0.08] to-white/[0.02] shadow-lg backdrop-blur-xl transition-all duration-500 hover:border-right-stay-400/30 hover:shadow-[0_0_30px_rgba(51,126,47,0.2)]">
+              <step.icon className="h-10 w-10 text-right-stay-300" strokeWidth={1.25} />
             </div>
-          ))}
-        </div>
+            <div className="text-xs font-semibold uppercase tracking-[0.2em] text-right-stay-400 mb-3">
+              Step {step.number}
+            </div>
+            <h3 className="font-display text-xl font-semibold text-white sm:text-2xl mb-3">
+              {step.title}
+            </h3>
+            <p className="mx-auto max-w-xs text-sm leading-relaxed text-white/60 sm:text-base">
+              {step.description}
+            </p>
+          </article>
+        ))}
       </div>
-    </section>
+    </PremiumContentBlock>
   );
 }
-

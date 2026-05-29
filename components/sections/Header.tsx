@@ -5,10 +5,9 @@ import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
 
 const NAV_LINKS = [
-  { href: '/host-with-us', label: 'Host With Us' },
   { href: '/stay-with-us', label: 'Stay With Us' },
   { href: '/tours', label: 'Tours' },
-  { href: '/asset-management', label: 'Asset Management' },
+  { href: '/host-with-us', label: 'Property Management' },
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
 ] as const;

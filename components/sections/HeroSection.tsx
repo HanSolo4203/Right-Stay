@@ -4,6 +4,7 @@ import { useState, useEffect, FormEvent, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import HeroBackgroundImage from '@/components/ui/HeroBackgroundImage';
+import HeroPremiumFadeOverlay from '@/components/ui/HeroPremiumFadeOverlay';
 import Link from 'next/link';
 import { ArrowRight, Play, ChevronRight, Search, Calendar, Users, MapPin, ChevronDown } from 'lucide-react';
 
@@ -108,8 +109,10 @@ export default function HeroSection() {
           priority
           className="pointer-events-none object-cover motion-safe:[animation:cloudDrift_5s_ease-out_forwards]"
           style={{
-            maskImage: 'linear-gradient(to bottom, black 85%, transparent)',
-            WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent)',
+            maskImage:
+              'linear-gradient(to bottom, black 48%, rgba(0,0,0,0.75) 68%, rgba(0,0,0,0.25) 86%, transparent 100%)',
+            WebkitMaskImage:
+              'linear-gradient(to bottom, black 48%, rgba(0,0,0,0.75) 68%, rgba(0,0,0,0.25) 86%, transparent 100%)',
           }}
         />
       </div>
@@ -118,12 +121,15 @@ export default function HeroSection() {
         <div className="grid grid-cols-1 grid-rows-[minmax(0,1fr)] gap-12 md:px-8 md:pb-24 md:pt-16 lg:grid-cols-12 lg:gap-8 lg:pb-28 lg:pt-20 min-h-[calc(100vh-96px)] max-w-7xl mr-auto ml-auto pt-8 pr-6 pb-28 sm:pb-32 pl-6 gap-x-12 gap-y-12 items-center">
           <div className="col-span-7 flex flex-col justify-center items-start lg:items-center text-left lg:text-center" style={{ animation: 'fadeSlideIn 1.2s ease-out forwards' }}>
             <h1
-              className="font-display sm:text-4xl lg:font-normal lg:text-5xl text-3xl font-medium text-white tracking-tighter drop-shadow-xl"
+              className="font-display drop-shadow-xl"
               style={{ animation: 'fadeSlideIn 1s ease-out 0.2s both' }}
             >
-              Turn left and come right
-              <br className="hidden sm:block" />
-              with
+              <span className="block text-2xl sm:text-3xl lg:text-[2.25rem] font-extralight italic text-white/95 tracking-[0.04em] leading-snug">
+                Turn left and come right
+              </span>
+              <span className="mt-3 block text-lg sm:text-xl font-light uppercase tracking-[0.42em] text-white/80">
+                with
+              </span>
             </h1>
 
             <div className="mt-8" style={{ animation: 'fadeSlideIn 1s ease-out 0.4s both' }}>
@@ -289,7 +295,7 @@ export default function HeroSection() {
         </div>
       </div>
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black to-transparent"></div>
+      <HeroPremiumFadeOverlay />
     </>
   );
 }
