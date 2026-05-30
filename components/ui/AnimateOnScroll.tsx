@@ -8,6 +8,7 @@ import {
   type ElementType,
   type ReactNode,
 } from "react";
+import { registerScrollAnimationElement } from "@/hooks/useScrollAnimation";
 
 type AnimateOnScrollProps = {
   children: ReactNode;
@@ -16,16 +17,6 @@ type AnimateOnScrollProps = {
   duration?: number;
   as?: ElementType;
 };
-
-function revealIfInViewport(el: HTMLElement | null) {
-  if (!el || el.classList.contains("animate")) return;
-
-  const rect = el.getBoundingClientRect();
-  const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-  if (rect.top < viewportHeight * 0.95 && rect.bottom > 0) {
-    el.classList.add("animate");
-  }
-}
 
 /**
  * Scroll-triggered fade/slide — defers animation attrs until after mount to avoid hydration mismatches.
@@ -46,7 +37,7 @@ export default function AnimateOnScroll({
 
   useEffect(() => {
     if (!ready) return;
-    revealIfInViewport(elementRef.current);
+    return registerScrollAnimationElement(elementRef.current);
   }, [ready]);
 
   const style: CSSProperties | undefined = ready

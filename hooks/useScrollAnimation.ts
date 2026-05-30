@@ -7,10 +7,47 @@ const OBSERVER_OPTIONS: IntersectionObserverInit = {
   rootMargin: '0px 0px -5% 0px',
 };
 
-function isElementInViewport(el: Element): boolean {
+export function isElementInViewport(el: Element): boolean {
   const rect = el.getBoundingClientRect();
   const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
   return rect.top < viewportHeight * 0.95 && rect.bottom > 0;
+}
+
+function ensureInViewObserver(once: boolean): IntersectionObserver {
+  if (!window.__inViewIO) {
+    window.__inViewIO = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('animate');
+            if (once) {
+              window.__inViewIO.unobserve(entry.target);
+            }
+          } else if (!once) {
+            entry.target.classList.remove('animate');
+          }
+        });
+      },
+      OBSERVER_OPTIONS
+    );
+  }
+  return window.__inViewIO;
+}
+
+/** Register a single element once its scroll-animation class is applied. */
+export function registerScrollAnimationElement(el: HTMLElement | null): () => void {
+  if (!el || el.classList.contains('animate')) {
+    return () => {};
+  }
+
+  if (isElementInViewport(el)) {
+    el.classList.add('animate');
+    return () => {};
+  }
+
+  const io = ensureInViewObserver(true);
+  io.observe(el);
+  return () => io.unobserve(el);
 }
 
 function observeElements(io: IntersectionObserver, selector: string) {
@@ -31,25 +68,7 @@ export const useScrollAnimation = (selector: string = '.animate-on-scroll', once
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    if (!window.__inViewIO) {
-      window.__inViewIO = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('animate');
-              if (once) {
-                window.__inViewIO.unobserve(entry.target);
-              }
-            } else if (!once) {
-              entry.target.classList.remove('animate');
-            }
-          });
-        },
-        OBSERVER_OPTIONS
-      );
-    }
-
-    const io = window.__inViewIO;
+    const io = ensureInViewObserver(once);
     observeElements(io, selector);
 
     const mutationObserver = new MutationObserver(() => {
