@@ -1,6 +1,7 @@
 "use client";
 
 import HeroBackgroundImage from '@/components/ui/HeroBackgroundImage';
+import { MARKETING_IMAGES } from '@/lib/marketing-images';
 import type { PublicSiteContact } from '@/lib/public-site-settings';
 import { Mail, MapPin, Phone } from 'lucide-react';
 
@@ -24,11 +25,13 @@ export default function ContactHero({ contact }: ContactHeroProps) {
     <section className="isolate min-h-[500px] sm:min-h-[600px] overflow-hidden relative">
       <div className="absolute inset-0">
         <HeroBackgroundImage
-          src="/images/6b428a64-0de1-4837-bab2-9729ce2e28c2_3840w_1.jpg"
+          src={MARKETING_IMAGES.heroCapeTown}
           className="pointer-events-none object-cover"
           style={{
-            maskImage: 'linear-gradient(to bottom, black 85%, transparent)',
-            WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent)',
+            maskImage:
+              'linear-gradient(to bottom, black 48%, rgba(0,0,0,0.75) 68%, rgba(0,0,0,0.25) 86%, transparent 100%)',
+            WebkitMaskImage:
+              'linear-gradient(to bottom, black 48%, rgba(0,0,0,0.75) 68%, rgba(0,0,0,0.25) 86%, transparent 100%)',
           }}
         />
       </div>

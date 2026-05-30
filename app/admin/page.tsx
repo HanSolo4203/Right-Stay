@@ -16,6 +16,7 @@ import {
   User,
   MessageSquare,
   DollarSign,
+  Mail,
   PanelLeft,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
@@ -28,6 +29,7 @@ import {
   TourPackageSettingsSkeleton,
   BookingManagementSkeleton,
   BookingRequestManagementSkeleton,
+  ContactSubmissionManagementSkeleton,
   PropertyMappingSkeleton,
 } from '@/components/admin/AdminTabSkeletons';
 
@@ -60,6 +62,10 @@ const BookingRequestManagement = dynamicTab(
   () => import('@/components/admin/BookingRequestManagement'),
   BookingRequestManagementSkeleton
 );
+const ContactSubmissionManagement = dynamicTab(
+  () => import('@/components/admin/ContactSubmissionManagement'),
+  ContactSubmissionManagementSkeleton
+);
 const PropertyMapping = dynamicTab(
   () => import('@/components/admin/PropertyMapping'),
   PropertyMappingSkeleton
@@ -72,6 +78,7 @@ type TabType =
   | 'tours'
   | 'bookings'
   | 'booking-requests'
+  | 'contact-submissions'
   | 'mapping'
   | 'reviews';
 
@@ -82,6 +89,7 @@ const VALID_TABS: TabType[] = [
   'tours',
   'bookings',
   'booking-requests',
+  'contact-submissions',
   'mapping',
   'reviews',
 ];
@@ -110,6 +118,10 @@ const TAB_META: Record<TabType, { title: string; description: string }> = {
   'booking-requests': {
     title: 'Booking Requests',
     description: 'Review and respond to pending direct website booking requests',
+  },
+  'contact-submissions': {
+    title: 'Contact Enquiries',
+    description: 'View Get In Touch form submissions and property listing requests',
   },
   mapping: {
     title: 'Property Mapping',
@@ -237,6 +249,12 @@ function AdminDashboard() {
       name: 'Booking Requests',
       shortName: 'Requests',
       icon: Inbox,
+    },
+    {
+      id: 'contact-submissions' as TabType,
+      name: 'Contact Enquiries',
+      shortName: 'Contact',
+      icon: Mail,
     },
     { id: 'mapping' as TabType, name: 'Property Mapping', shortName: 'Mapping', icon: Link },
     { id: 'reviews' as TabType, name: 'Import Reviews', shortName: 'Reviews', icon: MessageSquare },
@@ -409,6 +427,7 @@ function AdminDashboard() {
             {activeTab === 'tours' && <TourPackageSettings />}
             {activeTab === 'bookings' && <BookingManagement />}
             {activeTab === 'booking-requests' && <BookingRequestManagement />}
+            {activeTab === 'contact-submissions' && <ContactSubmissionManagement />}
             {activeTab === 'mapping' && <PropertyMapping />}
             {activeTab === 'reviews' && (
               <div className="p-6 lg:p-8">
@@ -448,7 +467,7 @@ function AdminDashboard() {
             onClick={() => setMobileNavOpen(true)}
             className={cn(
               'flex flex-col items-center justify-center gap-1 flex-1 min-w-0 rounded-lg px-2 py-2 text-[10px] font-medium transition-colors',
-              ['booking-requests', 'mapping', 'reviews'].includes(activeTab)
+              ['booking-requests', 'contact-submissions', 'mapping', 'reviews'].includes(activeTab)
                 ? 'text-right-stay-700 bg-right-stay-50'
                 : 'text-slate-600 hover:bg-slate-100'
             )}

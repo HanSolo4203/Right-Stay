@@ -6,5 +6,7 @@ export {
 } from './email-ui';
 export { buildBookingDetailsTable } from './booking-details-table';
 export { renderAdminBookingRequestEmail } from './admin-booking-request';
+export { renderAdminContactEnquiryEmail } from './admin-contact-enquiry';
+export { renderAdminPropertyHostingEnquiryEmail } from './admin-property-hosting-enquiry';
 export { renderGuestBookingRequestEmail } from './guest-booking-request';
 export type { BookingEmailDetails } from './types';

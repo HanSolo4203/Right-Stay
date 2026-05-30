@@ -1,8 +1,23 @@
 "use client";
 
-import { useState } from 'react';
-import { Send, CheckCircle2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Send, CheckCircle2, Loader2 } from 'lucide-react';
 import { getPublicSiteContactEmail } from '@/lib/site-contact';
+import {
+  CONTACT_SUBJECT_OPTIONS,
+  createEmptyPropertyHostingDetails,
+  isPropertyHostingSubject,
+  type PropertyHostingDetails,
+} from '@/lib/contact-form';
+import PropertyHostingFields from '@/components/sections/PropertyHostingFields';
+
+const inputClassName =
+  'w-full rounded-lg border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/50 backdrop-blur focus:border-white/30 focus:outline-none focus:ring-1 focus:ring-white/20';
+
+const selectClassName =
+  'w-full rounded-lg border border-white/15 bg-white/5 px-4 py-3 text-sm text-white backdrop-blur focus:border-white/30 focus:outline-none focus:ring-1 focus:ring-white/20';
+
+const labelClassName = 'block text-sm font-medium text-white/90 mb-2';
 
 export default function ContactForm() {
   const contactEmail = getPublicSiteContactEmail();
@@ -13,15 +28,70 @@ export default function ContactForm() {
     subject: '',
     message: ''
   });
+  const [propertyData, setPropertyData] = useState<PropertyHostingDetails>(
+    createEmptyPropertyHostingDetails
+  );
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const showPropertySection = isPropertyHostingSubject(formData.subject);
+
+  useEffect(() => {
+    if (!showPropertySection) return;
+
+    setPropertyData((prev) => ({
+      ...prev,
+      ownerName: prev.ownerName || formData.name,
+      ownerEmail: prev.ownerEmail || formData.email,
+    }));
+  }, [showPropertySection, formData.name, formData.email]);
+
+  const resetForm = () => {
+    setFormData({ name: '', email: '', company: '', subject: '', message: '' });
+    setPropertyData(createEmptyPropertyHostingDetails());
+    setError(null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setFormData({ name: '', email: '', company: '', subject: '', message: '' });
-    }, 3000);
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          propertyHosting: showPropertySection ? propertyData : undefined,
+        }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          typeof data.error === 'string'
+            ? data.error
+            : 'Unable to send your message. Please try again.'
+        );
+      }
+
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+        resetForm();
+      }, 3000);
+    } catch (submitError) {
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : 'Unable to send your message. Please try again.'
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -29,6 +99,16 @@ export default function ContactForm() {
     setFormData(prev => ({
       ...prev,
       [name]: value
+    }));
+  };
+
+  const handlePropertyChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setPropertyData((prev) => ({
+      ...prev,
+      [name]: value,
     }));
   };
 
@@ -88,7 +168,7 @@ export default function ContactForm() {
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-white/90 mb-2">
+                    <label htmlFor="name" className={labelClassName}>
                       Full Name *
                     </label>
                     <input
@@ -98,13 +178,13 @@ export default function ContactForm() {
                       required
                       value={formData.name}
                       onChange={handleChange}
-                      className="w-full rounded-lg border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/50 backdrop-blur focus:border-white/30 focus:outline-none focus:ring-1 focus:ring-white/20"
+                      className={inputClassName}
                       placeholder="John Doe"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-white/90 mb-2">
+                    <label htmlFor="email" className={labelClassName}>
                       Email Address *
                     </label>
                     <input
@@ -114,13 +194,13 @@ export default function ContactForm() {
                       required
                       value={formData.email}
                       onChange={handleChange}
-                      className="w-full rounded-lg border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/50 backdrop-blur focus:border-white/30 focus:outline-none focus:ring-1 focus:ring-white/20"
+                      className={inputClassName}
                       placeholder="john@company.com"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="company" className="block text-sm font-medium text-white/90 mb-2">
+                    <label htmlFor="company" className={labelClassName}>
                       Company
                     </label>
                     <input
@@ -129,13 +209,13 @@ export default function ContactForm() {
                       name="company"
                       value={formData.company}
                       onChange={handleChange}
-                      className="w-full rounded-lg border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/50 backdrop-blur focus:border-white/30 focus:outline-none focus:ring-1 focus:ring-white/20"
+                      className={inputClassName}
                       placeholder="Your Company"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="subject" className="block text-sm font-medium text-white/90 mb-2">
+                    <label htmlFor="subject" className={labelClassName}>
                       Subject *
                     </label>
                     <select
@@ -144,39 +224,63 @@ export default function ContactForm() {
                       required
                       value={formData.subject}
                       onChange={handleChange}
-                      className="w-full rounded-lg border border-white/15 bg-white/5 px-4 py-3 text-sm text-white backdrop-blur focus:border-white/30 focus:outline-none focus:ring-1 focus:ring-white/20"
+                      className={selectClassName}
                     >
                       <option value="" className="bg-black">Select a subject</option>
-                      <option value="booking" className="bg-black">Booking Enquiry</option>
-                      <option value="hosting" className="bg-black">Host / Property</option>
-                      <option value="tours" className="bg-black">Tours</option>
-                      <option value="partnership" className="bg-black">Partnership</option>
-                      <option value="other" className="bg-black">Other</option>
+                      {CONTACT_SUBJECT_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value} className="bg-black">
+                          {option.label}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
+                  {showPropertySection ? (
+                    <PropertyHostingFields data={propertyData} onChange={handlePropertyChange} />
+                  ) : null}
+
                   <div>
-                    <label htmlFor="message" className="block text-sm font-medium text-white/90 mb-2">
-                      Message *
+                    <label htmlFor="message" className={labelClassName}>
+                      Message{showPropertySection ? '' : ' *'}
                     </label>
                     <textarea
                       id="message"
                       name="message"
-                      required
+                      required={!showPropertySection}
                       value={formData.message}
                       onChange={handleChange}
-                      rows={5}
-                      className="w-full rounded-lg border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/50 backdrop-blur focus:border-white/30 focus:outline-none focus:ring-1 focus:ring-white/20 resize-none"
-                      placeholder="Tell us about your project..."
+                      rows={showPropertySection ? 3 : 5}
+                      className={`${inputClassName} resize-none`}
+                      placeholder={
+                        showPropertySection
+                          ? 'Optional general message...'
+                          : 'Tell us about your project...'
+                      }
                     />
                   </div>
 
+                  {error ? (
+                    <p className="rounded-lg border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-200">
+                      {error}
+                    </p>
+                  ) : null}
+
                   <button
                     type="submit"
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-medium tracking-tight text-black hover:bg-white/90 shadow-[0_2.8px_2.2px_rgba(0,_0,_0,_0.034),_0_6.7px_5.3px_rgba(0,_0,_0,_0.048),_0_12.5px_10px_rgba(0,_0,_0,_0.06),_0_22.3px_17.9px_rgba(0,_0,_0,_0.072),_0_41.8px_33.4px_rgba(0,_0,_0,_0.086),_0_100px_80px_rgba(0,_0,_0,_0.12)]"
+                    disabled={submitting}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-medium tracking-tight text-black hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-70 shadow-[0_2.8px_2.2px_rgba(0,_0,_0,_0.034),_0_6.7px_5.3px_rgba(0,_0,_0,_0.048),_0_12.5px_10px_rgba(0,_0,_0,_0.06),_0_22.3px_17.9px_rgba(0,_0,_0,_0.072),_0_41.8px_33.4px_rgba(0,_0,_0,_0.086),_0_100px_80px_rgba(0,_0,_0,_0.12)]"
                   >
-                    Send Message
-                    <Send className="h-4 w-4" strokeWidth={1.5} />
+                    {submitting ? (
+                      <>
+                        Sending...
+                        <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.5} />
+                      </>
+                    ) : (
+                      <>
+                        Send Message
+                        <Send className="h-4 w-4" strokeWidth={1.5} />
+                      </>
+                    )}
                   </button>
                 </form>
               )}

@@ -3,7 +3,6 @@ import ScrollAnimationProvider from '@/components/providers/ScrollAnimationProvi
 import Header from '@/components/sections/Header';
 import ContactHero from '@/components/sections/ContactHero';
 import ContactForm from '@/components/sections/ContactForm';
-import ContactInfo from '@/components/sections/ContactInfo';
 import Footer from '@/components/sections/Footer';
 import { getPublicSiteContact } from '@/lib/public-site-settings';
 
@@ -25,7 +24,6 @@ export default async function ContactPage() {
       <div className="bg-black">
         <ScrollAnimationProvider>
           <ContactForm />
-          <ContactInfo />
         </ScrollAnimationProvider>
       </div>
       <Footer contact={contact} />
