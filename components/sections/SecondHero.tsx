@@ -1,6 +1,5 @@
 "use client";
 
-import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import PremiumSectionBackground from "@/components/premium/PremiumSectionBackground";
 import PremiumStatsStrip from "@/components/premium/PremiumStatsStrip";
 
@@ -14,8 +13,6 @@ const INTRO_STATS = [
 ];
 
 export default function SecondHero() {
-  useScrollAnimation();
-
   return (
     <PremiumSectionBackground
       variant="darker"

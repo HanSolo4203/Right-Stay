@@ -18,6 +18,8 @@ const nextConfig = {
     // If you see 502/timeouts on large originals in production, set unoptimized: true
     // and enable Supabase Storage transforms (Pro) plus NEXT_PUBLIC_USE_SUPABASE_IMAGE_TRANSFORM=true.
     unoptimized: false,
+    // Must include every `quality` passed to <Image /> (see ListingImage VARIANT_QUALITY).
+    qualities: [68, 72, 75, 78],
     minimumCacheTTL: 60 * 60 * 24 * 30,
     // Add device sizes for better optimization
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],

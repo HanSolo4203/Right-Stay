@@ -18,6 +18,7 @@ import {
   hasValidMapCoordinates,
   inferLocationDisplayFromText,
 } from '@/lib/property-location';
+import { stableHashInt } from '@/lib/utils';
 import {
   ArrowLeft,
   Calendar,
@@ -633,7 +634,9 @@ export default function BookingPageClient() {
                   <div className="flex items-center gap-1 shrink-0">
                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 shrink-0" />
                     <span className="font-medium">4.8</span>
-                    <span className="whitespace-nowrap">({Math.floor(Math.random() * 100) + 50} reviews)</span>
+                    <span className="whitespace-nowrap">
+                      ({stableHashInt(propertyId)} reviews)
+                    </span>
                   </div>
                   <span className="text-gray-400" aria-hidden="true">•</span>
                   <span className="whitespace-nowrap">{propertyData?.maximum_capacity || 2} guests</span>

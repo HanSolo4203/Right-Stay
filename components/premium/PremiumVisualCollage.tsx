@@ -2,20 +2,21 @@
 
 import Image from "next/image";
 import { IMAGE_SIZES } from "@/lib/image-sizes";
+import { MARKETING_IMAGES } from "@/lib/marketing-images";
 
 const COLLAGE_IMAGES = [
   {
-    src: "/images/993d5154-c104-4507-8c0a-55364d2a948c_800w_1.jpg",
+    src: MARKETING_IMAGES.coastalVilla,
     alt: "Premium accommodation interior",
     className: "col-span-2 row-span-2",
   },
   {
-    src: "/images/d953ad7f-2dd7-42f7-8f74-593d55181036_3840w_1.jpg",
+    src: MARKETING_IMAGES.wineEstate,
     alt: "Luxury property exterior",
     className: "col-span-1 row-span-1",
   },
   {
-    src: "/images/6d30fe29-43aa-4fc2-a513-6aa41d38a7d0_3840w_1.jpg",
+    src: MARKETING_IMAGES.safariLodge,
     alt: "African destination experience",
     className: "col-span-1 row-span-1",
   },

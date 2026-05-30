@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext } from "react";
+import ScrollAnimationProvider from "@/components/providers/ScrollAnimationProvider";
 
 const PremiumBackgroundContext = createContext(false);
 
@@ -20,7 +21,9 @@ export default function PremiumBackgroundProvider({
 }: PremiumBackgroundProviderProps) {
   return (
     <PremiumBackgroundContext.Provider value={true}>
-      <div className={`relative z-[1] ${className}`.trim()}>{children}</div>
+      <ScrollAnimationProvider>
+        <div className={`relative z-[1] ${className}`.trim()}>{children}</div>
+      </ScrollAnimationProvider>
     </PremiumBackgroundContext.Provider>
   );
 }

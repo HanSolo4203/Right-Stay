@@ -3,7 +3,6 @@
 import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 import { ArrowRight } from "lucide-react";
-import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import PremiumSectionBackground from "./PremiumSectionBackground";
 import PremiumFeatureCardGrid from "./PremiumFeatureCardGrid";
 import PremiumStatsStrip, { type PremiumStat } from "./PremiumStatsStrip";
@@ -44,8 +43,6 @@ export default function PremiumWhySection({
   statsTitle,
   statsSubtitle,
 }: PremiumWhySectionProps) {
-  useScrollAnimation();
-
   return (
     <PremiumSectionBackground>
       <div className="mx-auto max-w-7xl px-6 md:px-8">

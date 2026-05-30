@@ -1,5 +1,3 @@
-"use client";
-
 import Link from 'next/link';
 import { Asterisk, Twitter, Linkedin, Github, ArrowRight, ShieldCheck } from 'lucide-react';
 

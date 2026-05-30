@@ -1,13 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { ArrowRight, ShieldCheck, CheckCircle, Headphones } from "lucide-react";
 import PremiumSectionBackground from "@/components/premium/PremiumSectionBackground";
 
 export default function CTASection() {
-  useScrollAnimation();
-
   return (
     <PremiumSectionBackground className="!py-12 sm:!py-16">
       <div className="relative z-10 mx-auto max-w-7xl px-6 md:px-8 text-center">

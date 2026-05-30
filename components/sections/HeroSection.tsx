@@ -13,30 +13,39 @@ import {
   type AccommodationSearchForm,
 } from '@/lib/accommodation-search';
 import Link from 'next/link';
+import { MARKETING_IMAGES } from '@/lib/marketing-images';
 import { ArrowRight, ChevronRight } from 'lucide-react';
 
-export default function HeroSection() {
+type HeroSectionProps = {
+  initialLocations?: string[];
+};
+
+export default function HeroSection({ initialLocations = [] }: HeroSectionProps) {
   const router = useRouter();
-  const [locations, setLocations] = useState<string[]>([]);
-  const [loadingLocations, setLoadingLocations] = useState(true);
+  const [locations, setLocations] = useState<string[]>(initialLocations);
+  const [loadingLocations, setLoadingLocations] = useState(initialLocations.length === 0);
   const [formData, setFormData] = useState<AccommodationSearchForm>({
-    location: '',
+    location: initialLocations[0] ?? '',
     checkIn: getTodayISO(),
     checkOut: '',
     guests: '2',
   });
 
   useEffect(() => {
+    if (initialLocations.length > 0) {
+      setLoadingLocations(false);
+      return;
+    }
+
     async function fetchLocations() {
       try {
         const response = await fetch('/api/properties/locations');
         const data = await response.json();
         if (data.locations && data.locations.length > 0) {
           setLocations(data.locations);
-          // Set default location if available
-          if (data.locations.length > 0 && !formData.location) {
-            setFormData(prev => ({ ...prev, location: data.locations[0] }));
-          }
+          setFormData((prev) =>
+            prev.location ? prev : { ...prev, location: data.locations[0] }
+          );
         }
       } catch (error) {
         console.error('Error fetching locations:', error);
@@ -46,8 +55,7 @@ export default function HeroSection() {
     }
 
     fetchLocations();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount
-  }, []);
+  }, [initialLocations.length]);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -66,7 +74,7 @@ export default function HeroSection() {
     <>
       <div className="absolute inset-0">
         <HeroBackgroundImage
-          src="/cpt-lions-head-1.jpg"
+          src={MARKETING_IMAGES.heroCapeTown}
           priority
           className="pointer-events-none object-cover motion-safe:[animation:cloudDrift_5s_ease-out_forwards]"
           style={{

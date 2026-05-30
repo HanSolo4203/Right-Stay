@@ -5,7 +5,9 @@ import dynamic from 'next/dynamic';
 import { useSearchParams } from 'next/navigation';
 import ListingImage from '@/components/ui/ListingImage';
 import Link from 'next/link';
-import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { DEFAULT_PROPERTY_IMAGE, MARKETING_IMAGES } from '@/lib/marketing-images';
+import { stableHashInt } from '@/lib/utils';
+import type { CachedPropertyRecord } from '@/lib/properties-data';
 import { Star, MapPin, Users, Calendar, Wifi, Car, Coffee, Shield, Eye, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const QuickViewModal = dynamic(() => import('@/components/QuickViewModal'), {
@@ -54,32 +56,25 @@ interface PropertyPhoto {
   height: number | null;
 }
 
-interface CachedProperty {
-  id: string;
-  uplisting_id: string;
-  data: PropertyData;
-  last_synced: string;
-  created_at: string;
-  updated_at: string;
-  photos?: PropertyPhoto[];
-  pricing?: {
-    propertyId: string;
-    minPrice: number | null;
-    basePrice: number | null;
-    maxPrice: number | null;
-    pricingEnabled: boolean;
-    startingNightlyPrice?: number;
-  } | null;
-}
+type CachedProperty = CachedPropertyRecord & { data: PropertyData };
 
 type AccommodationCardsVariant = 'dark' | 'light';
 
-function AccommodationCardsContent({ variant = 'dark' }: { variant?: AccommodationCardsVariant }) {
+type AccommodationCardsContentProps = {
+  variant?: AccommodationCardsVariant;
+  initialProperties?: CachedPropertyRecord[];
+};
+
+function AccommodationCardsContent({
+  variant = 'dark',
+  initialProperties,
+}: AccommodationCardsContentProps) {
   const isLight = variant === 'light';
-  useScrollAnimation();
   const searchParams = useSearchParams();
-  const [properties, setProperties] = useState<CachedProperty[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [properties, setProperties] = useState<CachedProperty[]>(
+    (initialProperties as CachedProperty[]) ?? []
+  );
+  const [loading, setLoading] = useState(!initialProperties?.length);
   const [checkingAvailability, setCheckingAvailability] = useState(false);
   const [quickViewProperty, setQuickViewProperty] = useState<any | null>(null);
   const [availabilityMap, setAvailabilityMap] = useState<Map<string, boolean>>(new Map());
@@ -97,40 +92,39 @@ function AccommodationCardsContent({ variant = 'dark' }: { variant?: Accommodati
   const guestsFilter = searchParams?.get('guests') ? parseInt(searchParams.get('guests')!) : null;
 
   useEffect(() => {
+    if (initialProperties?.length) {
+      const initialPhotoIndices = new Map<string, number>();
+      initialProperties.forEach((property) => {
+        initialPhotoIndices.set(property.uplisting_id, 0);
+      });
+      setCurrentPhotoIndex(initialPhotoIndices);
+      return;
+    }
+
     async function fetchProperties() {
       try {
         const response = await fetch('/api/properties');
-        
-        // Check if response is ok
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
-        // Check if response is JSON
+
         const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          console.warn('Response is not JSON, content-type:', contentType);
-          // If not JSON, likely an error page, so use fallback data
+        if (!contentType?.includes('application/json')) {
           setProperties([]);
           return;
         }
-        
+
         const result = await response.json();
-        
-        console.log('API Response:', result);
-        
+
         if (result.properties) {
-          console.log('Properties found:', result.properties.length);
           setProperties(result.properties);
-          
-          // Initialize photo indices to 0 (primary photos will be sorted to first position)
+
           const initialPhotoIndices = new Map<string, number>();
           result.properties.forEach((property: CachedProperty) => {
             initialPhotoIndices.set(property.uplisting_id, 0);
           });
           setCurrentPhotoIndex(initialPhotoIndices);
-        } else if (result.error) {
-          console.error('API returned error:', result.error);
+        } else {
           setProperties([]);
         }
       } catch (error) {
@@ -142,7 +136,7 @@ function AccommodationCardsContent({ variant = 'dark' }: { variant?: Accommodati
     }
 
     fetchProperties();
-  }, []);
+  }, [initialProperties]);
 
   // Check availability for properties when dates are provided
   useEffect(() => {
@@ -155,30 +149,44 @@ function AccommodationCardsContent({ variant = 'dark' }: { variant?: Accommodati
     }
 
     async function checkAvailability() {
-      setCheckingAvailability(true); // Set loading state
-      const availability = new Map<string, boolean>();
-      const checkPromises = properties.map(async (property) => {
-        try {
-          const response = await fetch(
-            `/api/check-availability?propertyId=${property.uplisting_id}&startDate=${checkIn}&endDate=${checkOut}`
-          );
-          if (response.ok) {
-            const data = await response.json();
-            availability.set(property.uplisting_id, data.available);
-          } else {
-            // If check fails, assume available (don't hide properties due to API errors)
+      setCheckingAvailability(true);
+      try {
+        const response = await fetch('/api/check-availability/batch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            propertyIds: properties.map((p) => p.uplisting_id),
+            startDate: checkIn,
+            endDate: checkOut,
+          }),
+        });
+
+        const availability = new Map<string, boolean>();
+        if (response.ok) {
+          const data = await response.json();
+          const map = data.availability as Record<string, boolean> | undefined;
+          for (const property of properties) {
+            availability.set(
+              property.uplisting_id,
+              map?.[property.uplisting_id] !== false
+            );
+          }
+        } else {
+          for (const property of properties) {
             availability.set(property.uplisting_id, true);
           }
-        } catch (error) {
-          console.error(`Error checking availability for ${property.uplisting_id}:`, error);
-          // On error, assume available (don't hide properties due to API errors)
+        }
+        setAvailabilityMap(availability);
+      } catch (error) {
+        console.error('Error checking batch availability:', error);
+        const availability = new Map<string, boolean>();
+        for (const property of properties) {
           availability.set(property.uplisting_id, true);
         }
-      });
-
-      await Promise.all(checkPromises);
-      setAvailabilityMap(availability);
-      setCheckingAvailability(false); // Clear loading state
+        setAvailabilityMap(availability);
+      } finally {
+        setCheckingAvailability(false);
+      }
     }
 
     checkAvailability();
@@ -241,8 +249,8 @@ function AccommodationCardsContent({ variant = 'dark' }: { variant?: Accommodati
       guests: 6,
       bedrooms: 3,
       bathrooms: 2,
-      image: "/images/993d5154-c104-4507-8c0a-55364d2a948c_800w_1.jpg",
-      photos: [{ id: '1', url: "/images/993d5154-c104-4507-8c0a-55364d2a948c_800w_1.jpg", is_primary: true }],
+      image: MARKETING_IMAGES.coastalVilla,
+      photos: [{ id: '1', url: MARKETING_IMAGES.coastalVilla, is_primary: true }],
       amenities: ["WiFi", "Parking", "Pool", "Ocean View"],
       description: "Stunning oceanfront villa with panoramic views of the Atlantic Ocean. Perfect for families and groups seeking luxury and comfort. This beautifully designed property features spacious living areas, modern amenities, and direct access to pristine beaches. Wake up to breathtaking sunrises and enjoy world-class dining just steps away.",
       shortDescription: "Stunning oceanfront villa with panoramic views of the Atlantic Ocean. Perfect for families and groups seeking luxury and comfort..."
@@ -258,8 +266,8 @@ function AccommodationCardsContent({ variant = 'dark' }: { variant?: Accommodati
       guests: 4,
       bedrooms: 2,
       bathrooms: 2,
-      image: "/images/6d30fe29-43aa-4fc2-a513-6aa41d38a7d0_3840w_1.jpg",
-      photos: [{ id: '2', url: "/images/6d30fe29-43aa-4fc2-a513-6aa41d38a7d0_3840w_1.jpg", is_primary: true }],
+      image: MARKETING_IMAGES.safariLodge,
+      photos: [{ id: '2', url: MARKETING_IMAGES.safariLodge, is_primary: true }],
       amenities: ["WiFi", "Parking", "Safari", "Game Drives"],
       description: "Authentic safari experience with luxury accommodations. Wake up to the sounds of the African bush and spot the Big Five. Our professionally guided game drives offer unforgettable wildlife encounters. Experience traditional African hospitality in a modern, comfortable setting with gourmet meals and premium amenities.",
       shortDescription: "Authentic safari experience with luxury accommodations. Wake up to the sounds of the African bush and spot the Big Five..."
@@ -275,8 +283,8 @@ function AccommodationCardsContent({ variant = 'dark' }: { variant?: Accommodati
       guests: 8,
       bedrooms: 4,
       bathrooms: 3,
-      image: "/images/d953ad7f-2dd7-42f7-8f74-593d55181036_3840w_1.jpg",
-      photos: [{ id: '3', url: "/images/d953ad7f-2dd7-42f7-8f74-593d55181036_3840w_1.jpg", is_primary: true }],
+      image: MARKETING_IMAGES.wineEstate,
+      photos: [{ id: '3', url: MARKETING_IMAGES.wineEstate, is_primary: true }],
       amenities: ["WiFi", "Parking", "Wine Tasting", "Vineyard Views"],
       description: "Elegant villa on a working wine estate. Enjoy wine tastings, vineyard tours, and breathtaking mountain views. This historic property combines old-world charm with contemporary luxury. Indulge in award-winning wines, farm-to-table cuisine, and explore one of South Africa's most beautiful wine regions.",
       shortDescription: "Elegant villa on a working wine estate. Enjoy wine tastings, vineyard tours, and breathtaking mountain views..."
@@ -330,7 +338,7 @@ function AccommodationCardsContent({ variant = 'dark' }: { variant?: Accommodati
           });
         }
         const primaryPhoto = photos.find(p => p.is_primary) || photos[0];
-        const firstImage = primaryPhoto?.url || "/images/993d5154-c104-4507-8c0a-55364d2a948c_800w_1.jpg";
+        const firstImage = primaryPhoto?.url || DEFAULT_PROPERTY_IMAGE;
         
         // Determine display price
         let pricePrefix = 'R';
@@ -383,7 +391,7 @@ function AccommodationCardsContent({ variant = 'dark' }: { variant?: Accommodati
           priceUnit:
             dateQuote && dateQuote.nights > 0 ? `for ${dateQuote.nights} nights` : "per night",
           rating: 4.8,
-          reviews: Math.floor(Math.random() * 100) + 50,
+          reviews: stableHashInt(property.uplisting_id),
           guests: maxGuests,
           bedrooms: attributes.bedrooms || 1,
           bathrooms: attributes.bathrooms || 1,
@@ -395,7 +403,7 @@ function AccommodationCardsContent({ variant = 'dark' }: { variant?: Accommodati
           propertyId: property.uplisting_id // Keep property ID for availability checking
         };
       })
-    : fallbackAccommodations.map(acc => ({ ...acc, propertyId: acc.id || null }));
+    : fallbackAccommodations.map((acc) => ({ ...acc, propertyId: acc.id }));
 
   // Apply filters
   let filteredAccommodations = allAccommodations;
@@ -560,13 +568,6 @@ function AccommodationCardsContent({ variant = 'dark' }: { variant?: Accommodati
       </section>
     );
   }
-
-  console.log('Rendering AccommodationCards with:', { 
-    properties: properties.length, 
-    loading, 
-    accommodations: accommodations.length,
-    accommodationsData: accommodations
-  });
 
   return (
     <section
@@ -885,12 +886,16 @@ function AccommodationCardsFallback({ variant = 'dark' }: { variant?: Accommodat
 
 type AccommodationCardsProps = {
   variant?: AccommodationCardsVariant;
+  initialProperties?: CachedPropertyRecord[];
 };
 
-export default function AccommodationCards({ variant = 'dark' }: AccommodationCardsProps) {
+export default function AccommodationCards({
+  variant = 'dark',
+  initialProperties,
+}: AccommodationCardsProps) {
   return (
     <Suspense fallback={<AccommodationCardsFallback variant={variant} />}>
-      <AccommodationCardsContent variant={variant} />
+      <AccommodationCardsContent variant={variant} initialProperties={initialProperties} />
     </Suspense>
   );
 }
