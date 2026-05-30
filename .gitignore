@@ -40,6 +40,9 @@ mcp.json
 # vercel
 .vercel
 
+# local email HTML previews
+email-preview-*.html
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

@@ -94,7 +94,7 @@ export async function GET(request: Request) {
             .select('date, price')
             .eq('property_id', property.id)
             .gte('date', checkInDate)
-            .lte('date', checkOutDate);
+            .lt('date', checkOutDate);
 
           const dailyOverrideMap: Record<string, number> = {};
           for (const row of dailyRows || []) {

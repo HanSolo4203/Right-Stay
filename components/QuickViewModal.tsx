@@ -1,10 +1,24 @@
 "use client";
 
 import { useState, useEffect, useMemo } from 'react';
+import dynamic from 'next/dynamic';
+import { createPortal } from 'react-dom';
 import ListingImage from '@/components/ui/ListingImage';
-import { X, ChevronLeft, ChevronRight, Grid, Wifi, Car, Coffee, Shield, MapPin, Star, Users, Loader2 } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Grid, MapPin, Users, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { listingImageSrc } from '@/lib/listing-image';
+import { hasValidMapCoordinates } from '@/lib/property-location';
+import PropertyAmenitiesSection from '@/components/property/PropertyAmenitiesSection';
+import PropertyCheckInOutSection from '@/components/property/PropertyCheckInOutSection';
+
+const PropertyMap = dynamic(() => import('@/components/PropertyMap'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-[240px] items-center justify-center rounded-2xl border border-right-stay-200/60 bg-right-stay-50/40 md:h-[280px]">
+      <Loader2 className="h-8 w-8 animate-spin text-right-stay-500" aria-hidden />
+    </div>
+  ),
+});
 
 interface PropertyPhoto {
   id: string;
@@ -23,8 +37,6 @@ interface QuickViewModalProps {
     id: string;
     title: string;
     location: string;
-    rating: number;
-    reviews: number;
     guests: number;
     bedrooms: number;
     bathrooms: number;
@@ -32,11 +44,16 @@ interface QuickViewModalProps {
     priceUnit?: string;
     description: string;
     amenities?: string[];
+    check_in_time?: number | null;
+    check_out_time?: number | null;
     photos?: PropertyPhoto[];
+    latitude?: number | null;
+    longitude?: number | null;
   };
 }
 
 export default function QuickViewModal({ isOpen, onClose, property }: QuickViewModalProps) {
+  const [mounted, setMounted] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [lightboxMainLoaded, setLightboxMainLoaded] = useState(false);
@@ -103,6 +120,10 @@ export default function QuickViewModal({ isOpen, onClose, property }: QuickViewM
 
   // Prevent body scroll when modal is open
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
     } else {
@@ -113,23 +134,43 @@ export default function QuickViewModal({ isOpen, onClose, property }: QuickViewM
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (!isOpen || showPhotoModal) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, showPhotoModal, onClose]);
+
+  if (!isOpen || !mounted) return null;
 
   const amenities = property.amenities || [];
   const primaryPhoto = photos.find(p => p.is_primary) || photos[0];
   const propertyImage = primaryPhoto?.url || photos[0]?.url || "/images/993d5154-c104-4507-8c0a-55364d2a948c_800w_1.jpg";
+  const showPropertyMap = hasValidMapCoordinates(property.latitude, property.longitude);
 
-  return (
+  return createPortal(
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        {/* Backdrop */}
+      <div className="fixed inset-0 z-[110] overflow-y-auto overscroll-contain">
         <div
-          className="absolute inset-0 bg-black/75 backdrop-blur-sm transition-opacity"
+          className="fixed inset-0 bg-black/75 backdrop-blur-sm"
           onClick={onClose}
+          aria-hidden
         />
 
-        {/* Modal Content */}
-        <div className="relative z-10 w-full max-w-6xl max-h-[90vh] mx-4 bg-white rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+        <div className="relative z-10 flex min-h-full items-center justify-center p-4 py-8 sm:p-6">
+          <div
+            className="relative flex w-full max-w-6xl min-h-0 max-h-[min(90dvh,calc(100dvh-4rem))] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Quick view: ${property.title}`}
+            onClick={(e) => e.stopPropagation()}
+          >
           {/* Header */}
           <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between p-4 bg-gradient-to-b from-black/50 to-transparent pointer-events-none">
             <button
@@ -272,7 +313,7 @@ export default function QuickViewModal({ isOpen, onClose, property }: QuickViewM
           )}
 
           {/* Property Info */}
-          <div className="p-6 border-t border-gray-200 overflow-y-auto flex-1">
+          <div className="min-h-0 flex-1 overflow-y-auto border-t border-gray-200 p-6">
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
                 <h2 className="text-2xl font-semibold text-gray-900 mb-2">
@@ -291,12 +332,6 @@ export default function QuickViewModal({ isOpen, onClose, property }: QuickViewM
 
             <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600 mb-4 pb-4 border-b border-gray-200">
               <div className="flex items-center gap-1">
-                <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                <span className="font-medium text-gray-900">{property.rating}</span>
-                <span>({property.reviews} reviews)</span>
-              </div>
-              <span>•</span>
-              <div className="flex items-center gap-1">
                 <Users className="h-4 w-4" />
                 <span>{property.guests} guests</span>
               </div>
@@ -312,38 +347,36 @@ export default function QuickViewModal({ isOpen, onClose, property }: QuickViewM
               <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{property.description}</p>
             </div>
 
-            {/* Amenities */}
-            {amenities.length > 0 && (
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Amenities</h3>
-                <div className="flex flex-wrap gap-2">
-                  {amenities.map((amenity, index) => (
-                    <span
-                      key={index}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm text-gray-700"
-                    >
-                      {amenity === "WiFi" && <Wifi className="h-4 w-4" />}
-                      {amenity === "Parking" && <Car className="h-4 w-4" />}
-                      {amenity === "Pool" && <Shield className="h-4 w-4" />}
-                      {amenity === "Ocean View" && <MapPin className="h-4 w-4" />}
-                      {amenity === "Safari" && <Shield className="h-4 w-4" />}
-                      {amenity === "Game Drives" && <Car className="h-4 w-4" />}
-                      {amenity === "Wine Tasting" && <Coffee className="h-4 w-4" />}
-                      {amenity === "Vineyard Views" && <MapPin className="h-4 w-4" />}
-                      {amenity === "Beach Access" && <MapPin className="h-4 w-4" />}
-                      {amenity === "Whale Watching" && <Shield className="h-4 w-4" />}
-                      {amenity === "Hiking" && <MapPin className="h-4 w-4" />}
-                      {amenity === "Mountain Views" && <MapPin className="h-4 w-4" />}
-                      {amenity === "Gym" && <Shield className="h-4 w-4" />}
-                      {amenity === "City Views" && <MapPin className="h-4 w-4" />}
-                      {amenity === "Air Conditioning" && <Shield className="h-4 w-4" />}
-                      {amenity === "Kitchen" && <Shield className="h-4 w-4" />}
-                      {amenity}
-                    </span>
-                  ))}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Where you&apos;ll stay</h3>
+              {showPropertyMap &&
+              property.latitude != null &&
+              property.longitude != null ? (
+                <PropertyMap
+                  latitude={property.latitude}
+                  longitude={property.longitude}
+                  label={property.location}
+                  heightClassName="h-[240px] md:h-[280px]"
+                />
+              ) : (
+                <div className="flex h-[200px] items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-6 text-center text-sm text-gray-500">
+                  Location map will appear once the property address is set in admin.
                 </div>
-              </div>
-            )}
+              )}
+            </div>
+
+            <PropertyAmenitiesSection
+              amenities={amenities}
+              variant="light"
+              className="mb-6"
+            />
+
+            <PropertyCheckInOutSection
+              checkInTime={property.check_in_time}
+              checkOutTime={property.check_out_time}
+              variant="light"
+              className="mb-6"
+            />
 
             {/* Action Buttons */}
             <div className="flex gap-3 pt-4 border-t border-gray-200">
@@ -364,11 +397,12 @@ export default function QuickViewModal({ isOpen, onClose, property }: QuickViewM
           </div>
         </div>
       </div>
+      </div>
 
       {/* Full-Screen Photo Modal */}
       {showPhotoModal && photos.length > 0 && (
         <div 
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90" 
+          className="fixed inset-0 z-[120] flex items-center justify-center bg-black/90" 
           onClick={() => setShowPhotoModal(false)}
         >
           <div 
@@ -471,6 +505,7 @@ export default function QuickViewModal({ isOpen, onClose, property }: QuickViewM
           </div>
         </div>
       )}
-    </>
+    </>,
+    document.body
   );
 }

@@ -5,15 +5,19 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import HeroBackgroundImage from '@/components/ui/HeroBackgroundImage';
 import HeroPremiumFadeOverlay from '@/components/ui/HeroPremiumFadeOverlay';
-import { getTodayISO } from '@/components/ui/GlassSearchDateRange';
 import GlassAccommodationSearch from '@/components/search/GlassAccommodationSearch';
 import {
   buildAccommodationSearchParams,
+  getDefaultAccommodationDates,
+  clearStoredAccommodationDatesOnPageReload,
+  persistAccommodationDatesIfValid,
+  setStoredAccommodationDates,
   validateAccommodationSearch,
   type AccommodationSearchForm,
 } from '@/lib/accommodation-search';
 import Link from 'next/link';
 import { MARKETING_IMAGES } from '@/lib/marketing-images';
+import { glassShadow } from '@/lib/glass-styles';
 import { ArrowRight, ChevronRight } from 'lucide-react';
 
 type HeroSectionProps = {
@@ -24,12 +28,23 @@ export default function HeroSection({ initialLocations = [] }: HeroSectionProps)
   const router = useRouter();
   const [locations, setLocations] = useState<string[]>(initialLocations);
   const [loadingLocations, setLoadingLocations] = useState(initialLocations.length === 0);
-  const [formData, setFormData] = useState<AccommodationSearchForm>({
+  const [formData, setFormData] = useState<AccommodationSearchForm>(() => ({
     location: initialLocations[0] ?? '',
-    checkIn: getTodayISO(),
+    checkIn: '',
     checkOut: '',
     guests: '2',
-  });
+  }));
+
+  useEffect(() => {
+    clearStoredAccommodationDatesOnPageReload();
+    const defaults = getDefaultAccommodationDates();
+    setFormData((prev) => ({
+      ...prev,
+      checkIn: defaults.checkIn,
+      checkOut: defaults.checkOut,
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset to site defaults once on mount
+  }, []);
 
   useEffect(() => {
     if (initialLocations.length > 0) {
@@ -57,6 +72,19 @@ export default function HeroSection({ initialLocations = [] }: HeroSectionProps)
     fetchLocations();
   }, [initialLocations.length]);
 
+  const handleFormDataChange = (updates: Partial<AccommodationSearchForm>) => {
+    setFormData((prev) => {
+      const next = { ...prev, ...updates };
+      persistAccommodationDatesIfValid(
+        next.checkIn,
+        next.checkOut,
+        next.guests,
+        next.location
+      );
+      return next;
+    });
+  };
+
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -65,6 +93,13 @@ export default function HeroSection({ initialLocations = [] }: HeroSectionProps)
       alert(error);
       return;
     }
+
+    setStoredAccommodationDates({
+      checkIn: formData.checkIn,
+      checkOut: formData.checkOut,
+      guests: formData.guests,
+      location: formData.location,
+    });
 
     const params = buildAccommodationSearchParams(formData);
     router.push(`/stay-with-us?${params.toString()}`);
@@ -76,7 +111,7 @@ export default function HeroSection({ initialLocations = [] }: HeroSectionProps)
         <HeroBackgroundImage
           src={MARKETING_IMAGES.heroCapeTown}
           priority
-          className="pointer-events-none object-cover motion-safe:[animation:cloudDrift_5s_ease-out_forwards]"
+          className="pointer-events-none object-cover"
           style={{
             maskImage:
               'linear-gradient(to bottom, black 48%, rgba(0,0,0,0.75) 68%, rgba(0,0,0,0.25) 86%, transparent 100%)',
@@ -115,14 +150,14 @@ export default function HeroSection({ initialLocations = [] }: HeroSectionProps)
             <div className="flex flex-col sm:flex-row sm:items-center mt-10 gap-x-4 gap-y-4" style={{ animation: 'fadeSlideIn 1s ease-out 0.8s both' }}>
               <Link
                 href="#accommodations"
-                className="inline-flex items-center justify-center gap-2 hover:bg-white/90 text-sm text-black tracking-tight bg-white rounded-xl pt-3 pr-5 pb-3 pl-5 shadow-[0_2.8px_2.2px_rgba(0,_0,_0,_0.034),_0_6.7px_5.3px_rgba(0,_0,_0,_0.048),_0_12.5px_10px_rgba(0,_0,_0,_0.06),_0_22.3px_17.9px_rgba(0,_0,_0,_0.072),_0_41.8px_33.4px_rgba(0,_0,_0,_0.086),_0_100px_80px_rgba(0,_0,_0,_0.12)]"
+                className={`inline-flex items-center justify-center gap-2 hover:bg-white/90 text-sm text-black tracking-tight bg-white rounded-xl pt-3 pr-5 pb-3 pl-5 ${glassShadow}`}
               >
                 Explore Properties
                 <ArrowRight className="h-4 w-4" strokeWidth={1.5} />
               </Link>
               <Link
                 href="/about"
-                className="inline-flex items-center justify-center gap-2 hover:bg-white/10 text-sm text-white/90 tracking-tight bg-white/5 border-white/15 border rounded-xl pt-3 pr-5 pb-3 pl-5 shadow-[0_2.8px_2.2px_rgba(0,_0,_0,_0.034),_0_6.7px_5.3px_rgba(0,_0,_0,_0.048),_0_12.5px_10px_rgba(0,_0,_0,_0.06),_0_22.3px_17.9px_rgba(0,_0,_0,_0.072),_0_41.8px_33.4px_rgba(0,_0,_0,_0.086),_0_100px_80px_rgba(0,_0,_0,_0.12)]"
+                className={`inline-flex items-center justify-center gap-2 hover:bg-white/10 text-sm text-white/90 tracking-tight bg-white/5 border-white/15 border rounded-xl pt-3 pr-5 pb-3 pl-5 ${glassShadow}`}
               >
                 Learn More
                 <ChevronRight className="h-4 w-4" strokeWidth={1.5} />
@@ -136,7 +171,7 @@ export default function HeroSection({ initialLocations = [] }: HeroSectionProps)
           >
             <GlassAccommodationSearch
               formData={formData}
-              onFormDataChange={(updates) => setFormData((prev) => ({ ...prev, ...updates }))}
+              onFormDataChange={handleFormDataChange}
               locations={locations}
               loadingLocations={loadingLocations}
               onSubmit={handleSubmit}

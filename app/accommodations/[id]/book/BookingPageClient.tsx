@@ -1,24 +1,34 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import dynamic from 'next/dynamic';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Header from '@/components/sections/Header';
 import Footer from '@/components/sections/Footer';
 import AvailabilityCalendar from '@/components/AvailabilityCalendar';
 import Link from 'next/link';
 import ListingImage from '@/components/ui/ListingImage';
+import { formatDateForDisplay } from '@/lib/date-utils';
 import {
   calculateNightsBetween,
   DEFAULT_MINIMUM_STAY_NIGHTS,
   getNextAvailableNightlyPrice,
 } from '@/lib/pricing';
 import {
+  buildStayWithUsUrl,
+  clearStoredAccommodationDates,
+  getStoredAccommodationDates,
+  isValidAccommodationDateRange,
+  persistAccommodationDatesIfValid,
+} from '@/lib/accommodation-search';
+import {
   extractLocationFromAttributes,
   hasValidMapCoordinates,
   inferLocationDisplayFromText,
 } from '@/lib/property-location';
-import { stableHashInt } from '@/lib/utils';
+import { extractAmenitiesFromAttributes } from '@/lib/property-amenities';
+import PropertyAmenitiesSection from '@/components/property/PropertyAmenitiesSection';
+import PropertyCheckInOutSection from '@/components/property/PropertyCheckInOutSection';
 import {
   ArrowLeft,
   Calendar,
@@ -34,7 +44,6 @@ import {
   Grid,
   Share2,
   Heart,
-  Star,
   ChevronLeft,
   ChevronRight,
   X,
@@ -43,9 +52,9 @@ import {
 const PropertyMap = dynamic(() => import('@/components/PropertyMap'), {
   ssr: false,
   loading: () => (
-    <div className="flex h-[360px] items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-gray-50 md:h-[420px]">
+    <div className="flex h-[360px] items-center justify-center rounded-2xl border border-right-stay-200/60 bg-right-stay-50/40 md:h-[420px]">
       <div
-        className="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600"
+        className="h-8 w-8 animate-spin rounded-full border-2 border-right-stay-200 border-t-right-stay-500"
         aria-hidden="true"
       />
     </div>
@@ -73,6 +82,7 @@ interface PropertyData {
     location_display?: string;
     latitude?: number;
     longitude?: number;
+    amenities?: string[];
   };
 }
 
@@ -137,7 +147,13 @@ interface CalendarDataState {
 export default function BookingPageClient() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const propertyId = params?.id as string;
+
+  const searchLocation = searchParams?.get('location') || '';
+  const searchCheckIn = searchParams?.get('checkIn') || '';
+  const searchCheckOut = searchParams?.get('checkOut') || '';
+  const searchGuests = searchParams?.get('guests') || '';
 
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
@@ -171,6 +187,30 @@ export default function BookingPageClient() {
       maxPrice: null,
     },
   });
+  const datesPrefilledRef = useRef(false);
+
+  const accommodationsReturnHref = useMemo(() => {
+    const stored =
+      typeof window !== 'undefined' ? getStoredAccommodationDates() : null;
+    return buildStayWithUsUrl({
+      location: searchLocation || stored?.location || '',
+      checkIn: formData.checkInDate || searchCheckIn || stored?.checkIn || '',
+      checkOut: formData.checkOutDate || searchCheckOut || stored?.checkOut || '',
+      guests:
+        String(formData.numberOfGuests) ||
+        searchGuests ||
+        stored?.guests ||
+        '2',
+    });
+  }, [
+    formData.checkInDate,
+    formData.checkOutDate,
+    formData.numberOfGuests,
+    searchLocation,
+    searchCheckIn,
+    searchCheckOut,
+    searchGuests,
+  ]);
 
   // Fetch property details
   useEffect(() => {
@@ -196,6 +236,53 @@ export default function BookingPageClient() {
       fetchProperty();
     }
   }, [propertyId]);
+
+  useEffect(() => {
+    if (!property || datesPrefilledRef.current) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const urlCheckIn = params.get('checkIn')?.trim() || '';
+    const urlCheckOut = params.get('checkOut')?.trim() || '';
+    const stored = getStoredAccommodationDates();
+
+    const checkIn = urlCheckIn || stored?.checkIn || '';
+    const checkOut = urlCheckOut || stored?.checkOut || '';
+
+    if (!isValidAccommodationDateRange(checkIn, checkOut)) {
+      datesPrefilledRef.current = true;
+      return;
+    }
+
+    const minimumStay =
+      property.pricing?.minimumStayNights ?? DEFAULT_MINIMUM_STAY_NIGHTS;
+    const nights = calculateNightsBetween(checkIn, checkOut);
+    if (nights < minimumStay) {
+      datesPrefilledRef.current = true;
+      return;
+    }
+
+    const guestCount = stored?.guests
+      ? Math.max(1, parseInt(stored.guests, 10) || 1)
+      : undefined;
+
+    setFormData((prev) => ({
+      ...prev,
+      checkInDate: checkIn,
+      checkOutDate: checkOut,
+      ...(guestCount != null ? { numberOfGuests: guestCount } : {}),
+    }));
+
+    const locationFromUrl = params.get('location')?.trim() || stored?.location || '';
+
+    persistAccommodationDatesIfValid(
+      checkIn,
+      checkOut,
+      stored?.guests ?? String(guestCount ?? ''),
+      locationFromUrl || undefined
+    );
+
+    datesPrefilledRef.current = true;
+  }, [property, propertyId]);
 
   const minimumStayNights =
     property?.pricing?.minimumStayNights ?? DEFAULT_MINIMUM_STAY_NIGHTS;
@@ -381,6 +468,16 @@ export default function BookingPageClient() {
     }
   };
 
+  const nightlyPricesForDisplay = pricing?.nightlyPrices ?? [];
+  const accommodationSubtotal =
+    nightlyPricesForDisplay.length > 0
+      ? nightlyPricesForDisplay.reduce((sum, night) => sum + night.price, 0)
+      : (pricing?.basePrice ?? 0);
+  const calculatedAvgPerNight =
+    pricing && pricing.numberOfNights > 0
+      ? Math.round(accommodationSubtotal / pricing.numberOfNights)
+      : null;
+
   if (loading) {
     return (
       <>
@@ -402,7 +499,7 @@ export default function BookingPageClient() {
           <Header />
           <div className="relative z-10 mx-auto max-w-7xl px-6 md:px-8 py-24">
             <Link
-              href="/accommodations"
+              href={accommodationsReturnHref}
               className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-8 transition-colors"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -421,6 +518,9 @@ export default function BookingPageClient() {
   }
 
   const propertyData = property?.data?.attributes;
+  const propertyAmenities = extractAmenitiesFromAttributes(
+    propertyData as Record<string, unknown> | undefined
+  );
   const propertyLocation = extractLocationFromAttributes(propertyData);
   const locationDisplayLabel =
     propertyLocation.location_display?.trim() ||
@@ -471,7 +571,7 @@ export default function BookingPageClient() {
           {/* Back Button */}
           <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 pt-6 pb-4">
             <Link
-              href="/accommodations"
+              href={accommodationsReturnHref}
               className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -631,14 +731,6 @@ export default function BookingPageClient() {
                   {propertyData?.name || propertyData?.nickname}
                 </h1>
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-gray-600 text-sm">
-                  <div className="flex items-center gap-1 shrink-0">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 shrink-0" />
-                    <span className="font-medium">4.8</span>
-                    <span className="whitespace-nowrap">
-                      ({stableHashInt(propertyId)} reviews)
-                    </span>
-                  </div>
-                  <span className="text-gray-400" aria-hidden="true">•</span>
                   <span className="whitespace-nowrap">{propertyData?.maximum_capacity || 2} guests</span>
                   <span className="text-gray-400" aria-hidden="true">•</span>
                   <span className="whitespace-nowrap">{propertyData?.bedrooms || 1} bed</span>
@@ -701,6 +793,24 @@ export default function BookingPageClient() {
                     Location map will appear once the property address is set in admin.
                   </div>
                 )}
+
+                {propertyAmenities.length > 0 && (
+                  <PropertyAmenitiesSection
+                    amenities={propertyAmenities}
+                    variant="light"
+                    className="mt-10 border-t border-gray-200 pt-10"
+                  />
+                )}
+
+                <PropertyCheckInOutSection
+                  attributes={propertyData}
+                  variant="light"
+                  className={`${
+                    propertyAmenities.length > 0
+                      ? 'mt-10'
+                      : 'mt-10 border-t border-gray-200 pt-10'
+                  }`}
+                />
               </div>
             </div>
 
@@ -714,7 +824,7 @@ export default function BookingPageClient() {
                       <>
                         <div>
                           <div className="text-2xl font-semibold text-gray-900">
-                            R{Math.round(pricing.averagePricePerNight || pricing.basePrice / pricing.numberOfNights).toLocaleString()}
+                            R{calculatedAvgPerNight?.toLocaleString()}
                           </div>
                           <div className="text-sm text-gray-600">per night</div>
                         </div>
@@ -758,7 +868,19 @@ export default function BookingPageClient() {
                       <select
                         value={formData.numberOfGuests}
                         onChange={(e) => {
-                          setFormData(prev => ({ ...prev, numberOfGuests: parseInt(e.target.value) }));
+                          setFormData((prev) => {
+                            const next = {
+                              ...prev,
+                              numberOfGuests: parseInt(e.target.value, 10),
+                            };
+                            persistAccommodationDatesIfValid(
+                              next.checkInDate,
+                              next.checkOutDate,
+                              String(next.numberOfGuests),
+                              searchLocation || undefined
+                            );
+                            return next;
+                          });
                         }}
                         className="mt-1 w-full text-sm font-medium text-gray-900 bg-white focus:outline-none"
                       >
@@ -777,98 +899,92 @@ export default function BookingPageClient() {
                       selectedCheckOut={formData.checkOutDate}
                       onCalendarDataChange={setCalendarData}
                       onDateSelect={(checkIn, checkOut) => {
-                        setFormData(prev => ({
-                          ...prev,
-                          checkInDate: checkIn || '',
-                          checkOutDate: checkOut || ''
-                        }));
+                        setFormData((prev) => {
+                          const next = {
+                            ...prev,
+                            checkInDate: checkIn || '',
+                            checkOutDate: checkOut || '',
+                          };
+                          persistAccommodationDatesIfValid(
+                            next.checkInDate,
+                            next.checkOutDate,
+                            String(next.numberOfGuests),
+                            searchLocation || undefined
+                          );
+                          return next;
+                        });
                       }}
                     />
                     {formData.checkInDate && (
                       <button
                         type="button"
-                        onClick={() => setFormData(prev => ({ ...prev, checkInDate: '', checkOutDate: '' }))}
+                        onClick={() => {
+                          clearStoredAccommodationDates();
+                          setFormData((prev) => ({
+                            ...prev,
+                            checkInDate: '',
+                            checkOutDate: '',
+                          }));
+                        }}
                         className="mt-3 w-full rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
                       >
                         Clear dates
                       </button>
                     )}
                   </div>
-
-                  {/* Book Button */}
-                  <button
-                    type="button"
-                    onClick={handleSubmit}
-                    disabled={
-                      submitting ||
-                      success ||
-                      !pricing ||
-                      checkingAvailability ||
-                      !!availabilityError ||
-                      !!minimumStayError ||
-                      !formData.checkInDate ||
-                      !formData.checkOutDate ||
-                      !formData.guestName ||
-                      !formData.guestEmail
-                    }
-                    className="w-full bg-right-stay-500 text-white font-semibold py-4 px-6 rounded-xl hover:bg-right-stay-600 transition-all duration-200 flex items-center justify-center gap-2 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                  >
-                    {checkingAvailability ? (
-                      <>
-                        <Loader2 className="h-5 w-5 animate-spin" />
-                        Checking Availability...
-                      </>
-                    ) : submitting ? (
-                      <>
-                        <Loader2 className="h-5 w-5 animate-spin" />
-                        Processing...
-                      </>
-                    ) : success ? (
-                      <>
-                        <CheckCircle className="h-5 w-5" />
-                        Booking Confirmed
-                      </>
-                    ) : (
-                      <>
-                        Reserve
-                      </>
-                    )}
-                  </button>
-
-                  {minimumStayError && (
-                    <div className="mt-4 bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-800">
-                      {minimumStayError}
-                    </div>
-                  )}
-
-                  {availabilityError && (
-                    <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-sm text-yellow-800">
-                      {availabilityError}
-                    </div>
-                  )}
-
-                  {error && !success && (
-                    <div className="mt-4 bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-800">
-                      {error}
-                    </div>
-                  )}
-
-                  {/* You won't be charged yet */}
-                  <p className="text-center text-sm text-gray-600 mt-4">
-                    You won&apos;t be charged yet
-                  </p>
                 </div>
 
-                {/* Pricing Breakdown */}
+                {/* Pricing Breakdown (below calendar so date selection does not shift layout) */}
                 {pricing && (
                   <>
-                    <div className="border-t border-gray-200 pt-6 space-y-3">
+                    {nightlyPricesForDisplay.length > 0 && (
+                      <div className="border-t border-gray-200 pt-6">
+                        <div className="rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm">
+                          <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500 mb-2">
+                            How your nightly rate is calculated
+                          </p>
+                          <ul className="space-y-1.5">
+                            {nightlyPricesForDisplay.map((night) => (
+                              <li key={night.date} className="flex justify-between text-gray-700">
+                                <span>{formatDateForDisplay(night.date)}</span>
+                                <span className="font-medium tabular-nums">
+                                  R{Math.round(night.price).toLocaleString()}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                          <div className="mt-2 space-y-1 border-t border-gray-200 pt-2 text-gray-700">
+                            <div className="flex justify-between">
+                              <span>Total for selected nights</span>
+                              <span className="font-medium tabular-nums">
+                                R{Math.round(accommodationSubtotal).toLocaleString()}
+                              </span>
+                            </div>
+                            <div className="flex justify-between text-gray-600">
+                              <span>
+                                ÷ {pricing.numberOfNights}{' '}
+                                {pricing.numberOfNights === 1 ? 'night' : 'nights'}
+                              </span>
+                              <span className="font-semibold text-gray-900 tabular-nums">
+                                R{calculatedAvgPerNight?.toLocaleString()} per night
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    <div
+                      className={`space-y-3 ${
+                        nightlyPricesForDisplay.length > 0 ? 'pt-4' : 'border-t border-gray-200 pt-6'
+                      }`}
+                    >
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-600 underline">
-                          R{Math.round(pricing.averagePricePerNight || pricing.basePrice / pricing.numberOfNights).toLocaleString()} × {pricing.numberOfNights} {pricing.numberOfNights === 1 ? 'night' : 'nights'}
+                          R{calculatedAvgPerNight?.toLocaleString()} × {pricing.numberOfNights}{' '}
+                          {pricing.numberOfNights === 1 ? 'night' : 'nights'}
                         </span>
-                        <span className="text-gray-900">
-                          R{pricing.basePrice.toLocaleString()}
+                        <span className="text-gray-900 tabular-nums">
+                          R{Math.round(accommodationSubtotal).toLocaleString()}
                         </span>
                       </div>
                       <div className="flex justify-between text-sm">
@@ -906,7 +1022,7 @@ export default function BookingPageClient() {
                         required
                         value={formData.guestName}
                         onChange={handleInputChange}
-                        placeholder="John Doe"
+                        placeholder="Your full name"
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-right-stay-500 focus:border-transparent"
                       />
                     </div>
@@ -921,7 +1037,7 @@ export default function BookingPageClient() {
                         required
                         value={formData.guestEmail}
                         onChange={handleInputChange}
-                        placeholder="john@example.com"
+                        placeholder="Email for booking confirmation"
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-right-stay-500 focus:border-transparent"
                       />
                     </div>
@@ -935,7 +1051,7 @@ export default function BookingPageClient() {
                         name="guestPhone"
                         value={formData.guestPhone}
                         onChange={handleInputChange}
-                        placeholder="+27 12 345 6789"
+                        placeholder="Mobile number (optional)"
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-right-stay-500 focus:border-transparent"
                       />
                     </div>
@@ -949,11 +1065,72 @@ export default function BookingPageClient() {
                         rows={3}
                         value={formData.specialRequests}
                         onChange={handleInputChange}
-                        placeholder="Any special requirements or requests..."
+                        placeholder="Early check-in, accessibility needs, etc."
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-right-stay-500 focus:border-transparent resize-none"
                       />
                     </div>
                   </div>
+                </div>
+
+                <div className="mt-6">
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={
+                      submitting ||
+                      success ||
+                      !pricing ||
+                      checkingAvailability ||
+                      !!availabilityError ||
+                      !!minimumStayError ||
+                      !formData.checkInDate ||
+                      !formData.checkOutDate ||
+                      !formData.guestName ||
+                      !formData.guestEmail
+                    }
+                    className="w-full bg-right-stay-500 text-white font-semibold py-4 px-6 rounded-xl hover:bg-right-stay-600 transition-all duration-200 flex items-center justify-center gap-2 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  >
+                    {checkingAvailability ? (
+                      <>
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        Checking Availability...
+                      </>
+                    ) : submitting ? (
+                      <>
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        Processing...
+                      </>
+                    ) : success ? (
+                      <>
+                        <CheckCircle className="h-5 w-5" />
+                        Booking Confirmed
+                      </>
+                    ) : (
+                      <>Reserve</>
+                    )}
+                  </button>
+
+                  {minimumStayError && (
+                    <div className="mt-4 bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-800">
+                      {minimumStayError}
+                    </div>
+                  )}
+
+                  {availabilityError && (
+                    <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-sm text-yellow-800">
+                      {availabilityError}
+                    </div>
+                  )}
+
+                  {error && !success && (
+                    <div className="mt-4 bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-800">
+                      {error}
+                    </div>
+                  )}
+
+                  <p className="text-center text-sm text-gray-600 mt-4">
+                    You won&apos;t be charged yet
+                  </p>
                 </div>
 
                 {/* Cancellation Policy */}

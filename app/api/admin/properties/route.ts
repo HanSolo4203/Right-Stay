@@ -4,6 +4,10 @@ import {
   extractLocationFromAttributes,
   locationFieldsForAttributes,
 } from '@/lib/property-location';
+import {
+  amenitiesForAttributes,
+  extractAmenitiesFromAttributes,
+} from '@/lib/property-amenities';
 import { DEFAULT_MINIMUM_STAY_NIGHTS } from '@/lib/pricing';
 
 export const dynamic = 'force-dynamic';
@@ -144,6 +148,7 @@ export async function GET() {
         ...location,
         pricing: buildPricingObject(pricingRow),
         pricelabsMapping: buildPriceLabsMappingObject(mappingRow),
+        amenities: extractAmenitiesFromAttributes(attributes),
         // Keep full data for reference
         data: property.data
       };
@@ -189,6 +194,7 @@ export async function POST(request: NextRequest) {
           property_slug: body.property_slug || null,
           time_zone: body.time_zone || 'Africa/Johannesburg',
           ...location,
+          ...amenitiesForAttributes(body),
         }
       },
       ical_url: body.ical_url || null
@@ -367,6 +373,9 @@ export async function PUT(request: NextRequest) {
         property_slug: body.property_slug !== undefined ? body.property_slug : existing.data?.attributes?.property_slug,
         time_zone: body.time_zone !== undefined ? body.time_zone : existing.data?.attributes?.time_zone || 'Africa/Johannesburg',
         ...(hasLocationFields ? location : {}),
+        ...(body.amenities !== undefined
+          ? amenitiesForAttributes(body)
+          : { amenities: extractAmenitiesFromAttributes(existing.data?.attributes) }),
       }
     };
 

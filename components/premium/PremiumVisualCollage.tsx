@@ -36,16 +36,16 @@ export default function PremiumVisualCollage({
       className="relative h-[420px] sm:h-[480px] lg:h-[560px] animate-on-scroll"
       style={{ animation: "fadeSlideIn 1s ease-out 0.35s both" }}
     >
-      <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-right-stay-500/20 to-transparent blur-2xl" />
+      <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-right-stay-500/15 to-transparent md:blur-xl" />
 
-      <div className="relative grid h-full grid-cols-2 grid-rows-2 gap-3 rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
+      <div className="relative grid h-full grid-cols-2 grid-rows-2 gap-3 rounded-2xl overflow-hidden border border-white/10 shadow-lg">
         <div className={`relative ${COLLAGE_IMAGES[0].className} overflow-hidden`}>
           <Image
             src={COLLAGE_IMAGES[0].src}
             alt={COLLAGE_IMAGES[0].alt}
             fill
             sizes={IMAGE_SIZES.half}
-            className="object-cover transition-transform duration-700 hover:scale-105"
+            className="object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
         </div>
@@ -57,7 +57,7 @@ export default function PremiumVisualCollage({
               alt={img.alt}
               fill
               sizes="(max-width: 768px) 50vw, 280px"
-              className="object-cover transition-transform duration-700 hover:scale-105"
+              className="object-cover"
             />
             <div className="absolute inset-0 bg-black/20" />
           </div>
@@ -65,8 +65,8 @@ export default function PremiumVisualCollage({
       </div>
 
       {/* Glass dashboard mockup overlay */}
-      <div className="absolute -bottom-4 -left-4 right-8 sm:right-12 rounded-xl border border-white/15 bg-black/60 p-4 backdrop-blur-xl shadow-xl animate-on-scroll sm:p-5"
-        style={{ animation: "fadeSlideIn 1s ease-out 0.55s both" }}
+      <div className="absolute -bottom-4 -left-4 right-8 sm:right-12 rounded-xl border border-white/15 bg-black/75 p-4 shadow-lg animate-on-scroll sm:p-5 md:bg-black/60 md:backdrop-blur-xl"
+        style={{ animation: "fadeSlideIn 0.6s ease-out 0.2s both" }}
       >
         <div className="flex items-center justify-between gap-4">
           <div>

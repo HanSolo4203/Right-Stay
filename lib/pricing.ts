@@ -2,6 +2,8 @@
  * Pricing utility to calculate booking costs based on PriceLabs data
  */
 
+import { parseLocalDate } from '@/lib/date-utils';
+
 interface PriceData {
   date: string;
   price: number;
@@ -16,9 +18,23 @@ export const DEFAULT_MINIMUM_STAY_NIGHTS = 2;
 
 /** Nights between check-in and check-out (checkout day excluded). */
 export function calculateNightsBetween(checkInDate: string, checkOutDate: string): number {
-  const start = new Date(checkInDate);
-  const end = new Date(checkOutDate);
-  return Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  const start = parseLocalDate(checkInDate);
+  const end = parseLocalDate(checkOutDate);
+  return Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+/** Each bookable night in a stay (check-in inclusive, check-out exclusive). */
+export function getStayNightDates(checkInDate: string, checkOutDate: string): string[] {
+  const nights = calculateNightsBetween(checkInDate, checkOutDate);
+  if (nights <= 0) return [];
+
+  const dates: string[] = [];
+  const current = parseLocalDate(checkInDate);
+  for (let i = 0; i < nights; i++) {
+    dates.push(formatDateLocal(current));
+    current.setDate(current.getDate() + 1);
+  }
+  return dates;
 }
 export const SERVICE_FEE_RATE = 0.05;
 
@@ -108,36 +124,26 @@ export const calculateBookingPricing = (
   checkOutDate: string,
   priceMap: Map<string, PriceData>
 ) => {
-  const checkIn = new Date(checkInDate);
-  const checkOut = new Date(checkOutDate);
-  
-  // Calculate number of nights
-  const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
-  
+  const nights = calculateNightsBetween(checkInDate, checkOutDate);
+
   if (nights <= 0) {
     return null;
   }
-  
-  // Calculate nightly prices
+
   const nightlyPrices: { date: string; price: number }[] = [];
   let totalAccommodation = 0;
-  let currentDate = new Date(checkIn);
-  
-  for (let i = 0; i < nights; i++) {
-    const dateStr = currentDate.toISOString().split('T')[0];
+
+  for (const dateStr of getStayNightDates(checkInDate, checkOutDate)) {
     const priceData = priceMap.get(dateStr);
-    
+
     if (priceData) {
       nightlyPrices.push({ date: dateStr, price: priceData.price });
       totalAccommodation += priceData.price;
     } else {
-      // Fallback to default price if not in CSV
       const defaultPrice = DEFAULT_NIGHTLY_PRICE;
       nightlyPrices.push({ date: dateStr, price: defaultPrice });
       totalAccommodation += defaultPrice;
     }
-    
-    currentDate.setDate(currentDate.getDate() + 1);
   }
   
   // Calculate fees
@@ -192,21 +198,16 @@ export const calculateBookingPricingFromMap = (
     serviceFeePercent?: number;
   }
 ) => {
-  const checkIn = new Date(checkInDate);
-  const checkOut = new Date(checkOutDate);
-  const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
+  const nights = calculateNightsBetween(checkInDate, checkOutDate);
   if (nights <= 0) return null;
 
   const nightlyPrices: { date: string; price: number }[] = [];
   let totalAccommodation = 0;
-  let currentDate = new Date(checkIn);
 
-  for (let i = 0; i < nights; i++) {
-    const dateStr = currentDate.toISOString().split('T')[0];
+  for (const dateStr of getStayNightDates(checkInDate, checkOutDate)) {
     const price = priceMap.get(dateStr) ?? defaultPrice;
     nightlyPrices.push({ date: dateStr, price });
     totalAccommodation += price;
-    currentDate.setDate(currentDate.getDate() + 1);
   }
 
   const cleaningFee = options?.cleaningFee ?? DEFAULT_CLEANING_FEE;
@@ -233,17 +234,12 @@ export const buildDatePriceMap = (
   minPrice?: number | null,
   maxPrice?: number | null
 ) => {
-  const start = new Date(checkInDate);
-  const end = new Date(checkOutDate);
   const map = new Map<string, number>();
-  let d = new Date(start);
 
-  while (d < end) {
-    const dateStr = d.toISOString().split('T')[0];
+  for (const dateStr of getStayNightDates(checkInDate, checkOutDate)) {
     const override = dailyOverrideMap[dateStr];
     const price = resolvePriceForDate(dateStr, override, basePrice, minPrice, maxPrice);
     map.set(dateStr, price);
-    d.setDate(d.getDate() + 1);
   }
 
   return map;

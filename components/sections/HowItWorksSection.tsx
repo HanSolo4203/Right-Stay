@@ -41,13 +41,13 @@ export default function HowItWorksSection() {
           <article
             key={step.number}
             className="relative text-center animate-on-scroll"
-            style={{ animation: `fadeSlideIn 0.9s ease-out ${0.2 + index * 0.12}s both` }}
+            style={{ animation: `fadeSlideIn 0.6s ease-out ${0.12 + index * 0.06}s both` }}
           >
             {index < steps.length - 1 && (
               <div className="pointer-events-none absolute top-14 left-[calc(50%+4rem)] hidden h-px w-[calc(100%-8rem)] bg-gradient-to-r from-right-stay-500/50 to-transparent lg:block" />
             )}
 
-            <div className="mx-auto mb-6 flex h-28 w-28 items-center justify-center rounded-2xl border border-white/15 bg-gradient-to-br from-white/[0.08] to-white/[0.02] shadow-lg backdrop-blur-xl transition-all duration-500 hover:border-right-stay-400/30 hover:shadow-[0_0_30px_rgba(51,126,47,0.2)]">
+            <div className="mx-auto mb-6 flex h-28 w-28 items-center justify-center rounded-2xl border border-white/15 bg-gradient-to-br from-white/[0.08] to-white/[0.02] shadow-md backdrop-blur-xl transition-[border-color,transform] duration-300 hover:border-right-stay-400/30">
               <step.icon className="h-10 w-10 text-right-stay-300" strokeWidth={1.25} />
             </div>
             <div className="text-xs font-semibold uppercase tracking-[0.2em] text-right-stay-400 mb-3">

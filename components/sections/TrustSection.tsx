@@ -49,8 +49,8 @@ export default function TrustSection() {
           className="relative h-[480px] sm:h-[560px] animate-on-scroll"
           style={{ animation: "fadeSlideIn 1s ease-out 0.3s both" }}
         >
-          <div className="absolute -inset-3 rounded-3xl bg-right-stay-500/15 blur-2xl" />
-          <div className="relative h-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
+          <div className="absolute -inset-3 rounded-3xl bg-right-stay-500/10 md:blur-xl" />
+          <div className="relative h-full rounded-2xl overflow-hidden border border-white/10 shadow-lg">
             <Image
               src="/images/993d5154-c104-4507-8c0a-55364d2a948c_800w_1.jpg"
               alt="Modern African luxury accommodation"
@@ -60,7 +60,7 @@ export default function TrustSection() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
 
-            <div className="absolute bottom-6 left-6 right-6 rounded-xl border border-white/15 bg-black/55 p-5 backdrop-blur-xl sm:p-6">
+            <div className="absolute bottom-6 left-6 right-6 rounded-xl border border-white/15 bg-black/70 p-5 sm:p-6 md:bg-black/55 md:backdrop-blur-xl">
               <div className="flex items-end justify-between gap-4">
                 <div>
                   <div className="font-display text-4xl font-bold text-white sm:text-5xl">4.9/5</div>

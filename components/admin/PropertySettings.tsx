@@ -13,6 +13,8 @@ import {
   type PropertyPhotoVariant,
 } from '@/lib/listing-image';
 import PropertyLocationPicker from './PropertyLocationPicker';
+import PropertyAmenitiesEditor from './PropertyAmenitiesEditor';
+import { extractAmenitiesFromAttributes } from '@/lib/property-amenities';
 
 function PropertyPhoto({
   src,
@@ -141,6 +143,7 @@ export default function PropertySettings() {
     pricelabsPms: '',
     pricelabsSyncEnabled: true,
     ...emptyLocationFields,
+    amenities: [],
   });
   const [pricingErrors, setPricingErrors] = useState<{
     minPrice?: string;
@@ -299,6 +302,12 @@ export default function PropertySettings() {
         pricelabsPms: property.pricelabsMapping?.pricelabsPms || '',
         pricelabsSyncEnabled: property.pricelabsMapping?.syncEnabled ?? true,
         ...locationFieldsFromProperty(property),
+        amenities:
+          property.amenities ??
+          extractAmenitiesFromAttributes(
+            (property as Property & { data?: { attributes?: Record<string, unknown> } }).data
+              ?.attributes
+          ),
       });
       setPricingErrors({});
       // Fetch photos for this property
@@ -329,6 +338,7 @@ export default function PropertySettings() {
         pricelabsPms: '',
         pricelabsSyncEnabled: true,
         ...emptyLocationFields,
+        amenities: [],
       });
       setPhotos([]);
       setPricingErrors({});
@@ -384,6 +394,7 @@ export default function PropertySettings() {
         pricelabsPms: '',
         pricelabsSyncEnabled: true,
         ...emptyLocationFields,
+        amenities: [],
       });
       setPricingErrors({});
   };
@@ -1489,6 +1500,13 @@ export default function PropertySettings() {
                 />
               </div>
 
+              <PropertyAmenitiesEditor
+                value={formData.amenities}
+                onChange={(amenities) =>
+                  setFormData((prev) => ({ ...prev, amenities }))
+                }
+              />
+
               <PricingSection
                 values={{
                   pricingEnabled: formData.pricingEnabled,
@@ -1545,7 +1563,7 @@ export default function PropertySettings() {
                       }
                       className="h-4 w-4"
                     />
-                    <span className="text-sm text-gray-200">Enable PriceLabs sync</span>
+                    <span className="text-sm text-slate-700">Enable PriceLabs sync</span>
                   </label>
                 </div>
               </div>

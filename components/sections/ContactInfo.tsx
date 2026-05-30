@@ -4,7 +4,6 @@ import Image from 'next/image';
 import HeroBackgroundImage from '@/components/ui/HeroBackgroundImage';
 import { IMAGE_SIZES } from '@/lib/image-sizes';
 import { Clock, MapPin, Globe, Users } from 'lucide-react';
-import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 const OFFICE_CARDS = [
   {
@@ -34,8 +33,6 @@ const OFFICE_CARDS = [
 ] as const;
 
 export default function ContactInfo() {
-  useScrollAnimation();
-
   return (
     <section id="offices" className="isolate overflow-hidden py-16 sm:py-24 relative scroll-mt-24">
       <div className="absolute inset-0">

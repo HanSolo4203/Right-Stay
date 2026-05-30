@@ -7,6 +7,11 @@ function normalizeDateKey(value: string): string {
   return value.slice(0, 10);
 }
 
+function monthFromISODate(iso: string): Date {
+  const [y, m] = iso.split('-').map(Number);
+  return new Date(y, m - 1, 1);
+}
+
 interface AvailabilityCalendarProps {
   propertyId: string;
   onDateSelect: (checkIn: string | null, checkOut: string | null) => void;
@@ -37,7 +42,9 @@ export default function AvailabilityCalendar({
   selectedCheckOut,
   onCalendarDataChange,
 }: AvailabilityCalendarProps) {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [currentMonth, setCurrentMonth] = useState(() =>
+    selectedCheckIn ? monthFromISODate(selectedCheckIn) : new Date()
+  );
   const [blockedDates, setBlockedDates] = useState<Set<string>>(new Set());
   const [dailyPrices, setDailyPrices] = useState<Record<string, number>>({});
   const [pricingMeta, setPricingMeta] = useState<{
@@ -51,10 +58,25 @@ export default function AvailabilityCalendar({
     basePrice: null,
     maxPrice: null,
   });
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [selectingCheckOut, setSelectingCheckOut] = useState(false);
+  const hasDisplayedCalendarRef = useRef(false);
   const onCalendarDataChangeRef = useRef(onCalendarDataChange);
   onCalendarDataChangeRef.current = onCalendarDataChange;
+
+  useEffect(() => {
+    if (!selectedCheckIn) return;
+    const nextMonth = monthFromISODate(selectedCheckIn);
+    setCurrentMonth((prev) => {
+      if (
+        prev.getFullYear() === nextMonth.getFullYear() &&
+        prev.getMonth() === nextMonth.getMonth()
+      ) {
+        return prev;
+      }
+      return nextMonth;
+    });
+  }, [selectedCheckIn]);
 
   const formatDateLocal = (date: Date) => {
     const year = date.getFullYear();
@@ -63,12 +85,20 @@ export default function AvailabilityCalendar({
     return `${year}-${month}-${day}`;
   };
 
+  useEffect(() => {
+    hasDisplayedCalendarRef.current = false;
+    setInitialLoading(true);
+  }, [propertyId]);
+
   // Fetch blocked dates for a wider range (6 months) to support navigation
   useEffect(() => {
     const abortController = new AbortController();
+    const showBlockingLoader = !hasDisplayedCalendarRef.current;
 
     async function fetchAvailability() {
-      setLoading(true);
+      if (showBlockingLoader) {
+        setInitialLoading(true);
+      }
       try {
         // 1 month before viewed month through end of month 6 months ahead
         const rangeStart = new Date(
@@ -122,7 +152,8 @@ export default function AvailabilityCalendar({
         console.error('Error fetching availability:', error);
       } finally {
         if (!abortController.signal.aborted) {
-          setLoading(false);
+          hasDisplayedCalendarRef.current = true;
+          setInitialLoading(false);
         }
       }
     }
@@ -336,7 +367,7 @@ export default function AvailabilityCalendar({
         <button
           type="button"
           onClick={previousMonth}
-          disabled={!canGoPrevious() || loading}
+          disabled={!canGoPrevious() || initialLoading}
           className="p-2 md:p-3 rounded-lg hover:bg-gray-100 active:bg-gray-200 transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent flex items-center justify-center"
           aria-label="Previous month"
         >
@@ -350,7 +381,7 @@ export default function AvailabilityCalendar({
         <button
           type="button"
           onClick={nextMonth}
-          disabled={loading}
+          disabled={initialLoading}
           className="p-2 md:p-3 rounded-lg hover:bg-gray-100 active:bg-gray-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent flex items-center justify-center"
           aria-label="Next month"
         >
@@ -371,15 +402,12 @@ export default function AvailabilityCalendar({
         </p>
       </div>
 
-      {/* Loading State */}
-      {loading && (
+      {/* Calendar Grid — spinner only on first load for this property */}
+      {initialLoading ? (
         <div className="flex items-center justify-center py-8">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
         </div>
-      )}
-
-      {/* Calendar Grid */}
-      {!loading && (
+      ) : (
         <>
           {/* Week Day Headers */}
           <div className="grid grid-cols-7 gap-1 md:gap-2 mb-2">

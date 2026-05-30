@@ -47,6 +47,8 @@ export interface Property {
   location_display?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  amenities?: string[];
+  data?: { attributes?: Record<string, unknown> };
 }
 
 export interface PropertyFormValues {
@@ -76,5 +78,6 @@ export interface PropertyFormValues {
   location_display: string;
   latitude: string;
   longitude: string;
+  amenities: string[];
 }
 

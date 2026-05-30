@@ -1,5 +1,6 @@
 import { unstable_cache } from 'next/cache';
 import { supabaseServer } from '@/lib/supabase-server';
+import { evaluateStayAvailability } from '@/lib/availability';
 import {
   DEFAULT_MINIMUM_STAY_NIGHTS,
   formatDateLocal,
@@ -260,7 +261,7 @@ export async function checkAvailabilityBatch(
 
   const { data: blockedRows, error } = await supabaseServer
     .from('cached_availability')
-    .select('property_id')
+    .select('property_id, date, blocked_reason')
     .in('property_id', propertyIds)
     .eq('available', false)
     .gte('date', startDate)
@@ -271,9 +272,20 @@ export async function checkAvailabilityBatch(
     return result;
   }
 
-  const blockedIds = new Set((blockedRows || []).map((r) => r.property_id));
+  const blockedByProperty = new Map<string, Array<{ date: string; blocked_reason?: string | null }>>();
+  for (const row of blockedRows || []) {
+    const list = blockedByProperty.get(row.property_id) || [];
+    list.push({ date: row.date, blocked_reason: row.blocked_reason });
+    blockedByProperty.set(row.property_id, list);
+  }
+
   for (const id of propertyIds) {
-    result[id] = !blockedIds.has(id);
+    const evaluation = evaluateStayAvailability(
+      blockedByProperty.get(id) || [],
+      startDate,
+      endDate
+    );
+    result[id] = evaluation.available;
   }
 
   return result;

@@ -4,13 +4,14 @@ const nextConfig = {
   // Vercel always reads routes-manifest.json from .next — never override there.
   distDir: process.env.VERCEL ? '.next' : (process.env.NEXT_DIST_DIR || '.next'),
   reactStrictMode: true,
-  transpilePackages: ['leaflet'],
+  transpilePackages: ['leaflet', 'maplibre-gl'],
   // Smaller dev + prod bundles when importing many icons from lucide-react.
   experimental: {
     optimizePackageImports: [
       'lucide-react',
       '@supabase/supabase-js',
       'leaflet',
+      'maplibre-gl',
     ],
   },
   images: {

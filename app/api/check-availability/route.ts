@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase-server';
+import { evaluateStayAvailability } from '@/lib/availability';
 
 export const dynamic = 'force-dynamic';
 
@@ -71,7 +72,9 @@ export async function GET(request: Request) {
       }, { status: 500 });
     }
 
-    const isAvailable = !blockedDates || blockedDates.length === 0;
+    const evaluation = evaluateStayAvailability(blockedDates || [], startDate, endDate);
+    const isAvailable = evaluation.available;
+    const blockingDates = evaluation.blockingDates;
 
     // Calculate number of nights
     const nights = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
@@ -82,10 +85,10 @@ export async function GET(request: Request) {
       startDate,
       endDate,
       nights,
-      blockedDates: blockedDates || [],
-      message: isAvailable 
+      blockedDates: blockingDates,
+      message: isAvailable
         ? `Property is available for ${nights} night(s)`
-        : `Property is not available. ${blockedDates.length} date(s) are already booked.`
+        : `Property is not available. ${blockingDates.length} date(s) are already booked.`,
     };
 
     console.log(`Availability check result:`, response);

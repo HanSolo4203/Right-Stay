@@ -22,7 +22,7 @@ export default function PremiumBackgroundProvider({
   return (
     <PremiumBackgroundContext.Provider value={true}>
       <ScrollAnimationProvider>
-        <div className={`relative z-[1] ${className}`.trim()}>{children}</div>
+        <div className={`premium-marketing-surface relative z-[1] ${className}`.trim()}>{children}</div>
       </ScrollAnimationProvider>
     </PremiumBackgroundContext.Provider>
   );

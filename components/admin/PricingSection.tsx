@@ -1,5 +1,6 @@
 import React from 'react';
 import type { PropertyFormValues } from '@/types/property';
+import { admin } from '@/components/admin/ui/classes';
 
 interface PricingErrors {
   minPrice?: string;
@@ -57,7 +58,7 @@ export function PricingSection({ values, currency, errors, onChange }: PricingSe
           <div className="flex items-center gap-2">
             <h4 className="text-lg font-semibold text-slate-900">Dynamic Pricing</h4>
             <span
-              className="inline-flex items-center justify-center w-5 h-5 text-xs rounded-full bg-white/10 text-slate-600 cursor-default"
+              className="inline-flex items-center justify-center w-5 h-5 text-xs rounded-full bg-slate-100 text-slate-600 cursor-default"
               title="Configure minimum, base, and maximum nightly prices for this property."
             >
               i
@@ -114,7 +115,7 @@ export function PricingSection({ values, currency, errors, onChange }: PricingSe
         <PricingInput
           label="Maximum Price"
           description="Highest price allowed during peak demand."
-          colorClass="text-emerald-400"
+          colorClass="text-emerald-700"
           prefix={currency === 'ZAR' ? 'R' : currency}
           name="maxPrice"
           value={maxPrice}
@@ -129,9 +130,9 @@ export function PricingSection({ values, currency, errors, onChange }: PricingSe
         <div className="relative h-3 w-full rounded-full bg-gradient-to-r from-orange-500 via-yellow-500 to-green-500" />
 
         <div className="relative flex justify-between text-[11px] text-slate-600">
-          <span className="text-orange-300">Low Demand</span>
-          <span className="text-yellow-300">Normal</span>
-          <span className="text-green-300">High Demand</span>
+          <span className="text-orange-700">Low Demand</span>
+          <span className="text-amber-700">Normal</span>
+          <span className="text-green-700">High Demand</span>
         </div>
 
         {hasValidRange && (
@@ -167,9 +168,7 @@ export function PricingSection({ values, currency, errors, onChange }: PricingSe
           Minimum nights required for direct website booking requests.
         </p>
         <div className="max-w-xs">
-          <label className="block text-sm font-medium text-slate-700 mb-1">
-            Minimum Stay Nights
-          </label>
+          <label className={admin.label}>Minimum Stay Nights</label>
           <input
             type="number"
             inputMode="numeric"
@@ -178,8 +177,8 @@ export function PricingSection({ values, currency, errors, onChange }: PricingSe
             name="minimumStayNights"
             value={minimumStayNights}
             onChange={(e) => onChange('minimumStayNights', e.target.value)}
-            className={`w-full rounded-lg border px-4 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500 ${
-              errors?.minimumStayNights ? 'border-red-500' : 'border-slate-200'
+            className={`${admin.input} py-2 text-sm ${
+              errors?.minimumStayNights ? 'border-red-500 bg-red-50' : ''
             }`}
             placeholder="2"
           />
@@ -194,7 +193,7 @@ export function PricingSection({ values, currency, errors, onChange }: PricingSe
         <PricingInput
           label="Cleaning Fee"
           description="Flat fee added once per booking."
-          colorClass="text-sky-400"
+          colorClass="text-sky-700"
           prefix={currency === 'ZAR' ? 'R' : currency}
           name="cleaningFee"
           value={cleaningFee}
@@ -205,7 +204,7 @@ export function PricingSection({ values, currency, errors, onChange }: PricingSe
         <PricingInput
           label="Service Fee %"
           description="Percentage applied to accommodation subtotal."
-          colorClass="text-violet-400"
+          colorClass="text-violet-700"
           prefix="%"
           name="serviceFeePercent"
           value={serviceFeePercent}
@@ -243,7 +242,7 @@ function PricingInput({
 }: PricingInputProps) {
   return (
     <div className="space-y-1">
-      <label className="block text-sm font-medium text-gray-200">
+      <label className={admin.label}>
         <span className={colorClass}>{label}</span>
       </label>
       <div className="relative">
@@ -258,9 +257,9 @@ function PricingInput({
           value={value}
           onChange={e => onChange(e.target.value)}
           disabled={disabled}
-          className={`w-full rounded-lg border px-8 py-2 text-sm text-slate-900 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 ${
-            error ? 'border-red-500 bg-red-500/10' : 'border-gray-700 bg-[#1a1f2e]'
-          } ${disabled ? 'cursor-not-allowed opacity-70' : ''}`}
+          className={`${admin.input} pl-8 py-2 text-sm ${
+            error ? 'border-red-500 bg-red-50' : ''
+          } ${disabled ? 'cursor-not-allowed opacity-70 bg-slate-100' : ''}`}
           placeholder="0.00"
         />
       </div>
@@ -290,7 +289,7 @@ function PriceMarker({ label, value, position, colorClass, currency }: PriceMark
       title={`${label}: ${prefix}${value.toFixed(2)}`}
     >
       <div className={`h-3 w-3 rounded-full border border-slate-300 ${colorClass}`} />
-      <span className="mt-1 text-[10px] text-gray-200">{label}</span>
+      <span className="mt-1 text-[10px] font-medium text-slate-700">{label}</span>
     </div>
   );
 }

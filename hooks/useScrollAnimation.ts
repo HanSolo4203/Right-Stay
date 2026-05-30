@@ -2,9 +2,21 @@
 
 import { useEffect } from 'react';
 
+const OBSERVER_OPTIONS: IntersectionObserverInit = {
+  threshold: 0.15,
+  rootMargin: '0px 0px -5% 0px',
+};
+
+function observeElements(io: IntersectionObserver, selector: string) {
+  document.querySelectorAll(selector).forEach((el) => {
+    if (!el.classList.contains('animate')) {
+      io.observe(el);
+    }
+  });
+}
+
 export const useScrollAnimation = (selector: string = '.animate-on-scroll', once: boolean = true) => {
   useEffect(() => {
-    // Create or reuse the shared IntersectionObserver
     if (typeof window === 'undefined') return;
 
     if (!window.__inViewIO) {
@@ -16,32 +28,32 @@ export const useScrollAnimation = (selector: string = '.animate-on-scroll', once
               if (once) {
                 window.__inViewIO.unobserve(entry.target);
               }
+            } else if (!once) {
+              entry.target.classList.remove('animate');
             }
           });
         },
-        { threshold: 0.2, rootMargin: '0px 0px -10% 0px' }
+        OBSERVER_OPTIONS
       );
     }
 
-    // Observe all elements matching the selector
-    const elements = document.querySelectorAll(selector);
-    elements.forEach((el) => {
-      window.__inViewIO.observe(el);
+    const io = window.__inViewIO;
+    observeElements(io, selector);
+
+    const mutationObserver = new MutationObserver(() => {
+      observeElements(io, selector);
     });
 
-    // Cleanup function
+    mutationObserver.observe(document.body, { childList: true, subtree: true });
+
     return () => {
-      elements.forEach((el) => {
-        window.__inViewIO.unobserve(el);
-      });
+      mutationObserver.disconnect();
     };
   }, [selector, once]);
 };
 
-// Extend Window interface for TypeScript
 declare global {
   interface Window {
     __inViewIO: IntersectionObserver;
   }
 }
-

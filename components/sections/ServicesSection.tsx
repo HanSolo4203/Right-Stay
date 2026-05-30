@@ -48,8 +48,8 @@ export default function ServicesSection() {
         {services.map((service, index) => (
           <article
             key={service.title}
-            className="group relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.06] to-transparent shadow-xl transition-all duration-500 hover:-translate-y-1 hover:border-right-stay-400/25 animate-on-scroll"
-            style={{ animation: `fadeSlideIn 0.9s ease-out ${0.2 + index * 0.1}s both` }}
+            className="group relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.06] to-transparent shadow-lg shadow-black/20 transition-[transform,border-color] duration-300 hover:-translate-y-0.5 hover:border-right-stay-400/25 animate-on-scroll"
+            style={{ animation: `fadeSlideIn 0.6s ease-out ${0.12 + index * 0.05}s both` }}
           >
             <div className="relative h-56 overflow-hidden sm:h-64">
               <Image
@@ -57,7 +57,7 @@ export default function ServicesSection() {
                 alt={service.title}
                 fill
                 sizes={IMAGE_SIZES.gridThird}
-                className="object-cover transition-transform duration-700 group-hover:scale-110"
+                className="object-cover transition-none group-hover:opacity-95"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0a1210] via-black/40 to-transparent" />
               <div className="absolute bottom-4 left-4 flex h-11 w-11 items-center justify-center rounded-xl border border-white/20 bg-white/10 backdrop-blur-md">

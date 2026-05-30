@@ -259,7 +259,7 @@ export default function PricingCalendarPage() {
             <select
               value={propertyId}
               onChange={(e) => router.push(`/admin/pricing/${e.target.value}`)}
-              className="mt-3 w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+              className="mt-3 w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500"
             >
               {properties.map((p) => (
                 <option key={p.id} value={p.uplisting_id}>
@@ -283,7 +283,7 @@ export default function PricingCalendarPage() {
                   value={minPrice}
                   onChange={(e) => setMinPrice(e.target.value)}
                   placeholder="988"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                  className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500"
                 />
               </div>
               <div>
@@ -293,7 +293,7 @@ export default function PricingCalendarPage() {
                   value={basePrice}
                   onChange={(e) => setBasePrice(e.target.value)}
                   placeholder="1288"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                  className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500"
                 />
               </div>
               <div>
@@ -303,7 +303,7 @@ export default function PricingCalendarPage() {
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(e.target.value)}
                   placeholder="2488"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                  className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500"
                 />
               </div>
             </div>
@@ -474,7 +474,7 @@ export default function PricingCalendarPage() {
               type="number"
               value={editPrice}
               onChange={(e) => setEditPrice(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 mb-4 focus:outline-none focus:border-blue-500"
+              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 mb-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500"
               placeholder="Price"
             />
             <div className="flex gap-2">

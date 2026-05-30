@@ -154,7 +154,7 @@ export default function SiteSettings() {
               value={settings.site_email}
               onChange={handleChange}
               className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500 transition-colors"
-              placeholder="info@rightstayafrica.com"
+              placeholder="info@right-stay.com"
             />
           </div>
 
@@ -168,8 +168,11 @@ export default function SiteSettings() {
               value={settings.site_phone}
               onChange={handleChange}
               className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500 transition-colors"
-              placeholder="+27 XXX XXX XXXX"
+              placeholder="+27 (0)21 000 0000"
             />
+            <p className="mt-2 text-xs text-slate-500">
+              Shown in the site footer and contact page. Use a local or international format, e.g. +27 (0)21 000 0000.
+            </p>
           </div>
 
           <div>
@@ -184,6 +187,9 @@ export default function SiteSettings() {
               className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500 transition-colors resize-none"
               placeholder="Cape Town, South Africa"
             />
+            <p className="mt-2 text-xs text-slate-500">
+              Shown in the site footer and contact page.
+            </p>
           </div>
         </div>
 

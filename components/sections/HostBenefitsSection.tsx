@@ -26,11 +26,11 @@ export default function HostBenefitsSection() {
         {benefits.map((benefit, index) => (
           <li
             key={benefit}
-            className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-sm transition-all duration-300 hover:border-right-stay-400/25 hover:bg-white/[0.07] animate-on-scroll"
-            style={{ animation: `fadeSlideIn 0.8s ease-out ${0.15 + index * 0.06}s both` }}
+            className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-sm transition-[border-color,background-color] duration-300 hover:border-right-stay-400/25 hover:bg-white/[0.07] animate-on-scroll"
+            style={{ animation: `fadeSlideIn 0.5s ease-out ${0.08 + index * 0.03}s both` }}
           >
             <CheckCircle
-              className="mt-0.5 h-5 w-5 flex-shrink-0 text-right-stay-400 drop-shadow-[0_0_8px_rgba(51,126,47,0.5)]"
+              className="mt-0.5 h-5 w-5 flex-shrink-0 text-right-stay-400"
               strokeWidth={1.5}
             />
             <span className="text-sm leading-relaxed text-white/75 sm:text-base">{benefit}</span>

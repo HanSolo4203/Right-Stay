@@ -3,11 +3,8 @@
 import { useEffect } from 'react';
 import Image from 'next/image';
 import { Home, Compass, Shield, CheckCircle, TrendingUp, Clock } from 'lucide-react';
-import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 export default function FeaturesSection() {
-  useScrollAnimation();
-
   return (
     <section className="isolate overflow-hidden min-h-[1000px] md:h-screen relative">
       <Image
@@ -35,7 +32,7 @@ export default function FeaturesSection() {
 
         <div className="grid gap-6 lg:grid-cols-3 gap-x-6 gap-y-6 animate-on-scroll" style={{ animation: 'fadeSlideIn 1.0s ease-out 0.6s both' }}>
           {/* Accommodation Excellence Card */}
-          <div className="rounded-3xl border border-white/10 bg-black/60 p-6 backdrop-blur-xl">
+          <div className="rounded-3xl border border-white/10 bg-black/70 p-6 md:bg-black/60 md:backdrop-blur-xl">
             <div className="flex items-center justify-between">
               <span className="text-xs uppercase tracking-[0.18em] text-white/60">ACCOMMODATION EXCELLENCE</span>
               <span className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-1 text-[10px] text-white/70 ring-1 ring-white/10">
@@ -102,7 +99,7 @@ export default function FeaturesSection() {
           </div>
 
           {/* Quality Standards Card */}
-          <div className="rounded-3xl border border-white/10 bg-black/60 p-6 backdrop-blur-xl">
+          <div className="rounded-3xl border border-white/10 bg-black/70 p-6 md:bg-black/60 md:backdrop-blur-xl">
             <p className="text-lg leading-relaxed text-white/90">
               Achieving <span className="text-lime-400">98%</span> guest satisfaction rate, we deliver consistent excellence across every touchpoint.
             </p>

@@ -1,15 +1,25 @@
 "use client";
 
 import HeroBackgroundImage from '@/components/ui/HeroBackgroundImage';
+import type { PublicSiteContact } from '@/lib/public-site-settings';
 import { Mail, MapPin, Phone } from 'lucide-react';
 
-const CONTACT_ITEMS = [
-  { icon: Mail, label: 'info@rightstayafrica.com', href: 'mailto:info@rightstayafrica.com' },
-  { icon: Phone, label: '+27 (0)21 000 0000', href: 'tel:+27210000000' },
-  { icon: MapPin, label: 'Cape Town, South Africa', href: '#offices' },
-] as const;
+type ContactHeroProps = {
+  contact: PublicSiteContact;
+};
 
-export default function ContactHero() {
+export default function ContactHero({ contact }: ContactHeroProps) {
+  const contactItems = [
+    ...(contact.email
+      ? [{ icon: Mail, label: contact.email, href: `mailto:${contact.email}` as const }]
+      : []),
+    ...(contact.phone
+      ? [{ icon: Phone, label: contact.phone, href: `tel:${contact.phoneTel}` as const }]
+      : []),
+    ...(contact.address
+      ? [{ icon: MapPin, label: contact.address.replace(/\n/g, ', '), href: '#offices' as const }]
+      : []),
+  ];
   return (
     <section className="isolate min-h-[500px] sm:min-h-[600px] overflow-hidden relative">
       <div className="absolute inset-0">
@@ -43,7 +53,7 @@ export default function ContactHero() {
               className="flex flex-col sm:flex-row flex-wrap justify-center gap-4 sm:gap-6 mt-10 px-2"
               style={{ animation: 'fadeSlideIn 1s ease-out 0.6s both' }}
             >
-              {CONTACT_ITEMS.map((item) => (
+              {contactItems.map((item) => (
                 <a
                   key={item.href}
                   href={item.href}

@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import { Send, CheckCircle2 } from 'lucide-react';
-import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { getPublicSiteContactEmail } from '@/lib/site-contact';
 
 export default function ContactForm() {
+  const contactEmail = getPublicSiteContactEmail();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -13,8 +14,6 @@ export default function ContactForm() {
     message: ''
   });
   const [submitted, setSubmitted] = useState(false);
-  
-  useScrollAnimation();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -53,25 +52,24 @@ export default function ContactForm() {
                 {
                   title: 'Guest & Booking Enquiries',
                   description: 'Questions about availability, amenities, or your upcoming stay.',
-                  contact: 'info@rightstayafrica.com',
                 },
                 {
                   title: 'Host & Property Owners',
                   description: 'List your property or discuss asset management with our team.',
-                  contact: 'info@rightstayafrica.com',
                 },
                 {
                   title: 'Tours & Partnerships',
                   description: 'Plan a curated experience or explore collaboration opportunities.',
-                  contact: 'info@rightstayafrica.com',
                 },
               ].map((item, index) => (
                 <div key={index} className="border-l-2 border-white/20 pl-4">
                   <h3 className="text-base font-medium text-white/90">{item.title}</h3>
                   <p className="mt-1 text-sm text-white/70">{item.description}</p>
-                  <a href={`mailto:${item.contact}`} className="mt-2 inline-block text-sm text-white/80 hover:text-white underline">
-                    {item.contact}
-                  </a>
+                  {contactEmail ? (
+                    <a href={`mailto:${contactEmail}`} className="mt-2 inline-block text-sm text-white/80 hover:text-white underline">
+                      {contactEmail}
+                    </a>
+                  ) : null}
                 </div>
               ))}
             </div>

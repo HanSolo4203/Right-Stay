@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { fetchUplistingProperty } from '@/lib/uplisting';
+import { mergePreservedAmenityAttributes } from '@/lib/property-amenities';
 import { mergePreservedLocationAttributes } from '@/lib/property-location';
 
 export type SyncPropertyResult = {
@@ -64,8 +65,8 @@ export async function syncSinglePropertyFromUplisting(
     string,
     unknown
   >;
-  const mergedAttributes = mergePreservedLocationAttributes(
-    incomingAttributes,
+  const mergedAttributes = mergePreservedAmenityAttributes(
+    mergePreservedLocationAttributes(incomingAttributes, existingAttributes),
     existingAttributes
   );
 

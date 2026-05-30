@@ -55,6 +55,9 @@
   }
   html {
     overflow-x: hidden;
+    scroll-behavior: smooth;
+    scroll-padding-top: var(--site-header-height);
+    -webkit-overflow-scrolling: touch;
   }
   html, body {
     margin: 0;
@@ -84,37 +87,241 @@
   }
 }
 
-/* Custom animation styles */
+/* Custom animation styles — transform + opacity only (GPU-friendly) */
 @keyframes fadeSlideIn {
   0% {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translate3d(0, 16px, 0);
   }
   100% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
-@keyframes iconGlow {
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes heroKenBurns {
+  0% {
+    transform: scale(1.05) translate3d(0, 0, 0);
+  }
+  100% {
+    transform: scale(1.12) translate3d(-0.5%, -0.3%, 0);
+  }
+}
+
+@keyframes philosophyGlow {
+  0% {
+    opacity: 0.35;
+    transform: scale(0.96);
+  }
+  100% {
+    opacity: 0.65;
+    transform: scale(1.04);
+  }
+}
+
+/* Testimonial ribbon background — slow drift + ambient glow */
+@keyframes testimonialRibbonDrift {
   0%,
   100% {
-    filter: drop-shadow(0 0 4px rgba(139, 200, 130, 0.4));
+    transform: translate3d(-2%, 0, 0) scale(1.08);
   }
-  50% {
-    filter: drop-shadow(0 0 12px rgba(139, 200, 130, 0.75));
+  33% {
+    transform: translate3d(1%, -1%, 0) scale(1.12);
+  }
+  66% {
+    transform: translate3d(2.5%, 0.5%, 0) scale(1.1);
   }
 }
 
-/* Subtle cloud animation for hero image */
-@keyframes cloudDrift {
+@keyframes testimonialRibbonGlow {
+  0%,
+  100% {
+    opacity: 0.12;
+    transform: translate3d(-3%, 0, 0) scale(1);
+  }
+  50% {
+    opacity: 0.22;
+    transform: translate3d(3%, 0, 0) scale(1.06);
+  }
+}
+
+.testimonial-ribbon-drift {
+  animation: testimonialRibbonDrift 32s ease-in-out infinite;
+  will-change: transform;
+}
+
+.testimonial-ribbon-glow {
+  animation: testimonialRibbonGlow 14s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes testimonialFogDrift {
+  0%,
+  100% {
+    transform: translate3d(-4%, 2%, 0) scale(1.05);
+    opacity: 0.45;
+  }
+  50% {
+    transform: translate3d(5%, -3%, 0) scale(1.12);
+    opacity: 0.62;
+  }
+}
+
+@keyframes testimonialFogDriftReverse {
+  0%,
+  100% {
+    transform: translate3d(3%, -2%, 0) scale(1.08);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translate3d(-6%, 4%, 0) scale(1.15);
+    opacity: 0.5;
+  }
+}
+
+@keyframes testimonialParticleDrift {
   0% {
-    transform: translate3d(-1%, -0.5%, 0);
-    opacity: 0.98;
+    transform: translate3d(0, 0, 0);
   }
   100% {
+    transform: translate3d(-12%, -18%, 0);
+  }
+}
+
+@keyframes testimonialParticleDriftAlt {
+  0% {
     transform: translate3d(0, 0, 0);
-    opacity: 1;
+  }
+  100% {
+    transform: translate3d(10%, 14%, 0);
+  }
+}
+
+@keyframes testimonialDustPulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.65;
+  }
+}
+
+/* Ominous air / particle atmosphere for testimonial section */
+.testimonial-atmosphere {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.testimonial-atmosphere__vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 95% 75% at 50% 48%,
+    transparent 0%,
+    rgba(0, 0, 0, 0.25) 45%,
+    rgba(0, 0, 0, 0.72) 100%
+  );
+}
+
+.testimonial-atmosphere__fog {
+  position: absolute;
+  inset: -25%;
+  filter: blur(56px);
+  animation: testimonialFogDrift 22s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.testimonial-atmosphere__fog--deep {
+  animation-name: testimonialFogDriftReverse;
+  animation-duration: 28s;
+  filter: blur(72px);
+}
+
+.testimonial-atmosphere__fog--primary {
+  background: radial-gradient(
+    ellipse 55% 45% at 30% 40%,
+    rgba(26, 54, 24, 0.55),
+    transparent 70%
+  );
+}
+
+.testimonial-atmosphere__fog--secondary {
+  background: radial-gradient(
+    ellipse 50% 40% at 72% 58%,
+    rgba(8, 14, 10, 0.85),
+    transparent 68%
+  );
+}
+
+.testimonial-atmosphere__particles,
+.testimonial-atmosphere__particles-alt {
+  position: absolute;
+  inset: -40%;
+  width: 180%;
+  height: 180%;
+  will-change: transform;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 14%,
+    black 86%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 14%,
+    black 86%,
+    transparent 100%
+  );
+}
+
+.testimonial-atmosphere__particles {
+  opacity: 0.58;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='480' viewBox='0 0 480 480'%3E%3Cg fill='%23ffffff' fill-opacity='0.55'%3E%3Ccircle cx='24' cy='56' r='0.7'/%3E%3Ccircle cx='88' cy='120' r='0.5'/%3E%3Ccircle cx='156' cy='34' r='0.9'/%3E%3Ccircle cx='220' cy='180' r='0.45'/%3E%3Ccircle cx='312' cy='92' r='0.65'/%3E%3Ccircle cx='400' cy='48' r='0.55'/%3E%3Ccircle cx='48' cy='240' r='0.8'/%3E%3Ccircle cx='132' cy='300' r='0.5'/%3E%3Ccircle cx='204' cy='268' r='0.7'/%3E%3Ccircle cx='288' cy='340' r='0.45'/%3E%3Ccircle cx='368' cy='220' r='0.85'/%3E%3Ccircle cx='432' cy='320' r='0.6'/%3E%3Ccircle cx='72' cy='400' r='0.5'/%3E%3Ccircle cx='176' cy='420' r='0.75'/%3E%3Ccircle cx='260' cy='440' r='0.55'/%3E%3Ccircle cx='360' cy='400' r='0.65'/%3E%3Ccircle cx='420' cy='160' r='0.5'/%3E%3C/g%3E%3Cg fill='%236ba066' fill-opacity='0.4'%3E%3Ccircle cx='64' cy='140' r='1'/%3E%3Ccircle cx='192' cy='88' r='0.6'/%3E%3Ccircle cx='340' cy='140' r='0.75'/%3E%3Ccircle cx='120' cy='360' r='0.55'/%3E%3Ccircle cx='248' cy='160' r='0.9'/%3E%3Ccircle cx='400' cy='280' r='0.65'/%3E%3Ccircle cx='32' cy='320' r='0.5'/%3E%3Ccircle cx='300' cy='24' r='0.7'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 480px 480px;
+  animation: testimonialParticleDrift 48s linear infinite;
+}
+
+.testimonial-atmosphere__particles-alt {
+  opacity: 0.38;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360' viewBox='0 0 360 360'%3E%3Cg fill='%23ffffff' fill-opacity='0.35'%3E%3Ccircle cx='40' cy='80' r='0.4'/%3E%3Ccircle cx='140' cy='40' r='0.55'/%3E%3Ccircle cx='260' cy='100' r='0.35'/%3E%3Ccircle cx='320' cy='200' r='0.5'/%3E%3Ccircle cx='60' cy='200' r='0.45'/%3E%3Ccircle cx='180' cy='280' r='0.6'/%3E%3Ccircle cx='300' cy='300' r='0.4'/%3E%3Ccircle cx='100' cy='320' r='0.5'/%3E%3Ccircle cx='220' cy='20' r='0.35'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 360px 360px;
+  animation: testimonialParticleDriftAlt 64s linear infinite;
+}
+
+.testimonial-atmosphere__dust {
+  position: absolute;
+  inset: 0;
+  opacity: 0.07;
+  mix-blend-mode: soft-light;
+  background-image: var(--premium-texture-image);
+  background-size: 256px 256px;
+  animation: testimonialDustPulse 6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .testimonial-ribbon-drift,
+  .testimonial-ribbon-glow,
+  .testimonial-atmosphere__fog,
+  .testimonial-atmosphere__particles,
+  .testimonial-atmosphere__particles-alt,
+  .testimonial-atmosphere__dust {
+    animation: none !important;
   }
 }
 
@@ -127,20 +334,44 @@
   animation-play-state: running !important;
 }
 
-/* Fade in animation for review transitions */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
+/* Defer off-screen section paint until near viewport */
+.scroll-contain-section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 480px;
+  contain: layout paint;
+}
+
+/* Mobile: opacity-only reveals, no stagger, shorter duration */
+@media (max-width: 767px) {
+  @keyframes fadeSlideIn {
+    0% {
+      opacity: 0;
+      transform: none;
+    }
+    100% {
+      opacity: 1;
+      transform: none;
+    }
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  .premium-marketing-surface .animate-on-scroll {
+    animation-duration: 0.35s !important;
+    animation-delay: 0s !important;
+  }
+
+  /* backdrop-blur is expensive during scroll on mobile GPUs */
+  .premium-marketing-surface [class*="backdrop-blur"] {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  .premium-marketing-surface .premium-page-backdrop__glow {
+    display: none;
   }
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.5s ease-in-out;
+  animation: fadeIn 0.4s ease-out;
 }
 
 /* Text selection highlight - Right Stay green with transparency */
@@ -179,7 +410,67 @@ input[type="number"] {
   height: 100%;
   width: 100%;
   font-family: inherit;
-  background: #f3f4f6;
+  background: #f9fafb;
+}
+
+.property-map-frame--booking {
+  border-color: #e5e7eb;
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.property-map-shell--booking .property-map-frame::after {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.65);
+  z-index: 500;
+}
+
+.property-map-shell--booking .property-map-frame {
+  position: relative;
+}
+
+.property-map-shell--booking .leaflet-tile-pane {
+  filter: saturate(0.82) contrast(1.02) brightness(1.02);
+}
+
+.property-map-shell--booking .maplibregl-canvas {
+  filter: saturate(0.96) contrast(1.01);
+}
+
+.property-map-shell--booking .leaflet-control-zoom {
+  border: none !important;
+  box-shadow: 0 2px 10px rgba(26, 54, 24, 0.12);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.property-map-shell--booking .leaflet-control-zoom a {
+  width: 34px;
+  height: 34px;
+  line-height: 34px;
+  background: #fff;
+  color: #235020;
+  border: 1px solid #d9ead7 !important;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.property-map-shell--booking .leaflet-control-zoom a:hover {
+  background: #f0f7ef;
+  color: #337e2f;
+}
+
+.property-map-shell--booking .leaflet-control-zoom-in {
+  border-radius: 10px 10px 0 0;
+}
+
+.property-map-shell--booking .leaflet-control-zoom-out {
+  border-radius: 0 0 10px 10px;
 }
 
 .property-map-frame .leaflet-control-attribution {
@@ -187,9 +478,69 @@ input[type="number"] {
   background: rgba(255, 255, 255, 0.85);
   border-radius: 6px 0 0 0;
   padding: 2px 6px;
+  color: #64748b;
+}
+
+.property-map-shell--booking .leaflet-control-attribution {
+  background: rgba(255, 255, 255, 0.92);
+  color: #64748b;
+  margin: 0 6px 6px 0;
+  border-radius: 8px;
+  padding: 3px 8px;
+  box-shadow: 0 1px 4px rgba(26, 54, 24, 0.08);
+}
+
+.property-map-shell--booking .leaflet-control-attribution a {
+  color: #337e2f;
+}
+
+/* MapLibre 3D booking maps */
+.property-map-3d-canvas.maplibregl-map {
+  font-family: var(--font-manrope), Manrope, inherit;
+  background: #f9fafb;
+}
+
+.property-map-shell--booking .maplibregl-ctrl-group {
+  border: none !important;
+  box-shadow: 0 2px 10px rgba(26, 54, 24, 0.12);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.property-map-shell--booking .maplibregl-ctrl-group button {
+  width: 34px;
+  height: 34px;
+  background: #fff;
+  color: #235020;
+  border: 1px solid #d9ead7 !important;
+}
+
+.property-map-shell--booking .maplibregl-ctrl-group button:hover {
+  background: #f0f7ef;
+  color: #337e2f;
+}
+
+.property-map-shell--booking .maplibregl-ctrl-attrib {
+  background: rgba(255, 255, 255, 0.92);
+  color: #64748b;
+  margin: 0 6px 6px 0;
+  border-radius: 8px;
+  padding: 3px 8px;
+  font-size: 10px;
+  box-shadow: 0 1px 4px rgba(26, 54, 24, 0.08);
+}
+
+.property-map-shell--booking .maplibregl-ctrl-attrib a {
+  color: #337e2f;
+}
+
+.admin-property-map {
+  position: relative;
 }
 
 .admin-property-map .leaflet-container {
+  position: absolute;
+  inset: 0;
   background: #f1f5f9;
 }
 
@@ -197,9 +548,29 @@ input[type="number"] {
   padding-bottom: max(0.375rem, env(safe-area-inset-bottom));
 }
 
+/* Ensure form controls stay readable on the light admin theme */
+.admin-root input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='hidden']):not([type='range']):not([type='color']),
+.admin-root textarea,
+.admin-root select {
+  color: rgb(15 23 42);
+  caret-color: rgb(15 23 42);
+}
+
+.admin-root input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='hidden']):not([type='range']):not([type='color']):not(:disabled),
+.admin-root textarea:not(:disabled),
+.admin-root select:not(:disabled) {
+  background-color: #fff;
+}
+
+.admin-root input::placeholder,
+.admin-root textarea::placeholder {
+  color: rgb(148 163 184);
+}
+
 .property-map-marker {
   background: transparent;
   border: none;
+  position: relative;
 }
 
 .property-map-marker-pin {
@@ -223,6 +594,44 @@ input[type="number"] {
   border-radius: 50%;
   background: #fff;
   transform: rotate(45deg);
+}
+
+.property-map-marker-pin--booking {
+  width: 32px;
+  height: 32px;
+  border-width: 3px;
+  box-shadow:
+    0 0 0 6px rgba(51, 126, 47, 0.18),
+    0 6px 16px rgba(26, 54, 24, 0.28);
+}
+
+.property-map-marker--booking::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  width: 44px;
+  height: 44px;
+  margin-left: -22px;
+  border-radius: 50%;
+  background: rgba(51, 126, 47, 0.12);
+  animation: property-map-pin-pulse 2.4s ease-out infinite;
+  z-index: -1;
+}
+
+@keyframes property-map-pin-pulse {
+  0% {
+    transform: scale(0.55);
+    opacity: 0.7;
+  }
+  70% {
+    transform: scale(1);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
 }
 
 /* Booking form date inputs — prevent mobile overflow */
@@ -251,6 +660,8 @@ input[type="date"].hide-native-calendar-icon::-webkit-date-and-time-value {
 
 /* Premium marketing surface — shared by fixed backdrop + hero fade (must stay in sync) */
 :root {
+  --site-header-height: 4.5rem;
+  --site-search-header-height: 4.25rem;
   --premium-surface-gradient: linear-gradient(
     to bottom,
     #121816 0%,
@@ -271,13 +682,14 @@ input[type="date"].hide-native-calendar-icon::-webkit-date-and-time-value {
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
+  contain: strict;
+  transform: translateZ(0);
 }
 
 .premium-page-backdrop__gradient {
   position: absolute;
   inset: 0;
   background: var(--premium-surface-gradient);
-  background-attachment: fixed;
 }
 
 .premium-page-backdrop__texture {
@@ -287,7 +699,72 @@ input[type="date"].hide-native-calendar-icon::-webkit-date-and-time-value {
   background-image: var(--premium-texture-image);
   background-size: 256px 256px;
   background-repeat: repeat;
-  background-attachment: fixed;
+}
+
+.premium-page-backdrop__particles {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0.9;
+}
+
+/* Property card — animated edge shimmer on hover */
+.accommodation-card-shimmer {
+  isolation: isolate;
+}
+
+.accommodation-card-shimmer-edge {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    transparent 38%,
+    rgba(255, 255, 255, 0.12) 44%,
+    rgba(180, 220, 175, 0.65) 50%,
+    rgba(255, 255, 255, 0.35) 56%,
+    transparent 62%,
+    transparent 100%
+  );
+  background-size: 280% 100%;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+.group:hover .accommodation-card-shimmer-edge,
+.group:focus-within .accommodation-card-shimmer-edge {
+  opacity: 1;
+  animation: accommodation-card-edge-shimmer 2.4s ease-in-out infinite;
+}
+
+@keyframes accommodation-card-edge-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .group:hover .accommodation-card-shimmer-edge,
+  .group:focus-within .accommodation-card-shimmer-edge {
+    animation: none;
+    opacity: 0.65;
+    background-position: 50% 0;
+  }
 }
 
 /*
@@ -325,16 +802,36 @@ input[type="date"].hide-native-calendar-icon::-webkit-date-and-time-value {
 }
 
 .hero-premium-fade-gradient {
-  background: var(--premium-surface-gradient);
-  background-attachment: fixed;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #121816 55%,
+    #0c1a14 100%
+  );
 }
 
 .hero-premium-fade-texture {
-  background-image: var(--premium-texture-image);
-  background-size: 256px 256px;
-  background-repeat: repeat;
-  background-attachment: fixed;
-  opacity: 0.04;
+  display: none;
+}
+
+/* Fades hero background (e.g. particle field) into the premium surface below */
+.hero-bg-fade {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 52%,
+    rgba(0, 0, 0, 0.88) 68%,
+    rgba(0, 0, 0, 0.5) 82%,
+    rgba(0, 0, 0, 0.15) 94%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    #000 52%,
+    rgba(0, 0, 0, 0.88) 68%,
+    rgba(0, 0, 0, 0.5) 82%,
+    rgba(0, 0, 0, 0.15) 94%,
+    transparent 100%
+  );
 }
 
 /* Pull premium content into hero fade zone — removes the hard section box seam */
@@ -359,7 +856,8 @@ input[type="date"].hide-native-calendar-icon::-webkit-date-and-time-value {
   height: 24rem;
   border-radius: 9999px;
   background: rgba(51, 126, 47, 0.1);
-  filter: blur(120px);
+  filter: blur(80px);
+  will-change: auto;
 }
 
 .premium-page-backdrop__glow--r {
@@ -370,7 +868,8 @@ input[type="date"].hide-native-calendar-icon::-webkit-date-and-time-value {
   margin-top: -10rem;
   border-radius: 9999px;
   background: rgba(74, 154, 68, 0.08);
-  filter: blur(100px);
+  filter: blur(64px);
+  will-change: auto;
 }
 
 .premium-page-backdrop__glow--b {
@@ -380,5 +879,20 @@ input[type="date"].hide-native-calendar-icon::-webkit-date-and-time-value {
   height: 18rem;
   border-radius: 9999px;
   background: rgba(6, 78, 59, 0.2);
-  filter: blur(90px);
+  filter: blur(56px);
+  will-change: auto;
+}
+
+@media (min-width: 768px) {
+  .premium-page-backdrop__glow--tl {
+    filter: blur(100px);
+  }
+
+  .premium-page-backdrop__glow--r {
+    filter: blur(80px);
+  }
+
+  .premium-page-backdrop__glow--b {
+    filter: blur(72px);
+  }
 }

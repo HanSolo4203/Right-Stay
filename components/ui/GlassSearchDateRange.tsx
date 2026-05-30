@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { getTodayISO } from "@/lib/accommodation-search";
 import { cn } from "@/lib/utils";
 
 const MONTH_NAMES = [
@@ -26,13 +27,7 @@ const POPOVER_WIDTH_SINGLE = 320;
 const POPOVER_WIDTH_DUAL = 624;
 const MONTH_GRID_WIDTH = 272;
 
-export function getTodayISO(): string {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
+export { getTodayISO } from "@/lib/accommodation-search";
 
 function formatDateISO(date: Date): string {
   const year = date.getFullYear();
@@ -93,9 +88,7 @@ export default function GlassSearchDateRange({
   const [mounted, setMounted] = useState(false);
   const dualMonth = useDualMonthLayout();
 
-  const [checkIn, setCheckIn] = useState(
-    () => checkInProp || (defaultCheckInToday ? getTodayISO() : "")
-  );
+  const [checkIn, setCheckIn] = useState(() => checkInProp || "");
   const [checkOut, setCheckOut] = useState(checkOutProp);
 
   const today = startOfDay(new Date());

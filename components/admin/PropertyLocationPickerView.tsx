@@ -26,11 +26,24 @@ function clearLeafletContainer(el: HTMLDivElement) {
   el.replaceChildren();
 }
 
+/** Leaflet mis-measures containers inside modals until layout has settled. */
+function scheduleLeafletSizeRefresh(map: L.Map) {
+  const refresh = () => {
+    map.invalidateSize({ animate: false });
+  };
+  refresh();
+  requestAnimationFrame(() => {
+    refresh();
+    requestAnimationFrame(refresh);
+  });
+}
+
 export default function PropertyLocationPickerView({
   latitude,
   longitude,
   onCoordinatesChange,
 }: PropertyLocationPickerViewProps) {
+  const frameRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
@@ -93,7 +106,20 @@ export default function PropertyLocationPickerView({
       placeMarker(map, startLat!, startLng!);
     }
 
+    scheduleLeafletSizeRefresh(map);
+
+    const frame = frameRef.current;
+    const resizeObserver =
+      frame &&
+      new ResizeObserver(() => {
+        map.invalidateSize({ animate: false });
+      });
+    if (resizeObserver && frame) {
+      resizeObserver.observe(frame);
+    }
+
     return () => {
+      resizeObserver?.disconnect();
       markerRef.current = null;
       map.remove();
       mapRef.current = null;
@@ -121,6 +147,7 @@ export default function PropertyLocationPickerView({
 
     map.setView([lat!, lng!], Math.max(map.getZoom(), 15), { animate: true });
     placeMarker(map, lat!, lng!);
+    scheduleLeafletSizeRefresh(map);
   }, [latitude, longitude]);
 
   return (
@@ -128,8 +155,11 @@ export default function PropertyLocationPickerView({
       <p className="text-xs text-slate-500">
         Click the map or drag the pin to set the exact property location.
       </p>
-      <div className="property-map-frame admin-property-map h-[280px] overflow-hidden rounded-xl border border-slate-200">
-        <div ref={containerRef} className="h-full w-full" />
+      <div
+        ref={frameRef}
+        className="property-map-frame admin-property-map relative h-[280px] overflow-hidden rounded-xl border border-slate-200"
+      >
+        <div ref={containerRef} className="h-full w-full min-h-0" />
       </div>
     </div>
   );

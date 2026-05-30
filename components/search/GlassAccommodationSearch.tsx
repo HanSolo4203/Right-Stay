@@ -3,8 +3,13 @@
 import { FormEvent } from "react";
 import GlassSearchDateRange from "@/components/ui/GlassSearchDateRange";
 import type { AccommodationSearchForm } from "@/lib/accommodation-search";
+import { isValidAccommodationDateRange } from "@/lib/accommodation-search";
+import {
+  calculateNightsBetween,
+  DEFAULT_MINIMUM_STAY_NIGHTS,
+} from "@/lib/pricing";
 import { glassFrostInput, glassFrostPanel } from "@/lib/glass-styles";
-import { ChevronDown, MapPin, Search, Users } from "lucide-react";
+import { AlertCircle, ChevronDown, MapPin, Search, Users } from "lucide-react";
 
 type GlassAccommodationSearchProps = {
   formData: AccommodationSearchForm;
@@ -25,6 +30,15 @@ export default function GlassAccommodationSearch({
   showTabs = true,
   className = "",
 }: GlassAccommodationSearchProps) {
+  const minimumStayError =
+    formData.checkIn &&
+    formData.checkOut &&
+    isValidAccommodationDateRange(formData.checkIn, formData.checkOut) &&
+    calculateNightsBetween(formData.checkIn, formData.checkOut) <
+      DEFAULT_MINIMUM_STAY_NIGHTS
+      ? `Minimum stay is ${DEFAULT_MINIMUM_STAY_NIGHTS} nights.`
+      : null;
+
   return (
     <div
       className={`w-full min-w-0 rounded-3xl p-4 sm:p-8 overflow-visible ${glassFrostPanel} ${className}`.trim()}
@@ -57,11 +71,22 @@ export default function GlassAccommodationSearch({
           <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/60 pointer-events-none" />
         </div>
 
-        <GlassSearchDateRange
-          checkIn={formData.checkIn}
-          checkOut={formData.checkOut}
-          onDatesChange={(checkIn, checkOut) => onFormDataChange({ checkIn, checkOut })}
-        />
+        <div className="space-y-2">
+          <GlassSearchDateRange
+            checkIn={formData.checkIn}
+            checkOut={formData.checkOut}
+            onDatesChange={(checkIn, checkOut) => onFormDataChange({ checkIn, checkOut })}
+          />
+          {minimumStayError && (
+            <div
+              className="flex items-start gap-3 rounded-xl border-2 border-red-400/80 bg-red-500/30 px-4 py-3 text-base font-semibold text-white shadow-[0_0_24px_rgba(239,68,68,0.35)]"
+              role="alert"
+            >
+              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-100" aria-hidden />
+              <p>{minimumStayError}</p>
+            </div>
+          )}
+        </div>
 
         <div className="relative">
           <Users className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/60 z-10" />

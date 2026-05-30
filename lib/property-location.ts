@@ -107,3 +107,78 @@ export function inferLocationDisplayFromText(
 
   return name ? 'South Africa' : 'Location to be confirmed';
 }
+
+/** True when admin display label is only a postal code, not a city or neighbourhood. */
+export function isPostcodeOnlyLocationLabel(label: string | null | undefined): boolean {
+  if (!label?.trim()) return false;
+  const value = label.trim();
+  if (/^\d{4,5}(?:\s*,?\s*South Africa)?$/i.test(value)) return true;
+  if (/^\d{4,5}\s*,?\s*[A-Za-z\s]+$/i.test(value) && !/\b(cape town|johannesburg|durban|pretoria|stellenbosch|hermanus|franschhoek|knysna|milnerton|century city|mouille point)\b/i.test(value)) {
+    return true;
+  }
+  return false;
+}
+
+const CITY_FROM_ADDRESS_PATTERN =
+  /\b(Cape Town|Johannesburg|Durban|Pretoria|Stellenbosch|Hermanus|Franschhoek|Knysna|Milnerton|Century City|Mouille Point)\b/i;
+
+/** Extract a city name from a structured address string. */
+export function extractCityFromAddress(address?: string | null): string | null {
+  if (!address?.trim()) return null;
+  const match = address.match(CITY_FROM_ADDRESS_PATTERN);
+  return match?.[1] ?? null;
+}
+
+/** Best label for cards, search, and filters. */
+export function resolvePropertyListingLocation(
+  attributes?: Record<string, unknown> | null
+): string {
+  const fields = extractLocationFromAttributes(attributes);
+  const display = fields.location_display?.trim();
+  const address = fields.location_address?.trim();
+  const name = typeof attributes?.name === 'string' ? attributes.name : '';
+  const nickname = typeof attributes?.nickname === 'string' ? attributes.nickname : '';
+  const description = typeof attributes?.description === 'string' ? attributes.description : '';
+
+  if (display && !isPostcodeOnlyLocationLabel(display)) {
+    return display;
+  }
+
+  const fromAddress = extractCityFromAddress(address);
+  if (fromAddress) return fromAddress;
+
+  const fromName = name.match(CITY_FROM_ADDRESS_PATTERN)?.[1]
+    ?? nickname.match(CITY_FROM_ADDRESS_PATTERN)?.[1];
+  if (fromName) return fromName;
+
+  const inferred = inferLocationDisplayFromText(description, name || nickname);
+  if (inferred !== 'Location to be confirmed') {
+    return inferred;
+  }
+
+  return display || fromAddress || 'Cape Town';
+}
+
+/** Match search location against all known location fields on a property. */
+export function propertyMatchesLocationFilter(
+  attributes: Record<string, unknown> | undefined,
+  locationFilter: string
+): boolean {
+  const filter = locationFilter.trim().toLowerCase();
+  if (!filter) return true;
+
+  const fields = extractLocationFromAttributes(attributes);
+  const searchableText = [
+    fields.location_display,
+    fields.location_address,
+    attributes?.name,
+    attributes?.nickname,
+    attributes?.description,
+    resolvePropertyListingLocation(attributes),
+  ]
+    .filter(Boolean)
+    .join('\n')
+    .toLowerCase();
+
+  return searchableText.includes(filter);
+}

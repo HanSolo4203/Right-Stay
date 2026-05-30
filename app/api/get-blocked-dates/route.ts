@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase-server';
+import { filterCalendarBlockedDates } from '@/lib/availability';
 
 export const dynamic = 'force-dynamic';
 
@@ -110,13 +111,15 @@ export async function GET(request: Request) {
       }
     }
 
+    const calendarBlockedDates = filterCalendarBlockedDates(blockedDates || []);
+
     return NextResponse.json(
       {
         propertyId,
         startDate,
         endDate,
-        blockedDates: blockedDates || [],
-        count: blockedDates?.length || 0,
+        blockedDates: calendarBlockedDates,
+        count: calendarBlockedDates.length,
         dailyPrices,
         pricing,
       },

@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { Plus, Minus } from 'lucide-react';
-import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 const faqs = [
   {
@@ -33,7 +32,6 @@ const faqs = [
 
 export default function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
-  useScrollAnimation();
 
   return (
     <section className="isolate overflow-hidden pt-24 pb-24 relative">

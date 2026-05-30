@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, FormEvent, Suspense } from 'react';
+import { useState, useEffect, useRef, FormEvent, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '@/components/sections/Header';
 import AccommodationCards from '@/components/sections/AccommodationCards';
@@ -12,10 +12,14 @@ import HeroBackgroundImage from '@/components/ui/HeroBackgroundImage';
 import HeroPremiumFadeOverlay from '@/components/ui/HeroPremiumFadeOverlay';
 import GlassAccommodationSearch from '@/components/search/GlassAccommodationSearch';
 import MinimizedSearchHeader from '@/components/search/MinimizedSearchHeader';
-import { getTodayISO } from '@/components/ui/GlassSearchDateRange';
 import {
   buildAccommodationSearchParams,
+  getDefaultAccommodationDates,
+  getStoredAccommodationDates,
   hasActiveAccommodationSearch,
+  isValidAccommodationDateRange,
+  persistAccommodationDatesIfValid,
+  setStoredAccommodationDates,
   validateAccommodationSearch,
   type AccommodationSearchForm,
 } from '@/lib/accommodation-search';
@@ -48,12 +52,14 @@ function StayWithUsContent({
     checkOut,
   });
 
-  const [formData, setFormData] = useState<AccommodationSearchForm>({
+  const searchHydratedRef = useRef(false);
+
+  const [formData, setFormData] = useState<AccommodationSearchForm>(() => ({
     location: locationFilter || initialLocations[0] || '',
-    checkIn: checkIn || getTodayISO(),
-    checkOut: checkOut,
-    guests: guestsFilter,
-  });
+    checkIn: checkIn || '',
+    checkOut: checkOut || '',
+    guests: guestsFilter || '2',
+  }));
 
   useEffect(() => {
     if (initialLocations.length > 0) {
@@ -82,17 +88,84 @@ function StayWithUsContent({
   }, [initialLocations.length]);
 
   useEffect(() => {
+    const urlHasSearch = hasActiveAccommodationSearch({
+      location: locationFilter,
+      checkIn,
+      checkOut,
+    });
+
+    if (urlHasSearch) {
+      searchHydratedRef.current = true;
+      setFormData({
+        location: locationFilter,
+        checkIn,
+        checkOut,
+        guests: guestsFilter || '2',
+      });
+      persistAccommodationDatesIfValid(
+        checkIn,
+        checkOut,
+        guestsFilter,
+        locationFilter
+      );
+      return;
+    }
+
+    if (searchHydratedRef.current) return;
+
+    const stored = getStoredAccommodationDates();
+    if (
+      stored &&
+      isValidAccommodationDateRange(stored.checkIn, stored.checkOut)
+    ) {
+      const location =
+        stored.location || locationFilter || initialLocations[0] || '';
+      const guests = stored.guests || guestsFilter || '2';
+
+      if (location) {
+        searchHydratedRef.current = true;
+        router.replace(
+          `/stay-with-us?${buildAccommodationSearchParams({
+            location,
+            checkIn: stored.checkIn,
+            checkOut: stored.checkOut,
+            guests,
+          }).toString()}`,
+          { scroll: false }
+        );
+        return;
+      }
+    }
+
+    searchHydratedRef.current = true;
+    const defaults = getDefaultAccommodationDates();
     setFormData((prev) => ({
       ...prev,
-      location: locationFilter || prev.location,
-      checkIn: checkIn || prev.checkIn || getTodayISO(),
-      checkOut: checkOut || prev.checkOut,
-      guests: guestsFilter || prev.guests,
+      location: prev.location || initialLocations[0] || '',
+      checkIn: prev.checkIn || defaults.checkIn,
+      checkOut: prev.checkOut || defaults.checkOut,
+      guests: prev.guests || guestsFilter || '2',
     }));
-  }, [locationFilter, checkIn, checkOut, guestsFilter]);
+  }, [
+    locationFilter,
+    checkIn,
+    checkOut,
+    guestsFilter,
+    initialLocations,
+    router,
+  ]);
 
   const handleFormDataChange = (updates: Partial<AccommodationSearchForm>) => {
-    setFormData((prev) => ({ ...prev, ...updates }));
+    setFormData((prev) => {
+      const next = { ...prev, ...updates };
+      persistAccommodationDatesIfValid(
+        next.checkIn,
+        next.checkOut,
+        next.guests,
+        next.location
+      );
+      return next;
+    });
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -103,6 +176,13 @@ function StayWithUsContent({
       alert(error);
       return;
     }
+
+    setStoredAccommodationDates({
+      checkIn: formData.checkIn,
+      checkOut: formData.checkOut,
+      guests: formData.guests,
+      location: formData.location,
+    });
 
     const params = buildAccommodationSearchParams(formData);
     router.push(`/stay-with-us?${params.toString()}`);
@@ -118,19 +198,25 @@ function StayWithUsContent({
           loadingLocations={loadingLocations}
           onSubmit={handleSubmit}
         />
-        <main className="min-h-screen bg-gray-50">
-          <Suspense
-            fallback={
-              <div className="py-16 text-center text-gray-600">Loading accommodations...</div>
-            }
-          >
-            <AccommodationCards
-              variant="light"
-              initialProperties={initialProperties}
-            />
-          </Suspense>
-        </main>
-        <Footer />
+        <PremiumPageBackdrop />
+        <div className="relative z-[1] min-h-screen">
+          <PremiumBackgroundProvider>
+            <div className="pt-12 sm:pt-[3.25rem]">
+              <Suspense
+                fallback={
+                  <div className="py-16 text-center text-white/70">Loading accommodations...</div>
+                }
+              >
+                <AccommodationCards
+                  variant="dark"
+                  layout="belowNav"
+                  initialProperties={initialProperties}
+                />
+              </Suspense>
+            </div>
+          </PremiumBackgroundProvider>
+          <Footer />
+        </div>
       </>
     );
   }
@@ -142,7 +228,7 @@ function StayWithUsContent({
           <HeroBackgroundImage
             src={MARKETING_IMAGES.heroCapeTown}
             priority
-            className="pointer-events-none object-cover motion-safe:[animation:cloudDrift_5s_ease-out_forwards]"
+            className="pointer-events-none object-cover"
             style={{
               maskImage:
                 'linear-gradient(to bottom, black 48%, rgba(0,0,0,0.75) 68%, rgba(0,0,0,0.25) 86%, transparent 100%)',

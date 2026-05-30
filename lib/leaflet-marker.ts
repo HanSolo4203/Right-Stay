@@ -1,17 +1,16 @@
 import L from 'leaflet';
 
-let markerIconConfigured = false;
+export type PropertyMarkerVariant = 'booking' | 'default';
 
-export function getPropertyMarkerIcon(): L.DivIcon {
-  if (!markerIconConfigured) {
-    markerIconConfigured = true;
-  }
+export function getPropertyMarkerIcon(variant: PropertyMarkerVariant = 'default'): L.DivIcon {
+  const pinClass =
+    variant === 'booking' ? 'property-map-marker-pin property-map-marker-pin--booking' : 'property-map-marker-pin';
 
   return L.divIcon({
-    className: 'property-map-marker',
-    html: `<span class="property-map-marker-pin" aria-hidden="true"></span>`,
-    iconSize: [36, 44],
-    iconAnchor: [18, 44],
+    className: `property-map-marker property-map-marker--${variant}`,
+    html: `<span class="${pinClass}" aria-hidden="true"></span>`,
+    iconSize: variant === 'booking' ? [40, 48] : [36, 44],
+    iconAnchor: variant === 'booking' ? [20, 48] : [18, 44],
     popupAnchor: [0, -40],
   });
 }

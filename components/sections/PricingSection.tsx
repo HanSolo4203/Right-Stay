@@ -3,11 +3,9 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { Check, CheckCircle2, Star } from 'lucide-react';
-import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 export default function PricingSection() {
   const [isAnnual, setIsAnnual] = useState(true);
-  useScrollAnimation();
 
   return (
     <section className="isolate overflow-hidden pt-24 pb-24 relative">

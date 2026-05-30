@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Menu, Search, X } from "lucide-react";
 import GlassAccommodationSearch from "@/components/search/GlassAccommodationSearch";
@@ -37,6 +38,11 @@ export default function MinimizedSearchHeader({
 }: MinimizedSearchHeaderProps) {
   const [searchExpanded, setSearchExpanded] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const closeSearch = useCallback(() => setSearchExpanded(false), []);
   const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), []);
@@ -63,19 +69,19 @@ export default function MinimizedSearchHeader({
   const datesLabel = formatSearchDateRange(formData.checkIn, formData.checkOut);
   const guestsLabel = formatGuestLabel(formData.guests);
 
-  return (
+  const headerChrome = (
     <>
-      <header className="sticky top-0 z-40 isolate overflow-hidden border-b border-white/10">
+      <header className="fixed inset-x-0 top-0 z-[100] isolate overflow-hidden border-b border-white/10">
         <div className="absolute inset-0">
           <HeroBackgroundImage
             src="/cpt-lions-head-1.jpg"
             priority
             className="object-cover object-[center_30%]"
           />
-          <div className="absolute inset-0 bg-black/55 backdrop-blur-[2px]" aria-hidden />
+          <div className="absolute inset-0 bg-black/55" aria-hidden />
         </div>
 
-        <div className="relative backdrop-blur-xl bg-white/[0.03]">
+        <div className="relative bg-black/80 md:bg-white/[0.03] md:backdrop-blur-xl">
           <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6 md:px-8">
             <Link
               href="/"
@@ -156,9 +162,16 @@ export default function MinimizedSearchHeader({
           )}
         </div>
       </header>
+    </>
+  );
+
+  return (
+    <>
+      {mounted ? createPortal(headerChrome, document.body) : null}
+      <div aria-hidden="true" className="h-[var(--site-search-header-height)] shrink-0" />
 
       {searchExpanded && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-20 sm:pt-24">
+        <div className="fixed inset-0 z-[120] flex items-start justify-center p-4 pt-20 sm:pt-24">
           <button
             type="button"
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"

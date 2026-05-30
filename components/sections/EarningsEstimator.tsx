@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from 'react';
-import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { Calculator, TrendingUp, ChevronDown } from 'lucide-react';
 import PremiumSectionBackground from '@/components/premium/PremiumSectionBackground';
 
@@ -22,8 +21,6 @@ const currencies: Currency[] = [
 ];
 
 export default function EarningsEstimator() {
-  useScrollAnimation();
-
   const [currency, setCurrency] = useState<Currency>(currencies[0]); // Default to ZAR
   const [adr, setAdr] = useState<number>(150);
   const [occupancy, setOccupancy] = useState<number>(65);

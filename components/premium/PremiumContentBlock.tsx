@@ -1,6 +1,5 @@
 "use client";
 
-import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import PremiumSectionBackground from "./PremiumSectionBackground";
 
 type PremiumContentBlockProps = {
@@ -11,6 +10,7 @@ type PremiumContentBlockProps = {
   variant?: "dark" | "darker";
   className?: string;
   centered?: boolean;
+  id?: string;
 };
 
 export default function PremiumContentBlock({
@@ -21,11 +21,10 @@ export default function PremiumContentBlock({
   variant = "dark",
   className = "",
   centered = false,
+  id,
 }: PremiumContentBlockProps) {
-  useScrollAnimation();
-
   return (
-    <PremiumSectionBackground variant={variant} className={className}>
+    <PremiumSectionBackground id={id} variant={variant} className={className}>
       <div className="mx-auto max-w-7xl px-6 md:px-8">
         <div className={`mb-12 sm:mb-16 ${centered ? "text-center mx-auto max-w-3xl" : "max-w-3xl"}`}>
           {eyebrow && (
