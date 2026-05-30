@@ -7,11 +7,23 @@ const OBSERVER_OPTIONS: IntersectionObserverInit = {
   rootMargin: '0px 0px -5% 0px',
 };
 
+function isElementInViewport(el: Element): boolean {
+  const rect = el.getBoundingClientRect();
+  const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+  return rect.top < viewportHeight * 0.95 && rect.bottom > 0;
+}
+
 function observeElements(io: IntersectionObserver, selector: string) {
   document.querySelectorAll(selector).forEach((el) => {
-    if (!el.classList.contains('animate')) {
-      io.observe(el);
+    if (el.classList.contains('animate')) return;
+
+    if (isElementInViewport(el)) {
+      el.classList.add('animate');
+      io.unobserve(el);
+      return;
     }
+
+    io.observe(el);
   });
 }
 

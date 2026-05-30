@@ -19,6 +19,7 @@ import {
   hasActiveAccommodationSearch,
   isValidAccommodationDateRange,
   persistAccommodationDatesIfValid,
+  readAccommodationSearchParams,
   setStoredAccommodationDates,
   validateAccommodationSearch,
   type AccommodationSearchForm,
@@ -41,10 +42,12 @@ function StayWithUsContent({
   const [locations, setLocations] = useState<string[]>(initialLocations);
   const [loadingLocations, setLoadingLocations] = useState(initialLocations.length === 0);
 
-  const locationFilter = searchParams?.get('location') || '';
-  const checkIn = searchParams?.get('checkIn') || '';
-  const checkOut = searchParams?.get('checkOut') || '';
-  const guestsFilter = searchParams?.get('guests') || '2';
+  const {
+    location: locationFilter,
+    checkIn,
+    checkOut,
+    guests: guestsFilter,
+  } = readAccommodationSearchParams(searchParams);
 
   const isSearchResults = hasActiveAccommodationSearch({
     location: locationFilter,

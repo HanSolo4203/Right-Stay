@@ -13,7 +13,7 @@ import {
   resolvePropertyListingLocation,
 } from '@/lib/property-location';
 import { extractAmenitiesFromAttributes } from '@/lib/property-amenities';
-import { buildPropertyBookUrl } from '@/lib/accommodation-search';
+import { buildPropertyBookUrl, readAccommodationSearchParams } from '@/lib/accommodation-search';
 import { MapPin, Users, Bed, ArrowRight, Loader2, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface PropertyData {
@@ -95,11 +95,12 @@ function AccommodationCardsContent({
     Map<string, { total: number; nightly: number; nights: number }>
   >(new Map());
 
-  // Get search filters from URL
-  const locationFilter = searchParams?.get('location') || '';
-  const checkIn = searchParams?.get('checkIn') || '';
-  const checkOut = searchParams?.get('checkOut') || '';
-  const guestsParam = searchParams?.get('guests') || '';
+  const {
+    location: locationFilter,
+    checkIn,
+    checkOut,
+    guests: guestsParam,
+  } = readAccommodationSearchParams(searchParams);
   const guestsFilter = guestsParam ? parseInt(guestsParam, 10) : null;
 
   const listingSearchQuery = {

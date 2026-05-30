@@ -17,6 +17,41 @@ export type StoredAccommodationDates = {
   location?: string;
 };
 
+export type AccommodationSearchParams = {
+  location: string;
+  checkIn: string;
+  checkOut: string;
+  guests: string;
+};
+
+function readSearchParam(
+  searchParams: Pick<URLSearchParams, "get"> | null | undefined,
+  canonical: string,
+  aliases: string[] = []
+): string {
+  const direct = searchParams?.get(canonical)?.trim();
+  if (direct) return direct;
+
+  for (const alias of aliases) {
+    const value = searchParams?.get(alias)?.trim();
+    if (value) return value;
+  }
+
+  return "";
+}
+
+/** Read stay-with-us search params, accepting common URL aliases (checkin, checkout, etc.). */
+export function readAccommodationSearchParams(
+  searchParams: Pick<URLSearchParams, "get"> | null | undefined
+): AccommodationSearchParams {
+  return {
+    location: readSearchParam(searchParams, "location"),
+    checkIn: readSearchParam(searchParams, "checkIn", ["checkin", "check-in"]),
+    checkOut: readSearchParam(searchParams, "checkOut", ["checkout", "check-out"]),
+    guests: readSearchParam(searchParams, "guests") || "2",
+  };
+}
+
 const ACCOMMODATION_DATES_STORAGE_KEY = "right-stay:accommodation-dates";
 
 let reloadStorageCleared = false;
