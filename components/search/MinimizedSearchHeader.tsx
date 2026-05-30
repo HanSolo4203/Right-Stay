@@ -94,10 +94,13 @@ export default function MinimizedSearchHeader({
             <button
               type="button"
               onClick={() => setSearchExpanded(true)}
-              className={`mx-auto flex min-w-0 flex-1 max-w-xl items-center rounded-full py-1 pl-1 pr-1 ${glassFrostPill}`}
+              className={`mx-auto flex min-w-0 flex-1 max-w-xl items-center rounded-full py-1 pl-1 pr-3 sm:pr-1 ${glassFrostPill}`}
               aria-expanded={searchExpanded}
               aria-label="Edit search"
             >
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-black shadow-md">
+                <Search className="h-4 w-4" strokeWidth={2.5} />
+              </span>
               <div className="hidden min-w-0 flex-1 items-center sm:flex">
                 <span className="truncate px-4 py-2.5 text-sm font-medium text-white/95">
                   {locationLabel}
@@ -107,15 +110,12 @@ export default function MinimizedSearchHeader({
                 <span className="h-6 w-px shrink-0 bg-white/25" aria-hidden />
                 <span className="truncate px-4 py-2.5 text-sm text-white/75">{guestsLabel}</span>
               </div>
-              <div className="flex min-w-0 flex-1 flex-col items-start px-4 py-2 text-left sm:hidden">
+              <div className="flex min-w-0 flex-1 flex-col items-start px-3 py-2 text-left sm:hidden">
                 <span className="truncate text-sm font-medium text-white/95">{locationLabel}</span>
                 <span className="truncate text-xs text-white/65">
                   {datesLabel} · {guestsLabel}
                 </span>
               </div>
-              <span className="ml-auto flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-black shadow-md sm:ml-0">
-                <Search className="h-4 w-4" strokeWidth={2.5} />
-              </span>
             </button>
 
             <nav className="hidden shrink-0 items-center gap-5 lg:flex" aria-label="Main">

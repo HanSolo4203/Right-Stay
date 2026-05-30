@@ -123,12 +123,12 @@ export default function HeroSection({ initialLocations = [] }: HeroSectionProps)
 
       <div className="z-10 relative">
         <div className="grid grid-cols-1 grid-rows-[minmax(0,1fr)] gap-12 md:px-8 md:pb-24 md:pt-16 lg:grid-cols-12 lg:gap-8 lg:pb-28 lg:pt-20 min-h-[calc(100vh-96px)] max-w-7xl mr-auto ml-auto pt-8 pr-6 pb-28 sm:pb-32 pl-6 gap-x-12 gap-y-12 items-center">
-          <div className="col-span-7 flex flex-col justify-center items-start lg:items-center text-left lg:text-center" style={{ animation: 'fadeSlideIn 1.2s ease-out forwards' }}>
+          <div className="col-span-7 flex flex-col justify-center items-center text-center" style={{ animation: 'fadeSlideIn 1.2s ease-out forwards' }}>
             <h1
               className="font-display drop-shadow-xl"
               style={{ animation: 'fadeSlideIn 1s ease-out 0.2s both' }}
             >
-              <span className="block text-2xl sm:text-3xl lg:text-[2.25rem] font-extralight italic text-white/95 tracking-[0.04em] leading-snug">
+              <span className="block text-lg sm:text-xl lg:text-xl font-light uppercase text-white/80 tracking-[0.42em] leading-snug">
                 Turn left and come right
               </span>
               <span className="mt-3 block text-lg sm:text-xl font-light uppercase tracking-[0.42em] text-white/80">
@@ -136,31 +136,37 @@ export default function HeroSection({ initialLocations = [] }: HeroSectionProps)
               </span>
             </h1>
 
-            <div className="mt-8" style={{ animation: 'fadeSlideIn 1s ease-out 0.4s both' }}>
+            <div
+              className="mt-8 w-full max-w-[min(552px,80vw)] mx-auto"
+              style={{ animation: 'fadeSlideIn 1s ease-out 0.4s both' }}
+            >
               <Image
                 src="/rsa-logo-white.png"
                 alt="RSA Logo"
                 width={552}
                 height={166}
                 sizes="(max-width: 640px) 80vw, 552px"
-                className="opacity-90 h-auto w-full max-w-[min(552px,80vw)]"
+                className="opacity-90 h-auto w-full"
               />
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center mt-10 gap-x-4 gap-y-4" style={{ animation: 'fadeSlideIn 1s ease-out 0.8s both' }}>
+            <div
+              className="mt-10 flex w-full max-w-md flex-row items-stretch justify-center gap-3 sm:max-w-none sm:w-auto"
+              style={{ animation: 'fadeSlideIn 1s ease-out 0.8s both' }}
+            >
               <Link
                 href="#accommodations"
-                className={`inline-flex items-center justify-center gap-2 hover:bg-white/90 text-sm text-black tracking-tight bg-white rounded-xl pt-3 pr-5 pb-3 pl-5 ${glassShadow}`}
+                className={`inline-flex flex-1 sm:flex-initial items-center justify-center gap-2 hover:bg-white/90 text-xs sm:text-sm text-black tracking-tight bg-white rounded-xl px-3.5 py-2.5 sm:px-5 sm:py-3 ${glassShadow}`}
               >
                 Explore Properties
-                <ArrowRight className="h-4 w-4" strokeWidth={1.5} />
+                <ArrowRight className="h-4 w-4 shrink-0" strokeWidth={1.5} />
               </Link>
               <Link
                 href="/about"
-                className={`inline-flex items-center justify-center gap-2 hover:bg-white/10 text-sm text-white/90 tracking-tight bg-white/5 border-white/15 border rounded-xl pt-3 pr-5 pb-3 pl-5 ${glassShadow}`}
+                className={`inline-flex flex-1 sm:flex-initial items-center justify-center gap-2 hover:bg-white/10 text-xs sm:text-sm text-white/90 tracking-tight bg-white/5 border-white/15 border rounded-xl px-3.5 py-2.5 sm:px-5 sm:py-3 ${glassShadow}`}
               >
                 Learn More
-                <ChevronRight className="h-4 w-4" strokeWidth={1.5} />
+                <ChevronRight className="h-4 w-4 shrink-0" strokeWidth={1.5} />
               </Link>
             </div>
           </div>

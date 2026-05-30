@@ -13,7 +13,13 @@ import {
   resolvePropertyListingLocation,
 } from '@/lib/property-location';
 import { extractAmenitiesFromAttributes } from '@/lib/property-amenities';
-import { buildPropertyBookUrl, readAccommodationSearchParams } from '@/lib/accommodation-search';
+import {
+  buildPropertyBookUrl,
+  formatGuestLabel,
+  formatSearchDateRange,
+  readAccommodationSearchParams,
+} from '@/lib/accommodation-search';
+import { calculateNightsBetween } from '@/lib/pricing';
 import { MapPin, Users, Bed, ArrowRight, Loader2, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface PropertyData {
@@ -430,6 +436,8 @@ function AccommodationCardsContent({
   }
 
   const accommodations = filteredAccommodations;
+  const searchNights =
+    checkIn && checkOut ? calculateNightsBetween(checkIn, checkOut) : null;
 
   const getCurrentPhotoIndex = useCallback(
     (accommodationId: string) => currentPhotoIndex.get(accommodationId) || 0,
@@ -502,28 +510,101 @@ function AccommodationCardsContent({
               isLight ? 'text-gray-900' : 'text-white'
             }`}
           >
-            Premium Stays
+            {locationFilter ? `Stays in ${locationFilter}` : 'Premium Stays'}
           </AnimateOnScroll>
-          <AnimateOnScroll
-            as="p"
-            delay={0.2}
-            duration={0.9}
-            className={`text-sm sm:text-base leading-relaxed max-w-3xl mx-auto ${
-              isLight ? 'text-gray-600' : 'text-white/60'
-            }`}
-          >
-            {locationFilter || checkIn || guestsFilter ? (
-              <>
-                {accommodations.length > 0 
-                  ? `Found ${accommodations.length} available propert${accommodations.length === 1 ? 'y' : 'ies'}${locationFilter ? ` in ${locationFilter}` : ''}${checkIn && checkOut ? ` for ${checkIn} to ${checkOut}` : ''}${guestsFilter ? ` for ${guestsFilter} guest${guestsFilter > 1 ? 's' : ''}` : ''}.`
-                  : `No properties found matching your search criteria.${locationFilter ? ` Try a different location.` : ''}`}
-              </>
-            ) : (
-              properties.length > 0 
-                ? `Browse our ${properties.length} curated properties from our Uplisting collection.` 
-                : "Discover our curated collection of luxury properties across South Africa. From coastal villas to safari lodges, each accommodation offers an unforgettable experience."
-            )}
-          </AnimateOnScroll>
+          {locationFilter || checkIn || guestsFilter ? (
+            <AnimateOnScroll
+              as="div"
+              delay={0.2}
+              duration={0.9}
+              className="mx-auto max-w-3xl space-y-4"
+            >
+              <p
+                className={`flex flex-wrap items-baseline justify-center gap-x-2 ${
+                  isLight ? 'text-gray-600' : 'text-white/70'
+                }`}
+              >
+                {accommodations.length > 0 ? (
+                  <>
+                    <span
+                      className={`font-display text-4xl font-medium tabular-nums leading-none sm:text-5xl ${
+                        isLight ? 'text-gray-900' : 'text-white'
+                      }`}
+                    >
+                      {accommodations.length}
+                    </span>
+                    <span className="text-base sm:text-lg">
+                      available propert{accommodations.length === 1 ? 'y' : 'ies'}
+                    </span>
+                  </>
+                ) : (
+                  <span className={`text-base sm:text-lg ${isLight ? 'text-gray-900' : 'text-white'}`}>
+                    No properties match your search
+                    {locationFilter ? ' — try different dates or a nearby area' : ''}
+                  </span>
+                )}
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+                {locationFilter && (
+                  <span
+                    className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium ${
+                      isLight
+                        ? 'border border-gray-200 bg-white text-gray-700 shadow-sm ring-1 ring-gray-100'
+                        : 'border border-white/15 bg-white/5 text-white/90 ring-1 ring-white/10 backdrop-blur-sm'
+                    }`}
+                  >
+                    <MapPin className="h-3.5 w-3.5 shrink-0 opacity-70" aria-hidden />
+                    {locationFilter}
+                  </span>
+                )}
+                {checkIn && checkOut && (
+                  <span
+                    className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium ${
+                      isLight
+                        ? 'border border-gray-200 bg-white text-gray-700 shadow-sm ring-1 ring-gray-100'
+                        : 'border border-white/15 bg-white/5 text-white/90 ring-1 ring-white/10 backdrop-blur-sm'
+                    }`}
+                  >
+                    <Calendar className="h-3.5 w-3.5 shrink-0 opacity-70" aria-hidden />
+                    {formatSearchDateRange(checkIn, checkOut)}
+                    {searchNights != null && searchNights > 0 && (
+                      <>
+                        <span className="opacity-40" aria-hidden>
+                          ·
+                        </span>
+                        {searchNights} night{searchNights === 1 ? '' : 's'}
+                      </>
+                    )}
+                  </span>
+                )}
+                {guestsFilter && (
+                  <span
+                    className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium ${
+                      isLight
+                        ? 'border border-gray-200 bg-white text-gray-700 shadow-sm ring-1 ring-gray-100'
+                        : 'border border-white/15 bg-white/5 text-white/90 ring-1 ring-white/10 backdrop-blur-sm'
+                    }`}
+                  >
+                    <Users className="h-3.5 w-3.5 shrink-0 opacity-70" aria-hidden />
+                    {formatGuestLabel(String(guestsFilter))}
+                  </span>
+                )}
+              </div>
+            </AnimateOnScroll>
+          ) : (
+            <AnimateOnScroll
+              as="p"
+              delay={0.2}
+              duration={0.9}
+              className={`text-sm sm:text-base leading-relaxed max-w-3xl mx-auto ${
+                isLight ? 'text-gray-600' : 'text-white/60'
+              }`}
+            >
+              {properties.length > 0
+                ? `Browse our ${properties.length} curated properties from our Uplisting collection.`
+                : 'Discover our curated collection of luxury properties across South Africa. From coastal villas to safari lodges, each accommodation offers an unforgettable experience.'}
+            </AnimateOnScroll>
+          )}
         </div>
 
         <div className={`grid gap-6 lg:gap-8 ${

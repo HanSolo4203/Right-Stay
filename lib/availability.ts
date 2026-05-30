@@ -30,8 +30,9 @@ export function enumerateStayNights(startDate: string, endDate: string): string[
 }
 
 /**
- * Confirmed reservations always block a stay. Manual "Not available" blocks only
- * block when every night in the stay is covered (e.g. host closed the whole period).
+ * A stay is unavailable when any calendar-visible blocked night falls within the
+ * range. Uses the same filtering as the booking calendar so search results match
+ * what guests see (isolated single-day Airbnb "Not available" blocks are ignored).
  */
 export function evaluateStayAvailability(
   blockedDates: BlockedDateRow[],
@@ -39,23 +40,17 @@ export function evaluateStayAvailability(
   endDate: string
 ): { available: boolean; blockingDates: BlockedDateRow[] } {
   const stayNights = enumerateStayNights(startDate, endDate);
-  const byDate = new Map(blockedDates.map((row) => [row.date, row]));
+  const calendarBlocks = filterCalendarBlockedDates(blockedDates);
+  const byDate = new Map(calendarBlocks.map((row) => [row.date, row]));
 
   const blockingDates = stayNights
     .map((date) => byDate.get(date))
     .filter((row): row is BlockedDateRow => !!row);
 
-  const hardBlocks = blockingDates.filter((row) => isHardCalendarBlock(row.blocked_reason));
-  if (hardBlocks.length > 0) {
-    return { available: false, blockingDates: hardBlocks };
-  }
-
-  const softBlocks = blockingDates.filter((row) => isSoftCalendarBlock(row.blocked_reason));
-  if (softBlocks.length === stayNights.length && stayNights.length > 0) {
-    return { available: false, blockingDates: softBlocks };
-  }
-
-  return { available: true, blockingDates: [] };
+  return {
+    available: blockingDates.length === 0,
+    blockingDates,
+  };
 }
 
 /** Hide isolated single-day manual Airbnb blocks from calendar UI. */

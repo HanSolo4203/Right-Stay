@@ -277,9 +277,11 @@ export default function GlassSearchDateRange({
 
     return (
       <div className="mx-auto shrink-0" style={{ width: MONTH_GRID_WIDTH }}>
-        <p className="mb-3 text-center text-sm font-medium text-white">
-          {MONTH_NAMES[month]} {year}
-        </p>
+        {dualMonth && (
+          <p className="mb-3 text-center text-sm font-medium text-white">
+            {MONTH_NAMES[month]} {year}
+          </p>
+        )}
         <div className="grid grid-cols-7 gap-1">
           {WEEK_DAYS.map((label) => (
             <div

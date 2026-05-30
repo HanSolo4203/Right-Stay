@@ -31,6 +31,8 @@ import PropertyAmenitiesSection from '@/components/property/PropertyAmenitiesSec
 import PropertyCheckInOutSection from '@/components/property/PropertyCheckInOutSection';
 import {
   ArrowLeft,
+  Bath,
+  Bed,
   Calendar,
   MapPin,
   Users,
@@ -559,28 +561,32 @@ export default function BookingPageClient() {
       },
     });
 
+  const propertyStats = [
+    {
+      icon: Users,
+      label: `${propertyData?.maximum_capacity || 2} guest${(propertyData?.maximum_capacity || 2) === 1 ? '' : 's'}`,
+    },
+    {
+      icon: Bed,
+      label: `${propertyData?.bedrooms || 1} bed${(propertyData?.bedrooms || 1) === 1 ? '' : 's'}`,
+    },
+    {
+      icon: Bath,
+      label: `${propertyData?.bathrooms || 1} bath${(propertyData?.bathrooms || 1) === 1 ? '' : 's'}`,
+    },
+    {
+      label: propertyData?.type || 'Entire place',
+    },
+  ];
+
   return (
     <>
       <section className="isolate min-h-screen overflow-x-hidden relative bg-white">
-        {/* Header with background */}
-        <div className="relative bg-gradient-to-br from-right-stay-500 to-right-stay-600">
-          <Header />
-        </div>
-        
-        <div className="relative z-10 bg-white">
-          {/* Back Button */}
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 pt-6 pb-4">
-            <Link
-              href={accommodationsReturnHref}
-              className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Accommodations
-            </Link>
-          </div>
+        <Header />
 
+        <div className="relative z-10 bg-white">
           {success && (
-            <div className="mx-auto max-w-7xl px-6 md:px-8 mb-4">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 pt-4">
               <div className="bg-green-50 border border-green-200 rounded-2xl p-6 flex items-start gap-4">
                 <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0 mt-0.5" />
                 <div>
@@ -593,124 +599,214 @@ export default function BookingPageClient() {
             </div>
           )}
 
-          {/* Photo Gallery Section - Airbnb Style */}
           {photos.length > 0 ? (
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 mb-8">
-              <div className="grid grid-cols-4 gap-2 rounded-2xl overflow-hidden h-[280px] sm:h-[400px] md:h-[600px]">
-                {/* Main Large Photo */}
-                <div className="col-span-4 md:col-span-2 relative group cursor-pointer" onClick={() => setShowPhotoModal(true)}>
+            <>
+              {/* Mobile hero gallery */}
+              <div className="relative md:hidden">
+                <div
+                  className="group relative aspect-[5/4] w-full cursor-pointer bg-gray-100"
+                  onClick={() => setShowPhotoModal(true)}
+                >
                   <ListingImage
                     src={mainPhoto.url}
-                    alt={propertyData?.name || "Property"}
+                    alt={propertyData?.name || 'Property'}
                     variant="modalMain"
                     fill
                     className="object-cover"
                     priority
                   />
+                  <div
+                    className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/5 to-black/30"
+                    aria-hidden
+                  />
+
+                  <Link
+                    href={accommodationsReturnHref}
+                    onClick={(e) => e.stopPropagation()}
+                    className="absolute left-4 top-4 z-10 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-2 text-sm font-medium text-gray-900 shadow-md transition hover:bg-white"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    Back
+                  </Link>
+
+                  <div
+                    className="absolute right-4 top-4 z-10 flex items-center gap-2"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <button
+                      type="button"
+                      className="rounded-full bg-white/95 p-2.5 text-gray-800 shadow-md transition hover:bg-white"
+                      aria-label="Share property"
+                    >
+                      <Share2 className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      className="rounded-full bg-white/95 p-2.5 text-gray-800 shadow-md transition hover:bg-white"
+                      aria-label="Save property"
+                    >
+                      <Heart className="h-4 w-4" />
+                    </button>
+                  </div>
+
                   {photos.length > 1 && (
                     <>
                       <button
+                        type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setSelectedPhotoIndex(prev => (prev > 0 ? prev - 1 : photos.length - 1));
+                          setSelectedPhotoIndex((prev) => (prev > 0 ? prev - 1 : photos.length - 1));
                         }}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/90 hover:bg-white transition-colors shadow-lg opacity-0 group-hover:opacity-100"
+                        className="absolute left-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-md transition hover:bg-white"
                         aria-label="Previous photo"
                       >
                         <ChevronLeft className="h-5 w-5 text-gray-900" />
                       </button>
                       <button
+                        type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setSelectedPhotoIndex(prev => (prev < photos.length - 1 ? prev + 1 : 0));
+                          setSelectedPhotoIndex((prev) => (prev < photos.length - 1 ? prev + 1 : 0));
                         }}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/90 hover:bg-white transition-colors shadow-lg opacity-0 group-hover:opacity-100"
+                        className="absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-md transition hover:bg-white"
                         aria-label="Next photo"
                       >
                         <ChevronRight className="h-5 w-5 text-gray-900" />
                       </button>
                     </>
                   )}
-                </div>
 
-                {/* Photo Grid (Right Side) */}
-                {photos.length > 1 && (
-                  <div className="col-span-4 md:col-span-2 grid grid-cols-2 gap-2">
-                    {galleryPhotos.slice(1, 5).map((photo, index) => {
-                      const isLastVisible = index === galleryPhotos.slice(1, 5).length - 1;
-                      const showAllButton = isLastVisible && hasMorePhotos;
-                      
-                      return (
-                        <div
-                          key={photo.id}
-                          className={`relative group cursor-pointer ${
-                            index === 0 && galleryPhotos.length > 2 ? 'row-span-2 hidden md:block' : ''
-                          }`}
-                          onClick={() => {
-                            setSelectedPhotoIndex(index + 1);
-                            setShowPhotoModal(true);
-                          }}
-                        >
-                          <ListingImage
-                            src={photo.url}
-                            alt={`${propertyData?.name || "Property"} - Photo ${index + 2}`}
-                            variant="modalTile"
-                            fill
-                            className="object-cover"
-                            loading="lazy"
-                          />
-                          {/* Show All Photos Overlay */}
-                          {showAllButton && (
-                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setShowPhotoModal(true);
-                                }}
-                                className="px-4 py-2 bg-white rounded-xl font-medium text-gray-900 flex items-center gap-2 hover:bg-gray-50 transition-colors"
-                              >
-                                <Grid className="h-4 w-4" />
-                                Show all {photos.length} photos
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                    {/* Show all photos button for mobile when we have more than 5 photos */}
-                    {hasMorePhotos && photos.length > 5 && (
-                      <div className="col-span-2 md:hidden relative aspect-square rounded-lg overflow-hidden">
+                  <div className="absolute inset-x-4 bottom-4 z-10 flex items-center justify-between gap-3">
+                    {photos.length > 1 ? (
+                      <span className="rounded-full bg-black/55 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm">
+                        {selectedPhotoIndex + 1} / {photos.length}
+                      </span>
+                    ) : (
+                      <span />
+                    )}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowPhotoModal(true);
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-2 text-sm font-medium text-gray-900 shadow-md transition hover:bg-white"
+                    >
+                      <Grid className="h-4 w-4" />
+                      All photos
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Desktop gallery */}
+              <div className="mx-auto hidden max-w-7xl px-4 sm:px-6 md:block md:px-8 md:pt-6 md:mb-8">
+                <Link
+                  href={accommodationsReturnHref}
+                  className="mb-4 inline-flex items-center gap-2 text-gray-600 transition-colors hover:text-gray-900"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Back to Accommodations
+                </Link>
+                <div className="grid h-[600px] grid-cols-4 gap-2 overflow-hidden rounded-2xl">
+                  <div
+                    className="group relative col-span-2 cursor-pointer"
+                    onClick={() => setShowPhotoModal(true)}
+                  >
+                    <ListingImage
+                      src={mainPhoto.url}
+                      alt={propertyData?.name || 'Property'}
+                      variant="modalMain"
+                      fill
+                      className="object-cover"
+                      priority
+                    />
+                    {photos.length > 1 && (
+                      <>
                         <button
-                          onClick={() => setShowPhotoModal(true)}
-                          className="absolute inset-0 bg-black/40 flex items-center justify-center"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedPhotoIndex((prev) => (prev > 0 ? prev - 1 : photos.length - 1));
+                          }}
+                          className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 opacity-0 shadow-lg transition-all hover:bg-white group-hover:opacity-100"
+                          aria-label="Previous photo"
                         >
-                          <div className="px-4 py-2 bg-white rounded-xl font-medium text-gray-900 flex items-center gap-2">
-                            <Grid className="h-4 w-4" />
-                            Show all {photos.length} photos
-                          </div>
+                          <ChevronLeft className="h-5 w-5 text-gray-900" />
                         </button>
-                        {galleryPhotos[4] && (
-                          <ListingImage
-                            src={galleryPhotos[4].url}
-                            alt={`${propertyData?.name || "Property"} - Photo 5`}
-                            variant="modalTile"
-                            fill
-                            className="object-cover"
-                            loading="lazy"
-                          />
-                        )}
-                      </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedPhotoIndex((prev) => (prev < photos.length - 1 ? prev + 1 : 0));
+                          }}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 opacity-0 shadow-lg transition-all hover:bg-white group-hover:opacity-100"
+                          aria-label="Next photo"
+                        >
+                          <ChevronRight className="h-5 w-5 text-gray-900" />
+                        </button>
+                      </>
                     )}
                   </div>
-                )}
+
+                  {photos.length > 1 && (
+                    <div className="col-span-2 grid grid-cols-2 gap-2">
+                      {galleryPhotos.slice(1, 5).map((photo, index) => {
+                        const isLastVisible = index === galleryPhotos.slice(1, 5).length - 1;
+                        const showAllButton = isLastVisible && hasMorePhotos;
+
+                        return (
+                          <div
+                            key={photo.id}
+                            className={`relative cursor-pointer group ${
+                              index === 0 && galleryPhotos.length > 2 ? 'row-span-2' : ''
+                            }`}
+                            onClick={() => {
+                              setSelectedPhotoIndex(index + 1);
+                              setShowPhotoModal(true);
+                            }}
+                          >
+                            <ListingImage
+                              src={photo.url}
+                              alt={`${propertyData?.name || 'Property'} - Photo ${index + 2}`}
+                              variant="modalTile"
+                              fill
+                              className="object-cover"
+                              loading="lazy"
+                            />
+                            {showAllButton && (
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowPhotoModal(true);
+                                  }}
+                                  className="flex items-center gap-2 rounded-xl bg-white px-4 py-2 font-medium text-gray-900 transition-colors hover:bg-gray-50"
+                                >
+                                  <Grid className="h-4 w-4" />
+                                  Show all {photos.length} photos
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            </>
           ) : (
-            <div className="mx-auto max-w-7xl px-6 md:px-8 mb-8">
-              <div className="relative h-[400px] md:h-[600px] rounded-2xl overflow-hidden bg-gray-200">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 md:pt-6 md:mb-8">
+              <Link
+                href={accommodationsReturnHref}
+                className="mb-4 inline-flex items-center gap-2 text-gray-600 transition-colors hover:text-gray-900"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Accommodations
+              </Link>
+              <div className="relative h-[280px] overflow-hidden rounded-none bg-gray-200 sm:h-[400px] sm:rounded-2xl md:h-[600px]">
                 <ListingImage
                   src={propertyImage}
-                  alt={propertyData?.name || "Property"}
+                  alt={propertyData?.name || 'Property'}
                   variant="modalMain"
                   fill
                   className="object-cover"
@@ -720,40 +816,48 @@ export default function BookingPageClient() {
             </div>
           )}
 
-          {/* Property Title and Actions */}
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 mb-6">
+          {/* Property title and meta */}
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 mb-6 pt-5 md:pt-0">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0 flex-1">
-                <h1 
-                  className="text-2xl sm:text-3xl md:text-4xl font-semibold text-gray-900 mb-3 break-words leading-tight"
-                  style={{ fontFamily: 'Manrope, sans-serif' }}
-                >
+                <h1 className="font-display text-2xl font-medium leading-tight tracking-tight text-gray-900 sm:text-3xl md:text-4xl">
                   {propertyData?.name || propertyData?.nickname}
                 </h1>
-                <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-gray-600 text-sm">
-                  <span className="whitespace-nowrap">{propertyData?.maximum_capacity || 2} guests</span>
-                  <span className="text-gray-400" aria-hidden="true">•</span>
-                  <span className="whitespace-nowrap">{propertyData?.bedrooms || 1} bed</span>
-                  <span className="text-gray-400" aria-hidden="true">•</span>
-                  <span className="whitespace-nowrap">{propertyData?.bathrooms || 1} bath</span>
-                  <span className="text-gray-400" aria-hidden="true">•</span>
-                  <span className="whitespace-nowrap">{propertyData?.type || 'Entire place'}</span>
-                  {locationDisplayLabel && (
-                    <span className="flex items-center gap-1 min-w-0 basis-full sm:basis-auto">
-                      <MapPin className="h-4 w-4 shrink-0" />
-                      <span className="truncate">{locationDisplayLabel}</span>
+
+                {locationDisplayLabel && (
+                  <p className="mt-2 flex items-center gap-1.5 text-sm text-gray-600">
+                    <MapPin className="h-4 w-4 shrink-0 text-right-stay-600" />
+                    <span>{locationDisplayLabel}</span>
+                  </p>
+                )}
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {propertyStats.map((stat) => (
+                    <span
+                      key={stat.label}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm text-gray-700"
+                    >
+                      {stat.icon && <stat.icon className="h-3.5 w-3.5 text-gray-500" aria-hidden />}
+                      {stat.label}
                     </span>
-                  )}
+                  ))}
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0 sm:gap-4">
-                <button type="button" className="p-2 rounded-full hover:bg-gray-100 transition-colors flex items-center gap-2 text-gray-700">
+
+              <div className="hidden shrink-0 items-center gap-2 md:flex md:gap-4">
+                <button
+                  type="button"
+                  className="flex items-center gap-2 rounded-full p-2 text-gray-700 transition-colors hover:bg-gray-100"
+                >
                   <Share2 className="h-5 w-5" />
-                  <span className="hidden md:inline text-sm font-medium">Share</span>
+                  <span className="text-sm font-medium">Share</span>
                 </button>
-                <button type="button" className="p-2 rounded-full hover:bg-gray-100 transition-colors flex items-center gap-2 text-gray-700">
+                <button
+                  type="button"
+                  className="flex items-center gap-2 rounded-full p-2 text-gray-700 transition-colors hover:bg-gray-100"
+                >
                   <Heart className="h-5 w-5" />
-                  <span className="hidden md:inline text-sm font-medium">Save</span>
+                  <span className="text-sm font-medium">Save</span>
                 </button>
               </div>
             </div>
