@@ -1,11 +1,13 @@
 import { Suspense } from 'react';
 import { getCachedProperties, getCachedPropertyLocations } from '@/lib/properties-data';
+import { isToursEnabled } from '@/lib/public-site-settings';
 import StayWithUsClient from './StayWithUsClient';
 
 export default async function StayWithUsPage() {
-  const [initialLocations, initialProperties] = await Promise.all([
+  const [initialLocations, initialProperties, toursEnabled] = await Promise.all([
     getCachedPropertyLocations(),
     getCachedProperties(),
+    isToursEnabled(),
   ]);
 
   return (
@@ -19,6 +21,7 @@ export default async function StayWithUsPage() {
       <StayWithUsClient
         initialLocations={initialLocations}
         initialProperties={initialProperties}
+        toursEnabled={toursEnabled}
       />
     </Suspense>
   );

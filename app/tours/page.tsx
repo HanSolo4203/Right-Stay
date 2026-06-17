@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import dynamic from "next/dynamic";
-import Header from "@/components/sections/Header";
+import { notFound } from "next/navigation";
+import SiteHeader from "@/components/sections/SiteHeader";
+import { isToursEnabled } from "@/lib/public-site-settings";
 import ToursHero from "@/components/sections/ToursHero";
 import PremiumBackgroundProvider from "@/components/premium/PremiumBackgroundProvider";
 import PremiumPageBackdrop from "@/components/premium/PremiumPageBackdrop";
@@ -25,11 +27,16 @@ export const metadata: Metadata = {
     "Discover curated African experiences — safaris, cultural encounters, wine tours and bespoke journeys designed to create unforgettable memories.",
 };
 
-export default function ToursPage() {
+export default async function ToursPage() {
+  const toursEnabled = await isToursEnabled();
+  if (!toursEnabled) {
+    notFound();
+  }
+
   return (
     <>
       <section className="isolate relative z-[1] min-h-[720px] overflow-x-hidden overflow-y-visible">
-        <Header />
+        <SiteHeader />
         <ToursHero />
       </section>
 

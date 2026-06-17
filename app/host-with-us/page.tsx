@@ -1,5 +1,5 @@
 import dynamic from 'next/dynamic';
-import Header from '@/components/sections/Header';
+import SiteHeader from '@/components/sections/SiteHeader';
 import HostHero from '@/components/sections/HostHero';
 import PremiumBackgroundProvider from '@/components/premium/PremiumBackgroundProvider';
 import PremiumPageBackdrop from '@/components/premium/PremiumPageBackdrop';
@@ -16,7 +16,7 @@ export default function HostWithUsPage() {
   return (
     <>
       <section className="isolate relative z-[1] min-h-[800px] overflow-x-hidden overflow-y-visible">
-        <Header />
+        <SiteHeader />
         <HostHero />
       </section>
       <PremiumPageBackdrop />

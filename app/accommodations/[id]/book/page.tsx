@@ -1,7 +1,10 @@
 import { Suspense } from 'react';
+import { isToursEnabled } from '@/lib/public-site-settings';
 import BookingPageClient from './BookingPageClient';
 
-export default function BookPropertyPage() {
+export default async function BookPropertyPage() {
+  const toursEnabled = await isToursEnabled();
+
   return (
     <Suspense
       fallback={
@@ -13,7 +16,7 @@ export default function BookPropertyPage() {
         </div>
       }
     >
-      <BookingPageClient />
+      <BookingPageClient toursEnabled={toursEnabled} />
     </Suspense>
   );
 }

@@ -148,6 +148,7 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const loadingRef = useRef(true);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [toursEnabled, setToursEnabled] = useState(false);
 
   const finishLoading = () => {
     loadingRef.current = false;
@@ -157,6 +158,25 @@ function AdminDashboard() {
   useEffect(() => {
     setActiveTab(parseTab(searchParams.get('tab')));
   }, [searchParams]);
+
+  useEffect(() => {
+    const fetchToursEnabled = async () => {
+      try {
+        const response = await fetch('/api/admin/site-settings');
+        if (!response.ok) return;
+
+        const data = await response.json();
+        const toursSetting = data.find(
+          (setting: { key: string; value?: number | null }) => setting.key === 'tours_enabled',
+        );
+        setToursEnabled(Number(toursSetting?.value) === 1);
+      } catch (error) {
+        console.error('Error fetching tours setting:', error);
+      }
+    };
+
+    fetchToursEnabled();
+  }, []);
 
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);
@@ -271,6 +291,7 @@ function AdminDashboard() {
   }) => {
     const Icon = tab.icon;
     const isActive = activeTab === tab.id;
+    const isToursHidden = tab.id === 'tours' && !toursEnabled;
     return (
       <button
         type="button"
@@ -280,12 +301,20 @@ function AdminDashboard() {
           isActive
             ? 'bg-right-stay-50 text-right-stay-700 border border-right-stay-200'
             : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent',
+          isToursHidden && !isActive && 'opacity-75',
           compact && 'flex-col gap-1 px-2 py-2 text-[10px] leading-tight min-w-0 flex-1'
         )}
       >
         <Icon className={cn('shrink-0', compact ? 'w-5 h-5' : 'w-4 h-4')} strokeWidth={2} />
-        <span className={cn(compact ? 'truncate w-full text-center' : 'truncate')}>
-          {compact ? tab.shortName : tab.name}
+        <span className={cn(compact ? 'truncate w-full text-center' : 'flex min-w-0 flex-1 items-center gap-2')}>
+          <span className={cn(compact ? 'truncate w-full text-center' : 'truncate')}>
+            {compact ? tab.shortName : tab.name}
+          </span>
+          {isToursHidden && !compact ? (
+            <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-amber-800">
+              Hidden from website
+            </span>
+          ) : null}
         </span>
       </button>
     );

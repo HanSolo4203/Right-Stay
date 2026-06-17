@@ -48,12 +48,19 @@ export async function POST(request: NextRequest) {
       'payment_processing_fee',
       'default_cleaning_fee',
       'default_welcome_pack_fee',
+      'tours_enabled',
     ];
     for (const key of numericSettings) {
       if (body[key] !== undefined && body[key] !== '') {
+        const parsed =
+          key === 'tours_enabled'
+            ? Number(body[key]) === 1
+              ? 1
+              : 0
+            : parseFloat(body[key]);
         settingsToUpsert.push({
           key,
-          value: parseFloat(body[key]),
+          value: parsed,
           text_value: null,
         });
       }

@@ -1,5 +1,5 @@
 import dynamic from 'next/dynamic';
-import Header from '@/components/sections/Header';
+import SiteHeader from '@/components/sections/SiteHeader';
 import HeroSection from '@/components/sections/HeroSection';
 import PremiumBackgroundProvider from '@/components/premium/PremiumBackgroundProvider';
 import PremiumPageBackdrop from '@/components/premium/PremiumPageBackdrop';
@@ -30,7 +30,7 @@ export default async function Home() {
   return (
     <>
       <section className="isolate relative z-[1] min-h-screen overflow-x-hidden overflow-y-visible">
-        <Header />
+        <SiteHeader />
         <HeroSection initialLocations={initialLocations} />
       </section>
       <PremiumPageBackdrop />

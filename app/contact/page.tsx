@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import ScrollAnimationProvider from '@/components/providers/ScrollAnimationProvider';
-import Header from '@/components/sections/Header';
+import SiteHeader from '@/components/sections/SiteHeader';
 import ContactHero from '@/components/sections/ContactHero';
 import ContactForm from '@/components/sections/ContactForm';
 import Footer from '@/components/sections/Footer';
@@ -18,7 +18,7 @@ export default async function ContactPage() {
   return (
     <>
       <section className="isolate min-h-[600px] overflow-hidden relative bg-black">
-        <Header />
+        <SiteHeader />
         <ContactHero contact={contact} />
       </section>
       <div className="bg-black">

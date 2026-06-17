@@ -22,8 +22,6 @@ export const PROPERTY_TYPE_OPTIONS = [
   'Other',
 ] as const;
 
-export const BEDROOM_OPTIONS = ['Studio', '1', '2', '3', '4+'] as const;
-
 export const BATHROOM_OPTIONS = ['1', '1.5', '2', '2.5', '3+'] as const;
 
 export const PARKING_OPTIONS = ['Yes', 'No'] as const;
@@ -59,9 +57,7 @@ export interface PropertyHostingDetails {
   location: string;
   areaSuburb: string;
   buildingName: string;
-  unitNumber: string;
   propertyType: string;
-  bedrooms: string;
   bathrooms: string;
   parking: string;
   furnishingStatus: string;
@@ -94,9 +90,7 @@ export function createEmptyPropertyHostingDetails(): PropertyHostingDetails {
     location: PROPERTY_LOCATION,
     areaSuburb: '',
     buildingName: '',
-    unitNumber: '',
     propertyType: '',
-    bedrooms: '',
     bathrooms: '',
     parking: '',
     furnishingStatus: '',
@@ -135,7 +129,6 @@ export function validateContactFormPayload(payload: ContactFormPayload): string 
     if (!property.ownerPhone.trim()) return 'Owner phone number is required.';
     if (!property.areaSuburb.trim()) return 'Area / suburb is required.';
     if (!property.propertyType.trim()) return 'Property type is required.';
-    if (!property.bedrooms.trim()) return 'Number of bedrooms is required.';
     if (!property.bathrooms.trim()) return 'Number of bathrooms is required.';
     if (!property.furnishingStatus.trim()) return 'Furnishing status is required.';
     if (!property.currentlyListed.trim()) return 'Currently listed status is required.';

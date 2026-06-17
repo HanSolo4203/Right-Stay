@@ -5,15 +5,22 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 
-const NAV_LINKS = [
+const BASE_NAV_LINKS = [
   { href: "/stay-with-us", label: "Stay With Us" },
-  { href: "/tours", label: "Tours" },
+  { href: "/tours", label: "Tours", toursOnly: true },
   { href: "/host-with-us", label: "Property Management" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ] as const;
 
-export default function Header() {
+type HeaderProps = {
+  toursEnabled?: boolean;
+};
+
+export default function Header({ toursEnabled = false }: HeaderProps) {
+  const navLinks = BASE_NAV_LINKS.filter(
+    (link) => !("toursOnly" in link && link.toursOnly) || toursEnabled,
+  );
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), []);
@@ -54,7 +61,7 @@ export default function Header() {
           </Link>
 
           <nav className="hidden items-center gap-6 md:flex lg:gap-8" aria-label="Main">
-            {NAV_LINKS.map((link) => (
+            {navLinks.map((link) => (
               <Link
                 key={link.href}
                 className="whitespace-nowrap text-sm text-white/80 transition hover:text-white/90"
@@ -100,7 +107,7 @@ export default function Header() {
         }`}
       >
         <nav className="flex flex-col gap-1" aria-label="Mobile">
-          {NAV_LINKS.map((link) => (
+          {navLinks.map((link) => (
             <Link
               key={link.href}
               className="flex min-h-11 items-center rounded-xl px-4 py-3 text-base text-white/85 transition hover:bg-white/5"

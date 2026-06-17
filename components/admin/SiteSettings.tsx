@@ -20,6 +20,7 @@ export default function SiteSettings() {
     default_cleaning_fee: '',
     default_welcome_pack_fee: '',
     ical_sync_schedule: '0 1 * * *',
+    tours_enabled: false,
   });
   
   const [loading, setLoading] = useState(true);
@@ -39,14 +40,23 @@ export default function SiteSettings() {
         const settingsObj: any = {};
         
         data.forEach((setting: SiteSetting) => {
-          if (setting.value !== null && setting.value !== undefined) {
+          if (setting.key === 'tours_enabled') {
+            settingsObj.tours_enabled = Number(setting.value) === 1;
+          } else if (setting.value !== null && setting.value !== undefined) {
             settingsObj[setting.key] = setting.value.toString();
           } else if (setting.text_value !== null && setting.text_value !== undefined) {
             settingsObj[setting.key] = setting.text_value;
           }
         });
         
-        setSettings(prevSettings => ({ ...prevSettings, ...settingsObj }));
+        setSettings(prevSettings => ({
+          ...prevSettings,
+          ...settingsObj,
+          tours_enabled:
+            typeof settingsObj.tours_enabled === 'boolean'
+              ? settingsObj.tours_enabled
+              : prevSettings.tours_enabled,
+        }));
         
         // Check if ical_sync_schedule is a custom value (not in predefined list)
         const predefinedSchedules = ['0 1 * * *', '0 */6 * * *', '0 * * * *', '*/30 * * * *', '*/10 * * * *'];
@@ -69,7 +79,10 @@ export default function SiteSettings() {
 
     try {
       // Prepare settings for submission
-      const settingsToSubmit = { ...settings };
+      const settingsToSubmit = {
+        ...settings,
+        tours_enabled: settings.tours_enabled ? 1 : 0,
+      };
       if (settings.ical_sync_schedule === 'custom') {
         settingsToSubmit.ical_sync_schedule = customCronExpression || '0 1 * * *';
       }
@@ -97,6 +110,13 @@ export default function SiteSettings() {
     setSettings(prev => ({
       ...prev,
       [e.target.name]: e.target.value,
+    }));
+  };
+
+  const handleToursToggle = () => {
+    setSettings(prev => ({
+      ...prev,
+      tours_enabled: !prev.tours_enabled,
     }));
   };
 
@@ -257,6 +277,36 @@ export default function SiteSettings() {
                 placeholder="0.00"
               />
             </div>
+          </div>
+        </div>
+
+        {/* Website Features */}
+        <div className="bg-slate-50 rounded-xl p-6 space-y-4">
+          <h3 className="text-lg font-semibold text-slate-900 mb-4">Website Features</h3>
+
+          <div className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-slate-900">Enable Tours Page</p>
+              <p className="mt-1 text-sm text-slate-500">
+                Show Tours in the website menu and allow visitors to access the Tours page.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleToursToggle}
+              className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors ${
+                settings.tours_enabled ? 'bg-right-stay-500' : 'bg-slate-300'
+              }`}
+              role="switch"
+              aria-checked={settings.tours_enabled}
+              aria-label="Enable Tours Page"
+            >
+              <span
+                className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
+                  settings.tours_enabled ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
           </div>
         </div>
 

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import dynamic from "next/dynamic";
-import Header from "@/components/sections/Header";
+import SiteHeader from "@/components/sections/SiteHeader";
 import AboutHero from "@/components/sections/AboutHero";
 import PremiumBackgroundProvider from "@/components/premium/PremiumBackgroundProvider";
 import PremiumPageBackdrop from "@/components/premium/PremiumPageBackdrop";
@@ -22,7 +22,7 @@ export default function AboutPage() {
   return (
     <>
       <section className="isolate relative z-[1] min-h-[720px] overflow-x-hidden overflow-y-visible">
-        <Header />
+        <SiteHeader />
         <AboutHero />
       </section>
 

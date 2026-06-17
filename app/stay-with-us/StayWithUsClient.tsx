@@ -31,11 +31,13 @@ import { ArrowLeft } from 'lucide-react';
 type StayWithUsClientProps = {
   initialLocations: string[];
   initialProperties: CachedPropertyRecord[];
+  toursEnabled?: boolean;
 };
 
 function StayWithUsContent({
   initialLocations,
   initialProperties,
+  toursEnabled = false,
 }: StayWithUsClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -241,7 +243,7 @@ function StayWithUsContent({
           />
         </div>
 
-        <Header />
+        <Header toursEnabled={toursEnabled} />
         <div className="relative z-10 mx-auto max-w-7xl px-6 md:px-8 py-24">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             <div

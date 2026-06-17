@@ -2,7 +2,6 @@
 
 import {
   BATHROOM_OPTIONS,
-  BEDROOM_OPTIONS,
   CURRENTLY_LISTED_OPTIONS,
   FURNISHING_OPTIONS,
   PARKING_OPTIONS,
@@ -214,44 +213,6 @@ export default function PropertyHostingFields({ data, onChange }: PropertyHostin
               className={inputClassName}
               placeholder="Building or estate name"
             />
-          </div>
-
-          <div>
-            <label htmlFor="unitNumber" className={labelClassName}>
-              Unit Number / Apartment Number
-            </label>
-            <input
-              type="text"
-              id="unitNumber"
-              name="unitNumber"
-              value={data.unitNumber}
-              onChange={onChange}
-              className={inputClassName}
-              placeholder="Unit or apartment number"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="bedrooms" className={labelClassName}>
-              Number of Bedrooms *
-            </label>
-            <select
-              id="bedrooms"
-              name="bedrooms"
-              required
-              value={data.bedrooms}
-              onChange={onChange}
-              className={selectClassName}
-            >
-              <option value="" className="bg-black">
-                Select bedrooms
-              </option>
-              {BEDROOM_OPTIONS.map((option) => (
-                <option key={option} value={option} className="bg-black">
-                  {option}
-                </option>
-              ))}
-            </select>
           </div>
 
           <div>

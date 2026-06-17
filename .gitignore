@@ -34,6 +34,9 @@ yarn-error.log*
 .env*.local
 .env
 
+# local-only ops notes (do not commit)
+LOCAL_VPS_SSH.md
+
 # MCP config (contains Supabase tokens / service role keys)
 mcp.json
 

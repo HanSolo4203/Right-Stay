@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Send, CheckCircle2, Loader2 } from 'lucide-react';
 import { getPublicSiteContactEmail } from '@/lib/site-contact';
 import {
@@ -37,16 +37,6 @@ export default function ContactForm() {
 
   const showPropertySection = isPropertyHostingSubject(formData.subject);
 
-  useEffect(() => {
-    if (!showPropertySection) return;
-
-    setPropertyData((prev) => ({
-      ...prev,
-      ownerName: prev.ownerName || formData.name,
-      ownerEmail: prev.ownerEmail || formData.email,
-    }));
-  }, [showPropertySection, formData.name, formData.email]);
-
   const resetForm = () => {
     setFormData({ name: '', email: '', company: '', subject: '', message: '' });
     setPropertyData(createEmptyPropertyHostingDetails());
@@ -63,7 +53,11 @@ export default function ContactForm() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...formData,
+          name: showPropertySection ? propertyData.ownerName : formData.name,
+          email: showPropertySection ? propertyData.ownerEmail : formData.email,
+          company: formData.company,
+          subject: formData.subject,
+          message: formData.message,
           propertyHosting: showPropertySection ? propertyData : undefined,
         }),
       });
@@ -96,9 +90,33 @@ export default function ContactForm() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+
+    if (name === 'subject') {
+      const wasProperty = isPropertyHostingSubject(formData.subject);
+      const isNowProperty = isPropertyHostingSubject(value);
+
+      if (!wasProperty && isNowProperty) {
+        setPropertyData((prev) => ({
+          ...prev,
+          ownerName: prev.ownerName || formData.name,
+          ownerEmail: prev.ownerEmail || formData.email,
+        }));
+      }
+
+      if (wasProperty && !isNowProperty) {
+        setFormData((prev) => ({
+          ...prev,
+          subject: value,
+          name: prev.name || propertyData.ownerName,
+          email: prev.email || propertyData.ownerEmail,
+        }));
+        return;
+      }
+    }
+
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -167,52 +185,56 @@ export default function ContactForm() {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  <div>
-                    <label htmlFor="name" className={labelClassName}>
-                      Full Name *
-                    </label>
-                    <input
-                      type="text"
-                      id="name"
-                      name="name"
-                      required
-                      value={formData.name}
-                      onChange={handleChange}
-                      className={inputClassName}
-                      placeholder="John Doe"
-                    />
-                  </div>
+                  {!showPropertySection ? (
+                    <>
+                      <div>
+                        <label htmlFor="name" className={labelClassName}>
+                          Full Name *
+                        </label>
+                        <input
+                          type="text"
+                          id="name"
+                          name="name"
+                          required
+                          value={formData.name}
+                          onChange={handleChange}
+                          className={inputClassName}
+                          placeholder="John Doe"
+                        />
+                      </div>
 
-                  <div>
-                    <label htmlFor="email" className={labelClassName}>
-                      Email Address *
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      required
-                      value={formData.email}
-                      onChange={handleChange}
-                      className={inputClassName}
-                      placeholder="john@company.com"
-                    />
-                  </div>
+                      <div>
+                        <label htmlFor="email" className={labelClassName}>
+                          Email Address *
+                        </label>
+                        <input
+                          type="email"
+                          id="email"
+                          name="email"
+                          required
+                          value={formData.email}
+                          onChange={handleChange}
+                          className={inputClassName}
+                          placeholder="john@company.com"
+                        />
+                      </div>
 
-                  <div>
-                    <label htmlFor="company" className={labelClassName}>
-                      Company
-                    </label>
-                    <input
-                      type="text"
-                      id="company"
-                      name="company"
-                      value={formData.company}
-                      onChange={handleChange}
-                      className={inputClassName}
-                      placeholder="Your Company"
-                    />
-                  </div>
+                      <div>
+                        <label htmlFor="company" className={labelClassName}>
+                          Company
+                        </label>
+                        <input
+                          type="text"
+                          id="company"
+                          name="company"
+                          value={formData.company}
+                          onChange={handleChange}
+                          className={inputClassName}
+                          placeholder="Your Company"
+                        />
+                      </div>
+                    </>
+                  ) : null}
 
                   <div>
                     <label htmlFor="subject" className={labelClassName}>

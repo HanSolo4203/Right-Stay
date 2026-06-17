@@ -28,6 +28,24 @@ function buildContactFallbacks(): PublicSiteContact {
   };
 }
 
+export const isToursEnabled = cache(async (): Promise<boolean> => {
+  if (!supabaseServer) {
+    return false;
+  }
+
+  const { data, error } = await supabaseServer
+    .from('app_settings')
+    .select('value')
+    .eq('key', 'tours_enabled')
+    .maybeSingle();
+
+  if (error || !data || data.value === null || data.value === undefined) {
+    return false;
+  }
+
+  return Number(data.value) === 1;
+});
+
 export const getPublicSiteContact = cache(async (): Promise<PublicSiteContact> => {
   const fallbacks = buildContactFallbacks();
 
