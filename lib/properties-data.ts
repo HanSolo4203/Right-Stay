@@ -137,6 +137,7 @@ async function fetchPropertiesUncached(): Promise<CachedPropertyRecord[]> {
   const { data: properties, error: propertiesError } = await supabaseServer
     .from('cached_properties')
     .select('*')
+    .eq('is_published', true)
     .order('created_at', { ascending: false });
 
   if (propertiesError || !properties?.length) {
@@ -198,7 +199,8 @@ async function fetchPropertyLocationsUncached(): Promise<string[]> {
 
   const { data: properties, error } = await supabaseServer
     .from('cached_properties')
-    .select('data');
+    .select('data')
+    .eq('is_published', true);
 
   if (error || !properties?.length) return [];
 

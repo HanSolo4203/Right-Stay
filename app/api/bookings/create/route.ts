@@ -181,6 +181,19 @@ export async function POST(request: Request) {
       );
     }
 
+    const { data: publishedProperty } = await supabase
+      .from('cached_properties')
+      .select('id, is_published')
+      .eq('uplisting_id', propertyId)
+      .maybeSingle();
+
+    if (publishedProperty && publishedProperty.is_published === false) {
+      return NextResponse.json(
+        { error: 'This property is not currently available for booking' },
+        { status: 404 }
+      );
+    }
+
     const nights = calculateNightsBetween(checkInDate, checkOutDate);
     if (nights <= 0) {
       return NextResponse.json(

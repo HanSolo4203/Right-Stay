@@ -8,7 +8,7 @@ import {
   calculateNightsBetween,
   DEFAULT_MINIMUM_STAY_NIGHTS,
 } from "@/lib/pricing";
-import { glassFrostInput, glassFrostPanel } from "@/lib/glass-styles";
+import { glassFrostInput, glassSearchCard } from "@/lib/glass-styles";
 import { AlertCircle, ChevronDown, MapPin, Search, Users } from "lucide-react";
 
 type GlassAccommodationSearchProps = {
@@ -41,17 +41,17 @@ export default function GlassAccommodationSearch({
 
   return (
     <div
-      className={`w-full min-w-0 rounded-3xl p-4 sm:p-8 overflow-visible ${glassFrostPanel} ${className}`.trim()}
+      className={`w-full min-w-0 rounded-3xl p-4 sm:p-8 overflow-visible ${glassSearchCard} ${className}`.trim()}
     >
       {showTabs && (
-        <p className="leading-relaxed text-lg font-normal text-white/90 tracking-tight mb-6">
-          Accommodations<span className="text-white/60 mx-2">•</span>Tours & Experiences
+        <p className="leading-relaxed text-lg font-medium text-white tracking-tight mb-6">
+          Accommodations<span className="text-white/70 mx-2">•</span>Tours & Experiences
         </p>
       )}
 
       <form onSubmit={onSubmit} className="space-y-4 min-w-0">
         <div className="relative">
-          <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/60 z-10" />
+          <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/80 z-10" />
           <select
             value={formData.location}
             onChange={(e) => onFormDataChange({ location: e.target.value })}
@@ -68,7 +68,7 @@ export default function GlassAccommodationSearch({
               </option>
             ))}
           </select>
-          <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/60 pointer-events-none" />
+          <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/80 pointer-events-none" />
         </div>
 
         <div className="space-y-2">
@@ -89,7 +89,7 @@ export default function GlassAccommodationSearch({
         </div>
 
         <div className="relative">
-          <Users className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/60 z-10" />
+          <Users className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/80 z-10" />
           <select
             value={formData.guests}
             onChange={(e) => onFormDataChange({ guests: e.target.value })}
@@ -119,12 +119,12 @@ export default function GlassAccommodationSearch({
               6+ Guests
             </option>
           </select>
-          <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/60 pointer-events-none" />
+          <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/80 pointer-events-none" />
         </div>
 
         <button
           type="submit"
-          className="w-full bg-white text-black font-semibold py-4 px-6 rounded-2xl hover:bg-white/90 transition-colors duration-200 flex items-center justify-center gap-2"
+          className="w-full bg-white text-black font-semibold py-4 px-6 rounded-2xl shadow-lg shadow-black/30 hover:bg-white/90 transition-colors duration-200 flex items-center justify-center gap-2"
         >
           <Search className="h-5 w-5" />
           Search Accommodations

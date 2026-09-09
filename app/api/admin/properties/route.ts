@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidateTag } from 'next/cache';
 import { createClient } from '@supabase/supabase-js';
 import {
   extractLocationFromAttributes,
@@ -16,6 +17,11 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey =
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+function revalidatePublicPropertyCaches() {
+  revalidateTag('properties');
+  revalidateTag('property-locations');
+}
 
 function buildPricingObject(row: any) {
   if (!row) {
@@ -142,6 +148,7 @@ export async function GET() {
         property_slug: attributes.property_slug || null,
         time_zone: attributes.time_zone || null,
         ical_url: property.ical_url || null,
+        is_published: property.is_published !== false,
         last_synced: property.last_synced,
         created_at: property.created_at,
         updated_at: property.updated_at,
@@ -197,7 +204,8 @@ export async function POST(request: NextRequest) {
           ...amenitiesForAttributes(body),
         }
       },
-      ical_url: body.ical_url || null
+      ical_url: body.ical_url || null,
+      is_published: body.is_published !== undefined ? !!body.is_published : true,
     };
 
     const { data, error } = await supabase
@@ -337,6 +345,47 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
+
+    // Lightweight visibility toggle — skip full attribute rewrite
+    if (
+      body.is_published !== undefined &&
+      body.name === undefined &&
+      body.type === undefined &&
+      body.description === undefined &&
+      body.ical_url === undefined &&
+      body.minPrice === undefined &&
+      body.basePrice === undefined &&
+      body.maxPrice === undefined &&
+      body.pricingEnabled === undefined &&
+      body.pricelabsListingId === undefined &&
+      body.amenities === undefined &&
+      body.location_address === undefined
+    ) {
+      const { data, error } = await supabase
+        .from('cached_properties')
+        .update({
+          is_published: !!body.is_published,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+        .select('*')
+        .single();
+
+      if (error) throw error;
+
+      revalidatePublicPropertyCaches();
+
+      const attributes = data.data?.attributes || {};
+      return NextResponse.json({
+        id: data.id,
+        uplisting_id: data.uplisting_id,
+        name: attributes.name || attributes.nickname || 'Unnamed Property',
+        type: attributes.type || 'Property',
+        is_published: data.is_published !== false,
+        updated_at: data.updated_at,
+      });
+    }
+
     const location = locationFieldsForAttributes(body);
 
     // First get the existing property to preserve data structure
@@ -387,6 +436,10 @@ export async function PUT(request: NextRequest) {
       updateData.ical_url = body.ical_url;
     }
 
+    if (body.is_published !== undefined) {
+      updateData.is_published = !!body.is_published;
+    }
+
     const { data, error } = await supabase
       .from('cached_properties')
       .update(updateData)
@@ -395,6 +448,8 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (error) throw error;
+
+    revalidatePublicPropertyCaches();
 
     // Upsert pricing if pricing fields were provided
     let pricing = null;
@@ -533,6 +588,7 @@ export async function PUT(request: NextRequest) {
       maximum_capacity: attributes.maximum_capacity,
       description: attributes.description,
       ical_url: data.ical_url,
+      is_published: data.is_published !== false,
       updated_at: data.updated_at,
       pricing,
       pricelabsMapping,
@@ -564,6 +620,8 @@ export async function DELETE(request: NextRequest) {
       .eq('id', id);
 
     if (error) throw error;
+
+    revalidatePublicPropertyCaches();
 
     return NextResponse.json({ success: true });
   } catch (error) {

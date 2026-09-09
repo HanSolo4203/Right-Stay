@@ -113,6 +113,7 @@ export default function PropertySettings() {
   const [syncingCalendarPropertyId, setSyncingCalendarPropertyId] = useState<string | null>(null);
   const [syncingUplistingPropertyId, setSyncingUplistingPropertyId] = useState<string | null>(null);
   const [syncingFromUplisting, setSyncingFromUplisting] = useState(false);
+  const [togglingPublishId, setTogglingPublishId] = useState<string | null>(null);
   const [savingProperty, setSavingProperty] = useState(false);
   const [geocodingLocation, setGeocodingLocation] = useState(false);
   const [mapPickerSession, setMapPickerSession] = useState(0);
@@ -820,6 +821,56 @@ export default function PropertySettings() {
     }
   };
 
+  const handleTogglePublished = async (property: Property) => {
+    const nextPublished = !(property.is_published !== false);
+    setTogglingPublishId(property.id);
+    setMessage(null);
+
+    // Optimistic update
+    setProperties((prev) =>
+      prev.map((p) =>
+        p.id === property.id ? { ...p, is_published: nextPublished } : p
+      )
+    );
+
+    try {
+      const response = await fetch(`/api/admin/properties?id=${property.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_published: nextPublished }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to update visibility');
+      }
+
+      setMessage({
+        type: 'success',
+        text: nextPublished
+          ? `"${property.name}" is now visible on the website.`
+          : `"${property.name}" is hidden from the website.`,
+      });
+      setTimeout(() => setMessage(null), 3000);
+    } catch (error: any) {
+      // Revert optimistic update
+      setProperties((prev) =>
+        prev.map((p) =>
+          p.id === property.id
+            ? { ...p, is_published: property.is_published !== false }
+            : p
+        )
+      );
+      setMessage({
+        type: 'error',
+        text: error.message || 'Error updating visibility. Please try again.',
+      });
+      setTimeout(() => setMessage(null), 5000);
+    } finally {
+      setTogglingPublishId(null);
+    }
+  };
+
   const handleSyncCalendar = async (propertyId: string) => {
     setSyncingCalendarPropertyId(propertyId);
     try {
@@ -1005,10 +1056,15 @@ export default function PropertySettings() {
       <div className="grid gap-4">
         {properties.map((property) => {
           const primaryPhotoUrl = propertyPrimaryPhotos[property.uplisting_id];
+          const isPublished = property.is_published !== false;
           return (
             <div
               key={property.id}
-              className="bg-white rounded-lg border border-slate-200 shadow-sm hover:border-slate-300 hover:shadow-md transition-all overflow-hidden"
+              className={`bg-white rounded-lg border shadow-sm transition-all overflow-hidden ${
+                isPublished
+                  ? 'border-slate-200 hover:border-slate-300 hover:shadow-md'
+                  : 'border-amber-200/80 bg-slate-50/80 opacity-90'
+              }`}
             >
               <div className="flex">
                 {/* Primary Image */}
@@ -1020,13 +1076,20 @@ export default function PropertySettings() {
                       variant="thumb"
                       sizes="192px"
                     />
+                    {!isPublished && (
+                      <div className="absolute inset-0 bg-slate-900/45 flex items-center justify-center">
+                        <span className="rounded-full bg-amber-500 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white">
+                          Hidden
+                        </span>
+                      </div>
+                    )}
                   </div>
                 )}
                 
                 <div className="flex-1 p-6">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-3">
+                      <div className="flex flex-wrap items-center gap-2 mb-3">
                         <h3 className="text-xl font-semibold text-slate-900">
                           {property.name}
                         </h3>
@@ -1036,6 +1099,11 @@ export default function PropertySettings() {
                         <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-500/10 text-slate-500 border border-gray-500/20">
                           ID: {property.uplisting_id}
                         </span>
+                        {!isPublished && (
+                          <span className="px-3 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-700 border border-amber-500/25">
+                            Hidden from website
+                          </span>
+                        )}
                       </div>
                       
                       {property.description && (
@@ -1160,7 +1228,34 @@ export default function PropertySettings() {
                     </div>
                     </div>
                     
-                    <div className="flex space-x-2 ml-4">
+                    <div className="flex flex-col items-end gap-3 ml-4">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-slate-600 whitespace-nowrap">
+                          Show on website
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleTogglePublished(property)}
+                          disabled={togglingPublishId === property.id}
+                          className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors disabled:opacity-50 ${
+                            isPublished ? 'bg-right-stay-500' : 'bg-slate-300'
+                          }`}
+                          role="switch"
+                          aria-checked={isPublished}
+                          aria-label={`Show ${property.name} on website`}
+                        >
+                          {togglingPublishId === property.id ? (
+                            <Loader2 className="absolute inset-0 m-auto h-4 w-4 animate-spin text-white" />
+                          ) : (
+                            <span
+                              className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
+                                isPublished ? 'translate-x-6' : 'translate-x-1'
+                              }`}
+                            />
+                          )}
+                        </button>
+                      </div>
+                      <div className="flex space-x-2">
                       <button
                         onClick={() => handleSyncPropertyFromUplisting(property.uplisting_id)}
                         disabled={syncingUplistingPropertyId === property.uplisting_id}
@@ -1199,6 +1294,7 @@ export default function PropertySettings() {
                       >
                         <Trash2 className="w-5 h-5" />
                       </button>
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -6,7 +6,7 @@ import { MARKETING_IMAGES } from "@/lib/marketing-images";
 
 const COLLAGE_IMAGES = [
   {
-    src: MARKETING_IMAGES.coastalVilla,
+    src: MARKETING_IMAGES.weKnowWhatYouWantTile,
     alt: "Premium accommodation interior",
     className: "col-span-2 row-span-2",
   },

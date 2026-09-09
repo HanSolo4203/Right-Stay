@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { IMAGE_SIZES } from "@/lib/image-sizes";
+import { MARKETING_IMAGES } from "@/lib/marketing-images";
 import { DollarSign, MessageSquare, Users, Shield } from "lucide-react";
 import PremiumContentBlock from "@/components/premium/PremiumContentBlock";
 import PremiumFeatureCard from "@/components/premium/PremiumFeatureCard";
@@ -38,49 +39,73 @@ export default function TrustSection() {
       subtitle="At Right Stay Africa, exceptional hospitality starts with honesty and integrity. Every interaction is transparent, fair and mutually beneficial."
       variant="darker"
     >
-      <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16 items-center">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {trustFeatures.map((feature, index) => (
-            <PremiumFeatureCard key={feature.title} {...feature} index={index} />
-          ))}
-        </div>
+      <div
+        className="relative overflow-hidden rounded-2xl border border-white/10 shadow-lg shadow-black/30 animate-on-scroll"
+        style={{ animation: "fadeSlideIn 1s ease-out 0.2s both" }}
+      >
+        <div className="relative min-h-[280px] sm:min-h-[320px] lg:min-h-[360px]">
+          <div className="absolute inset-0 bg-[#0b140f]" />
 
-        <div
-          className="relative h-[480px] sm:h-[560px] animate-on-scroll"
-          style={{ animation: "fadeSlideIn 1s ease-out 0.3s both" }}
-        >
-          <div className="absolute -inset-3 rounded-3xl bg-right-stay-500/10 md:blur-xl" />
-          <div className="relative h-full rounded-2xl overflow-hidden border border-white/10 shadow-lg">
+          <div
+            className="absolute inset-0"
+            style={{
+              WebkitMaskImage:
+                "linear-gradient(to right, transparent 0%, transparent 6%, rgba(0,0,0,0.18) 22%, rgba(0,0,0,0.55) 38%, rgba(0,0,0,0.88) 56%, black 72%)",
+              maskImage:
+                "linear-gradient(to right, transparent 0%, transparent 6%, rgba(0,0,0,0.18) 22%, rgba(0,0,0,0.55) 38%, rgba(0,0,0,0.88) 56%, black 72%)",
+            }}
+          >
             <Image
-              src="/images/993d5154-c104-4507-8c0a-55364d2a948c_800w_1.jpg"
-              alt="Modern African luxury accommodation"
+              src={MARKETING_IMAGES.premiumAccommodationTile}
+              alt="Premium accommodation interior"
               fill
-              sizes={IMAGE_SIZES.half}
-              className="object-cover"
+              sizes={IMAGE_SIZES.hero}
+              className="object-cover object-[68%_center]"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+          </div>
 
-            <div className="absolute bottom-6 left-6 right-6 rounded-xl border border-white/15 bg-black/70 p-5 sm:p-6 md:bg-black/55 md:backdrop-blur-xl">
-              <div className="flex items-end justify-between gap-4">
-                <div>
-                  <div className="font-display text-4xl font-bold text-white sm:text-5xl">4.9/5</div>
-                  <div className="mt-1 text-sm text-white/60">Average Guest Rating</div>
-                </div>
-                <div className="flex items-center gap-0.5">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <svg
-                      key={star}
-                      className={`h-5 w-5 sm:h-6 sm:w-6 ${star <= 4 ? "text-amber-400 fill-current" : "text-amber-400 fill-current opacity-50"}`}
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                    </svg>
-                  ))}
-                </div>
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#0b140f] from-0% via-[#0b140f]/70 via-[28%] to-transparent to-[58%]" />
+
+          <div className="relative z-10 flex min-h-[280px] w-full max-w-[20rem] flex-col justify-between gap-6 px-6 py-8 sm:min-h-[320px] sm:max-w-md sm:gap-8 sm:px-10 sm:py-10 lg:min-h-[360px] lg:px-12 lg:py-12">
+            <Image
+              src="/rsa-logo-white.png"
+              alt="Right Stay Africa"
+              width={552}
+              height={166}
+              className="h-auto w-[148px] opacity-90 sm:w-[180px] lg:w-[210px]"
+            />
+
+            <div>
+              <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-right-stay-400/90 sm:text-xs">
+                Average Guest Rating
+              </p>
+              <div className="mt-4 flex items-center gap-4 sm:mt-5 sm:gap-5">
+                <span className="font-display text-6xl font-medium leading-none tracking-tight text-white sm:text-7xl lg:text-[5.5rem]">
+                  4.9
+                </span>
+                <span
+                  className="h-12 w-px shrink-0 bg-right-stay-500 sm:h-16"
+                  aria-hidden
+                />
+                <span className="font-display text-3xl font-medium leading-none text-white sm:text-4xl lg:text-5xl">
+                  /5
+                </span>
               </div>
             </div>
+
+            <p className="text-sm leading-relaxed text-white/70 sm:text-base">
+              Trusted by our guests.
+              <br />
+              Committed to excellence.
+            </p>
           </div>
         </div>
+      </div>
+
+      <div className="mt-10 grid grid-cols-1 gap-4 sm:mt-12 sm:grid-cols-2 lg:gap-6">
+        {trustFeatures.map((feature, index) => (
+          <PremiumFeatureCard key={feature.title} {...feature} index={index} />
+        ))}
       </div>
     </PremiumContentBlock>
   );

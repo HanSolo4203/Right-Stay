@@ -37,6 +37,7 @@ export interface Property {
   check_in_time: number | null;
   check_out_time: number | null;
   ical_url: string | null;
+  is_published: boolean;
   last_synced: string | null;
   created_at: string;
   updated_at: string;

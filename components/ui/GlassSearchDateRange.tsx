@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { getTodayISO } from "@/lib/accommodation-search";
 import { cn } from "@/lib/utils";
+import { glassFrostInput } from "@/lib/glass-styles";
 
 const MONTH_NAMES = [
   "January",
@@ -390,12 +391,12 @@ export default function GlassSearchDateRange({
           type="button"
           onClick={() => openPicker(false)}
           className={cn(
-            "relative flex w-full min-w-0 items-center rounded-2xl border border-white/20 bg-white/10 py-4 pl-12 pr-4 text-left transition-colors",
-            "hover:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/30",
-            open && !selectingCheckOut && "ring-2 ring-white/30"
+            "relative flex w-full min-w-0 items-center py-4 pl-12 pr-4 text-left transition-colors hover:border-white/40",
+            glassFrostInput,
+            open && !selectingCheckOut && "ring-2 ring-white/40"
           )}
         >
-          <Calendar className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/60" />
+          <Calendar className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/80" />
           <span className="truncate text-white">
             {checkIn ? formatDisplayDate(checkIn) : "Check in date"}
           </span>
@@ -406,16 +407,16 @@ export default function GlassSearchDateRange({
           onClick={() => openPicker(true)}
           disabled={!checkIn}
           className={cn(
-            "relative flex w-full min-w-0 items-center rounded-2xl border border-white/20 bg-white/10 py-4 pl-12 pr-4 text-left transition-colors",
-            "hover:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/30",
+            "relative flex w-full min-w-0 items-center py-4 pl-12 pr-4 text-left transition-colors hover:border-white/40",
+            glassFrostInput,
             "disabled:cursor-not-allowed disabled:opacity-50",
-            open && selectingCheckOut && "ring-2 ring-white/30"
+            open && selectingCheckOut && "ring-2 ring-white/40"
           )}
         >
           <Calendar
             className={cn(
               "pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2",
-              checkIn ? "text-white/60" : "text-white/40"
+              checkIn ? "text-white/80" : "text-white/50"
             )}
           />
           <span

@@ -109,7 +109,7 @@ export default function HeroSection({ initialLocations = [] }: HeroSectionProps)
     <>
       <div className="absolute inset-0">
         <HeroBackgroundImage
-          src={MARKETING_IMAGES.heroCapeTown}
+          src={MARKETING_IMAGES.mainHero}
           priority
           className="pointer-events-none object-cover"
           style={{

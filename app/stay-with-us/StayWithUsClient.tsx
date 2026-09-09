@@ -231,7 +231,7 @@ function StayWithUsContent({
       <section className="isolate relative z-[1] min-h-[600px] overflow-x-hidden overflow-y-visible">
         <div className="absolute inset-0">
           <HeroBackgroundImage
-            src={MARKETING_IMAGES.heroCapeTown}
+            src={MARKETING_IMAGES.stayWithUsHero}
             priority
             className="pointer-events-none object-cover"
             style={{
