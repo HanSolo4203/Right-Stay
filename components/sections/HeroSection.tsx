@@ -114,30 +114,27 @@ export default function HeroSection({ initialLocations = [] }: HeroSectionProps)
           className="pointer-events-none object-cover"
           style={{
             maskImage:
-              'linear-gradient(to bottom, black 48%, rgba(0,0,0,0.75) 68%, rgba(0,0,0,0.25) 86%, transparent 100%)',
+              'linear-gradient(to bottom, black 30%, rgba(0,0,0,0.78) 52%, rgba(0,0,0,0.32) 72%, rgba(0,0,0,0.08) 88%, transparent 100%)',
             WebkitMaskImage:
-              'linear-gradient(to bottom, black 48%, rgba(0,0,0,0.75) 68%, rgba(0,0,0,0.25) 86%, transparent 100%)',
+              'linear-gradient(to bottom, black 30%, rgba(0,0,0,0.78) 52%, rgba(0,0,0,0.32) 72%, rgba(0,0,0,0.08) 88%, transparent 100%)',
           }}
         />
       </div>
 
       <div className="z-10 relative">
         <div className="grid grid-cols-1 grid-rows-[minmax(0,1fr)] gap-12 md:px-8 md:pb-24 md:pt-16 lg:grid-cols-12 lg:gap-8 lg:pb-28 lg:pt-20 min-h-[calc(100vh-96px)] max-w-7xl mr-auto ml-auto pt-8 pr-6 pb-28 sm:pb-32 pl-6 gap-x-12 gap-y-12 items-center">
-          <div className="col-span-7 flex flex-col justify-center items-center text-center" style={{ animation: 'fadeSlideIn 1.2s ease-out forwards' }}>
+          <div className="col-span-7 flex flex-col justify-center items-center text-center">
             <div className="relative w-full">
-              <div
-                aria-hidden
-                className="pointer-events-none absolute left-1/2 top-[42%] h-[130%] w-[115%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-black/60 blur-3xl"
-              />
+              <div aria-hidden className="hero-copy-scrim" />
 
               <h1
                 className="relative font-display"
                 style={{ animation: 'fadeSlideIn 1s ease-out 0.2s both' }}
               >
-                <span className="block text-lg sm:text-xl lg:text-xl font-medium uppercase tracking-[0.42em] leading-snug text-white [text-shadow:0_2px_16px_rgba(0,0,0,0.85),0_0_28px_rgba(0,0,0,0.55)]">
+                <span className="hero-copy-readable block text-lg sm:text-xl lg:text-xl font-medium uppercase tracking-[0.42em] leading-snug text-white">
                   Turn left and come right
                 </span>
-                <span className="mt-3 block text-lg sm:text-xl font-medium uppercase tracking-[0.42em] text-white [text-shadow:0_2px_16px_rgba(0,0,0,0.85),0_0_28px_rgba(0,0,0,0.55)]">
+                <span className="hero-copy-readable mt-3 block text-lg sm:text-xl font-medium uppercase tracking-[0.42em] text-white">
                   with
                 </span>
               </h1>
@@ -152,7 +149,7 @@ export default function HeroSection({ initialLocations = [] }: HeroSectionProps)
                   width={552}
                   height={166}
                   sizes="(max-width: 640px) 80vw, 552px"
-                  className="h-auto w-full drop-shadow-[0_8px_28px_rgba(0,0,0,0.8)]"
+                  className="h-auto w-full"
                 />
               </div>
             </div>

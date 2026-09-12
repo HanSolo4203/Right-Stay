@@ -29,7 +29,7 @@ export default async function Home() {
 
   return (
     <>
-      <section className="isolate relative z-[1] min-h-screen overflow-x-hidden overflow-y-visible">
+      <section className="isolate relative z-[1] min-h-screen overflow-x-clip">
         <SiteHeader />
         <HeroSection initialLocations={initialLocations} />
       </section>

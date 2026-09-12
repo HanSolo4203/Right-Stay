@@ -1,6 +1,6 @@
 /**
- * Fades the hero photograph into the premium section surface below.
- * Uses the same fixed gradient + texture as .premium-page-backdrop so the join stays seamless.
+ * Softens the hero photograph into the shared premium surface below.
+ * Stays transparent at the section edge so the fixed backdrop is uninterrupted.
  * Parent section must be `position: relative`.
  */
 export default function HeroPremiumFadeOverlay() {

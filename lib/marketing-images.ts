@@ -4,7 +4,7 @@
  */
 export const MARKETING_IMAGES = {
   mainHero: '/main-hero-image-2.png',
-  stayWithUsHero: '/premium%20accommodation%20hero.jpeg',
+  stayWithUsHero: '/premium%20accommodation%20hero-2.jpeg',
   heroCapeTown: '/cpt-lions-head-1.jpg',
   coastalVilla: '/images/services-accommodation.jpg',
   safariLodge: '/images/services-experiences.jpg',

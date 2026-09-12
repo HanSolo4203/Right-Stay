@@ -228,19 +228,20 @@ function StayWithUsContent({
 
   return (
     <>
-      <section className="isolate relative z-[1] min-h-[600px] overflow-x-hidden overflow-y-visible">
+      <section className="isolate relative z-[1] min-h-[600px] overflow-x-clip">
         <div className="absolute inset-0">
           <HeroBackgroundImage
             src={MARKETING_IMAGES.stayWithUsHero}
             priority
-            className="pointer-events-none object-cover"
+            className="pointer-events-none object-cover object-[center_bottom]"
             style={{
               maskImage:
-                'linear-gradient(to bottom, black 48%, rgba(0,0,0,0.75) 68%, rgba(0,0,0,0.25) 86%, transparent 100%)',
+                'linear-gradient(to bottom, black 68%, rgba(0,0,0,0.82) 84%, rgba(0,0,0,0.35) 94%, transparent 100%)',
               WebkitMaskImage:
-                'linear-gradient(to bottom, black 48%, rgba(0,0,0,0.75) 68%, rgba(0,0,0,0.25) 86%, transparent 100%)',
+                'linear-gradient(to bottom, black 68%, rgba(0,0,0,0.82) 84%, rgba(0,0,0,0.35) 94%, transparent 100%)',
             }}
           />
+          <div aria-hidden className="hero-copy-wash-left" />
         </div>
 
         <Header toursEnabled={toursEnabled} />
@@ -252,15 +253,15 @@ function StayWithUsContent({
             >
               <Link
                 href="/"
-                className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-8 transition-colors"
+                className="hero-copy-readable inline-flex items-center gap-2 text-white hover:text-white mb-8 transition-colors"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Back to Home
               </Link>
-              <h1 className="font-display sm:text-6xl lg:text-7xl text-4xl sm:text-5xl font-medium text-white tracking-tight mb-6">
+              <h1 className="hero-copy-readable font-display sm:text-6xl lg:text-7xl text-4xl sm:text-5xl font-medium text-white tracking-tight mb-6">
                 Premium Accommodations
               </h1>
-              <p className="sm:text-xl text-lg leading-relaxed text-white/90 max-w-3xl">
+              <p className="hero-copy-readable sm:text-xl text-lg leading-relaxed text-white max-w-3xl">
                 Browse our carefully curated collection of luxury properties across South Africa.
                 Each accommodation is verified for quality, comfort, and exceptional experiences.
               </p>

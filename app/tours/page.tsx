@@ -35,7 +35,7 @@ export default async function ToursPage() {
 
   return (
     <>
-      <section className="isolate relative z-[1] min-h-[720px] overflow-x-hidden overflow-y-visible">
+      <section className="isolate relative z-[1] min-h-[720px] overflow-x-clip">
         <SiteHeader />
         <ToursHero />
       </section>

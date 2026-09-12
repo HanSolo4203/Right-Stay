@@ -15,7 +15,7 @@ const Footer = dynamic(() => import('@/components/sections/Footer'));
 export default function HostWithUsPage() {
   return (
     <>
-      <section className="isolate relative z-[1] min-h-[800px] overflow-x-hidden overflow-y-visible">
+      <section className="isolate relative z-[1] min-h-[800px] overflow-x-clip">
         <SiteHeader />
         <HostHero />
       </section>

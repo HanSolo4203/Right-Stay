@@ -662,14 +662,7 @@ input[type="date"].hide-native-calendar-icon::-webkit-date-and-time-value {
 :root {
   --site-header-height: 4.5rem;
   --site-search-header-height: 4.25rem;
-  --premium-surface-gradient: linear-gradient(
-    to bottom,
-    #121816 0%,
-    #101a17 28%,
-    #0f1a16 52%,
-    #0d1f16 78%,
-    #0c1a14 100%
-  );
+  --premium-surface-gradient: #121816;
   --premium-texture-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   --premium-hero-overlap: clamp(6rem, 14vh, 11rem);
 }
@@ -699,13 +692,6 @@ input[type="date"].hide-native-calendar-icon::-webkit-date-and-time-value {
   background-image: var(--premium-texture-image);
   background-size: 256px 256px;
   background-repeat: repeat;
-}
-
-.premium-page-backdrop__particles {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  opacity: 0.9;
 }
 
 /* Property card — animated edge shimmer on hover */
@@ -768,16 +754,16 @@ input[type="date"].hide-native-calendar-icon::-webkit-date-and-time-value {
 }
 
 /*
- * Hero → premium blend: same fixed surface as .premium-page-backdrop, masked in at the
- * hero bottom so colours/textures align with the section below at every scroll position.
+ * Hero → premium blend: wash the photo into the same #121816 the backdrop starts with
+ * so the section join has no colour or texture seam.
  */
 .hero-premium-fade-wrap {
-  height: min(58vh, 32rem);
+  height: min(68vh, 42rem);
 }
 
 @media (min-width: 640px) {
   .hero-premium-fade-wrap {
-    height: min(52vh, 34rem);
+    height: min(62vh, 44rem);
   }
 }
 
@@ -785,33 +771,64 @@ input[type="date"].hide-native-calendar-icon::-webkit-date-and-time-value {
 .hero-premium-fade-texture {
   position: absolute;
   inset: 0;
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(0, 0, 0, 0.35) 32%,
-    rgba(0, 0, 0, 0.82) 58%,
-    #000 82%
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(0, 0, 0, 0.35) 32%,
-    rgba(0, 0, 0, 0.82) 58%,
-    #000 82%
-  );
 }
 
 .hero-premium-fade-gradient {
   background: linear-gradient(
     to bottom,
     transparent 0%,
-    #121816 55%,
-    #0c1a14 100%
+    rgba(18, 24, 22, 0.28) 34%,
+    rgba(18, 24, 22, 0.58) 62%,
+    rgba(18, 24, 22, 0.22) 86%,
+    transparent 100%
   );
 }
 
 .hero-premium-fade-texture {
   display: none;
+}
+
+/*
+ * Hero copy contrast — use gradients, never CSS filter:blur/drop-shadow behind text.
+ * Filter effects paint as an opaque box while a parent opacity animation is running
+ * (Safari/Chrome), then snap to a soft shadow once opacity hits 1.
+ */
+.hero-copy-scrim {
+  pointer-events: none;
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  z-index: 0;
+  width: 125%;
+  height: 145%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 0, 0, 0.62) 0%,
+    rgba(0, 0, 0, 0.36) 38%,
+    rgba(0, 0, 0, 0.12) 62%,
+    transparent 76%
+  );
+}
+
+.hero-copy-wash-left {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.58) 0%,
+    rgba(0, 0, 0, 0.36) 28%,
+    rgba(0, 0, 0, 0.14) 48%,
+    transparent 70%
+  );
+}
+
+.hero-copy-readable {
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.75),
+    0 4px 18px rgba(0, 0, 0, 0.8),
+    0 0 36px rgba(0, 0, 0, 0.5);
 }
 
 /* Fades hero background (e.g. particle field) into the premium surface below */
