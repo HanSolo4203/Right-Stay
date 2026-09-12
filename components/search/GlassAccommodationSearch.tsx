@@ -41,8 +41,9 @@ export default function GlassAccommodationSearch({
 
   return (
     <div
-      className={`w-full min-w-0 rounded-3xl p-4 sm:p-8 overflow-visible ${glassSearchCard} ${className}`.trim()}
+      className={`relative isolate w-full min-w-0 overflow-hidden rounded-3xl ${glassSearchCard} ${className}`.trim()}
     >
+      <div className="relative z-10 p-4 sm:p-8">
       {showTabs && (
         <p className="leading-relaxed text-lg font-medium text-white tracking-tight mb-6">
           Accommodations<span className="text-white/70 mx-2">•</span>Tours & Experiences
@@ -130,6 +131,7 @@ export default function GlassAccommodationSearch({
           Search Accommodations
         </button>
       </form>
+      </div>
     </div>
   );
 }

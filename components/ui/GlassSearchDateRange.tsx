@@ -391,7 +391,7 @@ export default function GlassSearchDateRange({
           type="button"
           onClick={() => openPicker(false)}
           className={cn(
-            "relative flex w-full min-w-0 items-center py-4 pl-12 pr-4 text-left transition-colors hover:border-white/40",
+            "relative flex w-full min-w-0 items-center bg-neutral-950 py-4 pl-12 pr-4 text-left transition-colors hover:border-white/40",
             glassFrostInput,
             open && !selectingCheckOut && "ring-2 ring-white/40"
           )}
@@ -407,7 +407,7 @@ export default function GlassSearchDateRange({
           onClick={() => openPicker(true)}
           disabled={!checkIn}
           className={cn(
-            "relative flex w-full min-w-0 items-center py-4 pl-12 pr-4 text-left transition-colors hover:border-white/40",
+            "relative flex w-full min-w-0 items-center bg-neutral-950 py-4 pl-12 pr-4 text-left transition-colors hover:border-white/40",
             glassFrostInput,
             "disabled:cursor-not-allowed disabled:opacity-50",
             open && selectingCheckOut && "ring-2 ring-white/40"

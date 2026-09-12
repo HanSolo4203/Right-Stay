@@ -53,3 +53,4 @@ next-env.d.ts
 # extracted webarchive files (can remove if no longer needed)
 extracted_site/
 *.webarchive
+.gstack/

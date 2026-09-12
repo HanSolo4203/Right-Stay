@@ -45,7 +45,7 @@ export default function SecondHero() {
             className="animate-on-scroll mt-6 text-lg font-semibold tracking-wide text-right-stay-300 sm:text-xl"
             style={{ animation: "fadeSlideIn 0.9s ease-out 0.32s both" }}
           >
-            Built right. Managed right. Experienced right.
+            Built Right. Managed Right. Experienced Right.
           </p>
         </div>
 

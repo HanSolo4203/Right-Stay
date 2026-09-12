@@ -3,7 +3,7 @@
  * Prefer 800w assets for cards; avoid 3840w sources in UI — Next still downloads full files for optimization.
  */
 export const MARKETING_IMAGES = {
-  mainHero: '/main-hero-image.jpeg',
+  mainHero: '/main-hero-image-2.png',
   stayWithUsHero: '/premium%20accommodation%20hero.jpeg',
   heroCapeTown: '/cpt-lions-head-1.jpg',
   coastalVilla: '/images/services-accommodation.jpg',
