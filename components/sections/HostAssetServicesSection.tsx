@@ -21,7 +21,7 @@ const services = [
     icon: Shield,
     title: "Property Maintenance",
     description:
-      "Regular inspections, preventative maintenance and emergency repairs — your property stays guest-ready, year round.",
+      "Regular inspections, preventative maintenance and emergency repairs, so your property stays guest-ready year round.",
   },
   {
     icon: DollarSign,
@@ -48,7 +48,7 @@ export default function HostAssetServicesSection() {
     <PremiumContentBlock
       eyebrow="Full-Service Management"
       title="Full-Service Property & Asset Management"
-      subtitle="Right Stay Africa is your end-to-end partner — from listings and bookings to maintenance, reporting and guest care. One team, one standard, zero oversight gaps."
+      subtitle="Right Stay Africa is your end-to-end partner, from listings and bookings to maintenance, reporting and guest care. One team, one standard, zero oversight gaps."
       centered
       variant="darker"
     >

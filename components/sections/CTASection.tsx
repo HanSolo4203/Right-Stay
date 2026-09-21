@@ -26,7 +26,7 @@ export default function CTASection() {
             style={{ animation: "fadeSlideIn 0.9s ease-out 0.2s both" }}
           >
             Welcome to Africa, managed properly. Where properties are managed right and every stay
-            is lekker — genuine hospitality and accommodation done the right way.
+            is lekker: genuine hospitality and accommodation done the right way.
           </p>
 
           <div

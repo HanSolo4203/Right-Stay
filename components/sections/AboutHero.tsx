@@ -1,18 +1,7 @@
-"use client";
-
-import { useRef } from "react";
-import GreenParticleBackground from "@/components/ui/GreenParticleBackground";
-
 export default function AboutHero() {
-  const heroRef = useRef<HTMLDivElement>(null);
-
   return (
-    <div ref={heroRef} className="absolute inset-0">
+    <div className="absolute inset-0">
       <div className="hero-bg-fade absolute inset-0 bg-[#121816]">
-        <GreenParticleBackground
-          interactionRef={heroRef}
-          className="pointer-events-none z-0"
-        />
         <div
           className="pointer-events-none absolute inset-0"
           style={{
@@ -25,7 +14,7 @@ export default function AboutHero() {
       </div>
 
       <div className="relative z-10">
-        <div className="mx-auto flex min-h-[calc(100vh-96px)] max-w-7xl flex-col justify-center px-6 pb-20 pt-16 md:px-8 md:pb-28 md:pt-20 lg:min-h-[720px]">
+        <div className="mx-auto flex min-h-[calc(100svh-96px)] max-w-7xl flex-col justify-center px-6 pb-20 pt-16 md:px-8 md:pb-28 md:pt-20 lg:min-h-[720px]">
           <p
             className="animate-on-scroll text-xs font-medium uppercase tracking-[0.32em] text-right-stay-400/90"
             style={{ animation: "fadeSlideIn 0.8s ease-out 0.1s both" }}

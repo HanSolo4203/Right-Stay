@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect } from 'react';
 import Image from 'next/image';
-import { Home, Compass, Shield, CheckCircle, TrendingUp, Clock } from 'lucide-react';
+import { Home, Compass, Shield, CheckCircle, TrendingUp } from 'lucide-react';
+import { IMAGE_SIZES } from '@/lib/image-sizes';
 
 export default function FeaturesSection() {
   return (
@@ -11,7 +11,8 @@ export default function FeaturesSection() {
         src="/images/d953ad7f-2dd7-42f7-8f74-593d55181036_3840w_1.jpg"
         alt="Abstract 3D render background"
         fill
-        sizes="100vw"
+        sizes={IMAGE_SIZES.hero}
+        quality={75}
         className="pointer-events-none object-cover"
         style={{
           maskImage: 'linear-gradient(to bottom, black 85%, transparent)',
@@ -26,7 +27,7 @@ export default function FeaturesSection() {
             Premium African Experiences. Exceptional Standards.
           </h2>
           <p className="sm:text-lg leading-relaxed animate-on-scroll text-base text-white/85 max-w-2xl mt-5" style={{ animation: 'fadeSlideIn 1.0s ease-out 0.2s both' }}>
-            Discover South Africa&apos;s finest accommodations, curated tours, and white-glove asset management—delivered with transparency, expertise, and unwavering quality.
+            Discover South Africa&apos;s finest accommodations, curated tours, and white-glove asset management, delivered with transparency, expertise, and unwavering quality.
           </p>
         </div>
 
@@ -70,6 +71,8 @@ export default function FeaturesSection() {
                 alt="Safari scene/Table Mountain/Wine Route landscape"
                 width={800}
                 height={600}
+                sizes={IMAGE_SIZES.gridThird}
+                quality={75}
                 className="h-56 w-full object-cover sm:h-64"
               />
               <div className="absolute inset-0 bg-[radial-gradient(60%_30%_at_50%_55%,rgba(163,230,53,0.25),transparent)]"></div>
@@ -94,7 +97,7 @@ export default function FeaturesSection() {
               </div>
             </div>
             <p className="mt-4 text-sm leading-6 text-white/70 px-4 pb-4">
-              Seamlessly pairing world-class accommodations with unforgettable tours—Big Five safaris, wine routes, cultural journeys, and coastal escapes.
+              Seamlessly pairing world-class accommodations with unforgettable tours: Big Five safaris, wine routes, cultural journeys, and coastal escapes.
             </p>
           </div>
 

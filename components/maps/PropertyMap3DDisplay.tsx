@@ -119,7 +119,7 @@ export default function PropertyMap3DDisplay({
           >
             {label}
           </p>
-          <span className="sr-only">3D map — drag to rotate, use controls to adjust view</span>
+          <span className="sr-only">3D map: drag to rotate, use controls to adjust view</span>
         </div>
       ) : null}
     </div>

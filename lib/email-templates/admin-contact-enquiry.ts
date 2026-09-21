@@ -62,6 +62,6 @@ export function renderAdminContactEnquiryEmail(options: AdminContactEnquiryEmail
 
   return wrapEmailLayout(content, {
     siteUrl,
-    preheader: `Contact enquiry from ${name} — ${subjectLabel}`,
+    preheader: `Contact enquiry from ${name}: ${subjectLabel}`,
   });
 }

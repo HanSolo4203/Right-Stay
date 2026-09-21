@@ -2,6 +2,7 @@
 
 import HeroBackgroundImage from '@/components/ui/HeroBackgroundImage';
 import HeroPremiumFadeOverlay from '@/components/ui/HeroPremiumFadeOverlay';
+import { MARKETING_IMAGES } from '@/lib/marketing-images';
 import Link from 'next/link';
 import { ArrowRight, Calendar } from 'lucide-react';
 
@@ -10,7 +11,8 @@ export default function HostHero() {
     <>
       <div className="absolute inset-0">
         <HeroBackgroundImage
-          src="/cpt-lions-head-1.jpg"
+          src={MARKETING_IMAGES.propertyManagementHero}
+          priority
           style={{
             maskImage:
               'linear-gradient(to bottom, black 48%, rgba(0,0,0,0.75) 68%, rgba(0,0,0,0.25) 86%, transparent 100%)',
@@ -18,10 +20,11 @@ export default function HostHero() {
               'linear-gradient(to bottom, black 48%, rgba(0,0,0,0.75) 68%, rgba(0,0,0,0.25) 86%, transparent 100%)',
           }}
         />
+        <div aria-hidden className="hero-copy-wash-left" />
       </div>
 
       <div className="z-10 relative">
-        <div className="grid grid-cols-1 grid-rows-[minmax(0,1fr)] gap-12 md:px-8 md:pb-24 md:pt-16 lg:grid-cols-12 lg:gap-8 lg:pb-28 lg:pt-20 min-h-[calc(100vh-96px)] max-w-7xl mr-auto ml-auto pt-8 pr-6 pb-16 pl-6 gap-x-12 gap-y-12 items-center">
+        <div className="grid grid-cols-1 grid-rows-[minmax(0,1fr)] gap-12 md:px-8 md:pb-24 md:pt-16 lg:grid-cols-12 lg:gap-8 lg:pb-28 lg:pt-20 min-h-[calc(100svh-96px)] max-w-7xl mr-auto ml-auto pt-8 pr-6 pb-16 pl-6 gap-x-12 gap-y-12 items-center">
           <div className="col-span-7 flex flex-col justify-center" style={{ animation: 'fadeSlideIn 1.2s ease-out forwards' }}>
             <p
               className="text-sm uppercase tracking-[0.28em] text-white/70 font-medium mb-4"
@@ -47,7 +50,7 @@ export default function HostHero() {
               className="leading-relaxed text-lg text-white/80 max-w-2xl mt-4"
               style={{ animation: 'fadeSlideIn 1s ease-out 0.6s both' }}
             >
-              We are a full-service property and asset management partner for owners across Africa — handling distribution, pricing, guest care, maintenance and transparent reporting so you can invest with confidence.
+              We are a full-service property and asset management partner for owners across Africa. We handle distribution, pricing, guest care, maintenance and transparent reporting so you can invest with confidence.
             </p>
 
             <div

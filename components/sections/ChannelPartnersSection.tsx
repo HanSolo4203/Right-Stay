@@ -46,7 +46,7 @@ export default function ChannelPartnersSection() {
     <PremiumContentBlock
       eyebrow="Distribution & Pricing"
       title="Reach More Guests. Earn More Per Night."
-      subtitle="World-class channel partners and intelligent pricing — working together to maximise your property's performance."
+      subtitle="World-class channel partners and intelligent pricing, working together to maximise your property's performance."
       variant="darker"
     >
       <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">

@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import MarketingImage from "@/components/ui/MarketingImage";
 import Link from "next/link";
 import { ArrowRight, MapPin } from "lucide-react";
 import { IMAGE_SIZES } from "@/lib/image-sizes";
@@ -20,7 +20,7 @@ export default function ToursDestinationsSection() {
       id="destinations"
       eyebrow="Destinations"
       title="Explore Africa's Most Remarkable Destinations"
-      subtitle="From iconic landmarks to hidden wilderness — discover where your journey could take you."
+      subtitle="From iconic landmarks to hidden wilderness, discover where your journey could take you."
       centered
       variant="darker"
     >
@@ -31,7 +31,7 @@ export default function ToursDestinationsSection() {
             className={`group relative overflow-hidden rounded-2xl border border-white/10 animate-on-scroll ${tileClasses[destination.span]}`}
             style={{ animation: `fadeSlideIn 0.7s ease-out ${0.08 + index * 0.05}s both` }}
           >
-            <Image
+            <MarketingImage
               src={destination.image}
               alt={destination.imageAlt}
               fill

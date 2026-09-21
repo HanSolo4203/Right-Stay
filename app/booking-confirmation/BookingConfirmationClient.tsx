@@ -13,7 +13,7 @@ const steps = [
     icon: Mail,
     title: 'Request confirmation email',
     description:
-      "You'll receive an email shortly confirming we received your request — not a final booking confirmation.",
+      "You'll receive an email shortly confirming we received your request. This is not a final booking confirmation.",
   },
   {
     icon: Calendar,
@@ -73,7 +73,7 @@ export default function BookingConfirmationClient({
             className="mt-5 text-base sm:text-lg leading-relaxed text-white/75 max-w-2xl px-2"
             style={{ animation: 'fadeSlideIn 1s ease-out 0.35s both' }}
           >
-            Thank you. Your request is in our queue — this is not yet a confirmed booking. We&apos;ll review
+            Thank you. Your request is in our queue. This is not yet a confirmed booking. We&apos;ll review
             availability and be in touch shortly.
           </p>
         </div>

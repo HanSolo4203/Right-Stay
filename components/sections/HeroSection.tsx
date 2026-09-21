@@ -111,7 +111,6 @@ export default function HeroSection({ initialLocations = [] }: HeroSectionProps)
         <HeroBackgroundImage
           src={MARKETING_IMAGES.mainHero}
           priority
-          className="pointer-events-none object-cover"
           style={{
             maskImage:
               'linear-gradient(to bottom, black 30%, rgba(0,0,0,0.78) 52%, rgba(0,0,0,0.32) 72%, rgba(0,0,0,0.08) 88%, transparent 100%)',
@@ -122,7 +121,7 @@ export default function HeroSection({ initialLocations = [] }: HeroSectionProps)
       </div>
 
       <div className="z-10 relative">
-        <div className="grid grid-cols-1 grid-rows-[minmax(0,1fr)] gap-12 md:px-8 md:pb-24 md:pt-16 lg:grid-cols-12 lg:gap-8 lg:pb-28 lg:pt-20 min-h-[calc(100vh-96px)] max-w-7xl mr-auto ml-auto pt-8 pr-6 pb-28 sm:pb-32 pl-6 gap-x-12 gap-y-12 items-center">
+        <div className="grid grid-cols-1 grid-rows-[minmax(0,1fr)] gap-12 md:px-8 md:pb-24 md:pt-16 lg:grid-cols-12 lg:gap-8 lg:pb-28 lg:pt-20 min-h-[calc(100svh-96px)] max-w-7xl mr-auto ml-auto pt-8 pr-6 pb-28 sm:pb-32 pl-6 gap-x-12 gap-y-12 items-center">
           <div className="col-span-7 flex flex-col justify-center items-center text-center">
             <div className="relative w-full">
               <div aria-hidden className="hero-copy-scrim" />

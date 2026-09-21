@@ -10,8 +10,8 @@ import {
 
 function buildPreviewSubjects(details: typeof SAMPLE_BOOKING_EMAIL_DETAILS) {
   return {
-    admin: `New Booking Request – ${details.propertyName} – ${details.guestName}`,
-    guest: 'Right Stay Africa – Booking Request Received (Not Confirmed)',
+    admin: `New Booking Request - ${details.propertyName} - ${details.guestName}`,
+    guest: 'Right Stay Africa - Booking Request Received (Not Confirmed)',
   };
 }
 

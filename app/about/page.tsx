@@ -13,15 +13,15 @@ const AboutTodaySection = dynamic(() => import("@/components/sections/AboutToday
 const AboutCTASection = dynamic(() => import("@/components/sections/AboutCTASection"));
 
 export const metadata: Metadata = {
-  title: "About Us — Right Stay Africa",
+  title: "About Us | Right Stay Africa",
   description:
-    "Discover the founder story behind Right Stay Africa — premium hospitality, transparent asset management and exceptional guest experiences across the continent.",
+    "Discover the founder story behind Right Stay Africa: premium hospitality, transparent asset management and exceptional guest experiences across the continent.",
 };
 
 export default function AboutPage() {
   return (
     <>
-      <section className="isolate relative z-[1] min-h-[720px] overflow-x-hidden overflow-y-visible">
+      <section className="isolate relative z-[1] min-h-svh overflow-x-hidden overflow-y-visible">
         <SiteHeader />
         <AboutHero />
       </section>

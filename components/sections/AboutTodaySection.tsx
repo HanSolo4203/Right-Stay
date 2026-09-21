@@ -78,7 +78,7 @@ export default function AboutTodaySection() {
     <PremiumContentBlock
       eyebrow="Right Stay Africa Today"
       title="A Portfolio Built on Performance and Care"
-      subtitle="From premium stays to end-to-end asset management — we deliver hospitality that earns trust on both sides of the door."
+      subtitle="From premium stays to end-to-end asset management, we deliver hospitality that earns trust on both sides of the door."
       centered
     >
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

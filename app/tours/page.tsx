@@ -22,9 +22,9 @@ const ToursTestimonialSection = dynamic(
 const ToursCTASection = dynamic(() => import("@/components/sections/ToursCTASection"));
 
 export const metadata: Metadata = {
-  title: "Tours & Experiences — Right Stay Africa",
+  title: "Tours & Experiences | Right Stay Africa",
   description:
-    "Discover curated African experiences — safaris, cultural encounters, wine tours and bespoke journeys designed to create unforgettable memories.",
+    "Discover curated African experiences: safaris, cultural encounters, wine tours and bespoke journeys designed to create unforgettable memories.",
 };
 
 export default async function ToursPage() {
@@ -35,7 +35,7 @@ export default async function ToursPage() {
 
   return (
     <>
-      <section className="isolate relative z-[1] min-h-[720px] overflow-x-clip">
+      <section className="isolate relative z-[1] min-h-svh overflow-x-clip">
         <SiteHeader />
         <ToursHero />
       </section>

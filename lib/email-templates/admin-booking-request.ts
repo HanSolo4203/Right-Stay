@@ -48,6 +48,6 @@ export function renderAdminBookingRequestEmail(
 
   return wrapEmailLayout(content, {
     siteUrl,
-    preheader: `New request from ${details.guestName} — ${details.propertyName}`,
+    preheader: `New request from ${details.guestName}: ${details.propertyName}`,
   });
 }

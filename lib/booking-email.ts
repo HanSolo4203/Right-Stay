@@ -29,7 +29,7 @@ export async function sendBookingRequestEmails(
       const { error } = await resend.emails.send({
         from: fromEmail,
         to: adminEmail,
-        subject: `New Booking Request – ${details.propertyName} – ${details.guestName}`,
+        subject: `New Booking Request - ${details.propertyName} - ${details.guestName}`,
         html: renderAdminBookingRequestEmail({
           details,
           adminLink,
@@ -52,7 +52,7 @@ export async function sendBookingRequestEmails(
     const { error } = await resend.emails.send({
       from: fromEmail,
       to: details.guestEmail,
-      subject: 'Right Stay Africa – Booking Request Received (Not Confirmed)',
+      subject: 'Right Stay Africa - Booking Request Received (Not Confirmed)',
       html: renderGuestBookingRequestEmail({ details, siteUrl }),
     });
     if (error) {

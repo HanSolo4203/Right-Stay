@@ -228,12 +228,11 @@ function StayWithUsContent({
 
   return (
     <>
-      <section className="isolate relative z-[1] min-h-[600px] overflow-x-clip">
+      <section className="isolate relative z-[1] min-h-[100svh] overflow-x-clip">
         <div className="absolute inset-0">
           <HeroBackgroundImage
             src={MARKETING_IMAGES.stayWithUsHero}
             priority
-            className="pointer-events-none object-cover object-[center_bottom]"
             style={{
               maskImage:
                 'linear-gradient(to bottom, black 68%, rgba(0,0,0,0.82) 84%, rgba(0,0,0,0.35) 94%, transparent 100%)',

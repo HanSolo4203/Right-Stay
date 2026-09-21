@@ -70,7 +70,7 @@ export default function HostWhyPartner() {
       stats={HOST_STATS}
       statsEyebrow="Proven Results"
       statsTitle="Our Track Record"
-      statsSubtitle="Real numbers from a growing portfolio — managed with transparency and care."
+      statsSubtitle="Real numbers from a growing portfolio, managed with transparency and care."
       collageBadge="Portfolio Performance"
       collageBadgeValue="R58M+ AUM"
     />

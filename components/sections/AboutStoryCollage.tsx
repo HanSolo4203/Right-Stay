@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import MarketingImage from "@/components/ui/MarketingImage";
 import { IMAGE_SIZES } from "@/lib/image-sizes";
 import { MARKETING_IMAGES } from "@/lib/marketing-images";
 
@@ -10,6 +10,9 @@ const COLLAGE_IMAGES = [
     alt: "Premium accommodation interior",
     label: "Premium Stays",
     className: "col-span-1 row-span-2",
+    // Zoom into the lower-right so the bed, not the window, leads the crop.
+    imageClassName:
+      "object-[82%_78%] scale-[1.32] origin-[82%_78%] transition-transform duration-700 group-hover:scale-[1.4]",
   },
   {
     src: MARKETING_IMAGES.wineEstate,
@@ -42,12 +45,12 @@ export default function AboutStoryCollage() {
       <div className="relative grid h-full grid-cols-2 grid-rows-[1fr_1fr_0.75fr] gap-2.5 overflow-hidden rounded-2xl border border-white/10 shadow-2xl shadow-black/40 sm:gap-3">
         {COLLAGE_IMAGES.map((img) => (
           <div key={img.src} className={`group relative overflow-hidden ${img.className}`}>
-            <Image
+            <MarketingImage
               src={img.src}
               alt={img.alt}
               fill
               sizes={img.className.includes("col-span-2") ? IMAGE_SIZES.half : "280px"}
-              className="object-cover transition-transform duration-700 group-hover:scale-105"
+              className={`object-cover ${img.imageClassName ?? "transition-transform duration-700 group-hover:scale-105"}`}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent" />
             <span className="absolute bottom-3 left-3 rounded-full border border-white/15 bg-black/50 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.18em] text-white/80 backdrop-blur-sm sm:bottom-4 sm:left-4 sm:text-xs">

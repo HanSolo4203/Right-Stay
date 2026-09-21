@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Menu, Search, X } from "lucide-react";
 import GlassAccommodationSearch from "@/components/search/GlassAccommodationSearch";
 import HeroBackgroundImage from "@/components/ui/HeroBackgroundImage";
+import { MARKETING_IMAGES } from "@/lib/marketing-images";
 import {
   type AccommodationSearchForm,
   formatGuestLabel,
@@ -74,9 +75,8 @@ export default function MinimizedSearchHeader({
       <header className="fixed inset-x-0 top-0 z-[100] isolate overflow-hidden border-b border-white/10">
         <div className="absolute inset-0">
           <HeroBackgroundImage
-            src="/cpt-lions-head-1.jpg"
+            src={MARKETING_IMAGES.heroCapeTown}
             priority
-            className="object-cover object-[center_30%]"
           />
           <div className="absolute inset-0 bg-black/55" aria-hidden />
         </div>

@@ -22,11 +22,12 @@ export default function ContactHero({ contact }: ContactHeroProps) {
       : []),
   ];
   return (
-    <section className="isolate min-h-[500px] sm:min-h-[600px] overflow-hidden relative">
+    <section className="isolate min-h-[70svh] sm:min-h-[600px] overflow-hidden relative">
       <div className="absolute inset-0">
         <HeroBackgroundImage
-          src={MARKETING_IMAGES.heroCapeTown}
-          className="pointer-events-none object-cover"
+          src={MARKETING_IMAGES.contactHero}
+          priority
+          className="brightness-[1.12]"
           style={{
             maskImage:
               'linear-gradient(to bottom, black 48%, rgba(0,0,0,0.75) 68%, rgba(0,0,0,0.25) 86%, transparent 100%)',
@@ -35,7 +36,7 @@ export default function ContactHero({ contact }: ContactHeroProps) {
           }}
         />
       </div>
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_60%_at_50%_40%,rgba(0,0,0,0.3),rgba(0,0,0,0.7)),linear-gradient(to_top,rgba(0,0,0,0.85),rgba(0,0,0,0.35))]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_60%_at_50%_40%,rgba(0,0,0,0.18),rgba(0,0,0,0.42)),linear-gradient(to_top,rgba(0,0,0,0.55),rgba(0,0,0,0.18))]" />
 
       <div className="z-10 relative">
         <div className="flex flex-col h-full min-h-[420px] sm:min-h-[500px] max-w-7xl mx-auto px-4 sm:px-6 md:px-8 pt-12 sm:pt-16 pb-12 sm:pb-16 justify-center items-center text-center">

@@ -540,7 +540,7 @@ function AccommodationCardsContent({
                 ) : (
                   <span className={`text-base sm:text-lg ${isLight ? 'text-gray-900' : 'text-white'}`}>
                     No properties match your search
-                    {locationFilter ? ' — try different dates or a nearby area' : ''}
+                    {locationFilter ? '. Try different dates or a nearby area' : ''}
                   </span>
                 )}
               </p>

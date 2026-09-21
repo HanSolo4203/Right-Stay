@@ -8,7 +8,7 @@ export default function ToursProcessSection() {
     <PremiumContentBlock
       eyebrow="Our Process"
       title="How We Create Experiences"
-      subtitle="A seamless journey from your first conversation to unforgettable memories — we handle every detail."
+      subtitle="A seamless journey from your first conversation to unforgettable memories. We handle every detail."
       centered
     >
       <div className="relative">

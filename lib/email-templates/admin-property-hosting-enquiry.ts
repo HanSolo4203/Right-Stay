@@ -99,6 +99,6 @@ export function renderAdminPropertyHostingEnquiryEmail(
 
   return wrapEmailLayout(content, {
     siteUrl,
-    preheader: `Property hosting enquiry from ${property.ownerName} — ${property.areaSuburb}`,
+    preheader: `Property hosting enquiry from ${property.ownerName}: ${property.areaSuburb}`,
   });
 }

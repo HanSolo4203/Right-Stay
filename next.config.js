@@ -19,11 +19,12 @@ const nextConfig = {
     // If you see 502/timeouts on large originals in production, set unoptimized: true
     // and enable Supabase Storage transforms (Pro) plus NEXT_PUBLIC_USE_SUPABASE_IMAGE_TRANSFORM=true.
     unoptimized: false,
-    // Must include every `quality` passed to <Image /> (see ListingImage VARIANT_QUALITY).
-    qualities: [68, 72, 75, 78],
+    formats: ['image/avif', 'image/webp'],
+    // Must include every `quality` passed to <Image /> (ListingImage + heroes).
+    qualities: [68, 72, 75, 78, 80, 82, 85],
     minimumCacheTTL: 60 * 60 * 24 * 30,
-    // Add device sizes for better optimization
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    // Drop 3840: 2x 1920 screens would otherwise download a 4k asset. 2560 is enough.
+    deviceSizes: [640, 750, 828, 1080, 1200, 1600, 1920, 2560],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     // Increase timeout for image optimization (30 seconds)
     dangerouslyAllowSVG: true,

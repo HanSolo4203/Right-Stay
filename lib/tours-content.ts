@@ -62,7 +62,7 @@ export const TOUR_WHY_FEATURES: TourFeature[] = [
   {
     icon: Sparkles,
     title: "Curated Experiences",
-    description: "Every itinerary is hand-selected — never mass-market or one-size-fits-all.",
+    description: "Every itinerary is hand-selected, never mass-market or one-size-fits-all.",
   },
   {
     icon: ShieldCheck,
@@ -231,7 +231,7 @@ export const TOUR_PROCESS_STEPS: TourProcessStep[] = [
     number: "03",
     title: "We Handle The Logistics",
     description:
-      "Transfers, bookings, permits and every detail — managed seamlessly so you can focus on the adventure.",
+      "Transfers, bookings, permits and every detail, managed seamlessly so you can focus on the adventure.",
     icon: CalendarCheck,
   },
   {
@@ -249,7 +249,7 @@ export const TOUR_TESTIMONIALS: TourTestimonial[] = [
     guestName: "James & Catherine M.",
     locationVisited: "Kruger Safari & Cape Town",
     review:
-      "Right Stay crafted the most incredible two-week journey for us. From our private safari drives to a sunset dinner on the V&A Waterfront — every moment felt personal and perfectly timed.",
+      "Right Stay crafted the most incredible two-week journey for us. From our private safari drives to a sunset dinner on the V&A Waterfront, every moment felt personal and perfectly timed.",
     rating: 5,
     initials: "JM",
   },
@@ -258,7 +258,7 @@ export const TOUR_TESTIMONIALS: TourTestimonial[] = [
     guestName: "Sarah Okonkwo",
     locationVisited: "Garden Route & Winelands",
     review:
-      "I've travelled extensively across Africa, but this was something else. The attention to detail, the local guides, the hidden spots we'd never have found alone — absolutely world-class.",
+      "I've travelled extensively across Africa, but this was something else. The attention to detail, the local guides, the hidden spots we'd never have found alone. Absolutely world-class.",
     rating: 5,
     initials: "SO",
   },

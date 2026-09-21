@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import MarketingImage from "@/components/ui/MarketingImage";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { IMAGE_SIZES } from "@/lib/image-sizes";
@@ -19,7 +19,7 @@ export default function ToursExperiencesSection() {
       id="experiences"
       eyebrow="Featured Experiences"
       title="Curated Journeys Across the Continent"
-      subtitle="From wildlife encounters to coastal retreats — each experience is designed to reveal Africa at its most extraordinary."
+      subtitle="From wildlife encounters to coastal retreats, each experience is designed to reveal Africa at its most extraordinary."
       centered
     >
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:grid-rows-2 lg:gap-6">
@@ -29,7 +29,7 @@ export default function ToursExperiencesSection() {
             className={`group relative overflow-hidden rounded-2xl border border-white/10 animate-on-scroll ${spanClasses[experience.span]}`}
             style={{ animation: `fadeSlideIn 0.7s ease-out ${0.1 + index * 0.06}s both` }}
           >
-            <Image
+            <MarketingImage
               src={experience.image}
               alt={experience.imageAlt}
               fill

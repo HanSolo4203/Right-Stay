@@ -7,7 +7,7 @@ import Footer from '@/components/sections/Footer';
 import { getPublicSiteContact } from '@/lib/public-site-settings';
 
 export const metadata: Metadata = {
-  title: "Contact Us — Right Stay Africa",
+  title: "Contact Us | Right Stay Africa",
   description:
     "Get in touch with Right Stay Africa for bookings, hosting, tours, and property management across South Africa.",
 };
@@ -17,7 +17,7 @@ export default async function ContactPage() {
 
   return (
     <>
-      <section className="isolate min-h-[600px] overflow-hidden relative bg-black">
+      <section className="isolate min-h-[70svh] sm:min-h-[600px] overflow-hidden relative bg-black">
         <SiteHeader />
         <ContactHero contact={contact} />
       </section>

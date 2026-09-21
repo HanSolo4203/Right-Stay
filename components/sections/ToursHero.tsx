@@ -12,7 +12,8 @@ export default function ToursHero() {
       <div className="absolute inset-0">
         <HeroBackgroundImage
           src={MARKETING_IMAGES.safariLodge}
-          className="pointer-events-none object-cover animate-[heroKenBurns_20s_ease-in-out_infinite_alternate]"
+          priority
+          className="animate-[heroKenBurns_20s_ease-in-out_infinite_alternate]"
           style={{
             maskImage:
               "linear-gradient(to bottom, black 42%, rgba(0,0,0,0.85) 62%, rgba(0,0,0,0.35) 82%, transparent 100%)",
@@ -32,7 +33,7 @@ export default function ToursHero() {
       </div>
 
       <div className="relative z-10">
-        <div className="mx-auto flex min-h-[calc(100vh-96px)] max-w-7xl flex-col justify-center px-6 pb-24 pt-16 md:px-8 md:pb-32 md:pt-20 lg:min-h-[720px]">
+        <div className="mx-auto flex min-h-[calc(100svh-96px)] max-w-7xl flex-col justify-center px-6 pb-24 pt-16 md:px-8 md:pb-32 md:pt-20 lg:min-h-[720px]">
           <p
             className="animate-on-scroll text-xs font-medium uppercase tracking-[0.32em] text-right-stay-400/90"
             style={{ animation: "fadeSlideIn 0.8s ease-out 0.1s both" }}

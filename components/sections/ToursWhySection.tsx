@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import MarketingImage from "@/components/ui/MarketingImage";
 import { IMAGE_SIZES } from "@/lib/image-sizes";
 import PremiumSectionBackground from "@/components/premium/PremiumSectionBackground";
 import PremiumFeatureCardGrid from "@/components/premium/PremiumFeatureCardGrid";
@@ -44,7 +44,7 @@ export default function ToursWhySection() {
             <div className="relative grid h-full grid-cols-2 grid-rows-2 gap-3 overflow-hidden rounded-2xl border border-white/10 shadow-lg">
               {TOUR_WHY_COLLAGE.map((img) => (
                 <div key={img.src} className={`relative overflow-hidden ${img.className}`}>
-                  <Image
+                  <MarketingImage
                     src={img.src}
                     alt={img.alt}
                     fill

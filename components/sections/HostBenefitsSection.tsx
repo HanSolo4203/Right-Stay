@@ -19,7 +19,7 @@ export default function HostBenefitsSection() {
     <PremiumContentBlock
       eyebrow="For Property Owners"
       title="What You Get as an Owner"
-      subtitle="Everything you need to run a premium short-term rental — without running it yourself."
+      subtitle="Everything you need to run a premium short-term rental, without running it yourself."
       centered
     >
       <ul className="mx-auto grid max-w-4xl gap-3 sm:grid-cols-2 sm:gap-4">

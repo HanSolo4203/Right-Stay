@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import MarketingImage from "@/components/ui/MarketingImage";
 import { IMAGE_SIZES } from "@/lib/image-sizes";
 import Link from "next/link";
 import { Home, Compass, TrendingUp, ArrowRight } from "lucide-react";
@@ -42,7 +42,7 @@ export default function ServicesSection() {
     <PremiumContentBlock
       eyebrow="What We Offer"
       title="Three Ways to Experience Africa, Done Right"
-      subtitle="From premium stays to curated experiences and full asset management — end-to-end solutions from one trusted partner."
+      subtitle="From premium stays to curated experiences and full asset management: end-to-end solutions from one trusted partner."
       centered
     >
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-8">
@@ -53,7 +53,7 @@ export default function ServicesSection() {
             style={{ animation: `fadeSlideIn 0.6s ease-out ${0.12 + index * 0.05}s both` }}
           >
             <div className="relative h-56 overflow-hidden sm:h-64">
-              <Image
+              <MarketingImage
                 src={service.image}
                 alt={service.title}
                 fill

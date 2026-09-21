@@ -37,7 +37,7 @@ const GUEST_FEATURES = [
     icon: Heart,
     title: "Genuine Hospitality",
     description:
-      "Local expertise and warm service — every stay managed with care, not corporate checklist hospitality.",
+      "Local expertise and warm service. Every stay is managed with care, not corporate checklist hospitality.",
   },
 ];
 

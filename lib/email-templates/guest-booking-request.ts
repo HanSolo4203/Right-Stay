@@ -61,6 +61,6 @@ export function renderGuestBookingRequestEmail(
 
   return wrapEmailLayout(content, {
     siteUrl,
-    preheader: 'Your booking request was received — not yet confirmed',
+    preheader: 'Your booking request was received. Not yet confirmed',
   });
 }

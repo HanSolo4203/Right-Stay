@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import HeroBackgroundImage from "@/components/ui/HeroBackgroundImage";
+import { MARKETING_IMAGES } from "@/lib/marketing-images";
 import { glassFrostPanel } from "@/lib/glass-styles";
 import { cn } from "@/lib/utils";
 import { Quote, Star, ChevronLeft, ChevronRight } from "lucide-react";
@@ -80,7 +81,7 @@ export default function ToursTestimonialSection() {
         >
           <div className="absolute -inset-[12%] testimonial-ribbon-drift">
             <HeroBackgroundImage
-              src="/images/testimonial-ribbon-flow-brand.png"
+              src={MARKETING_IMAGES.testimonialRibbon}
               alt=""
               className="pointer-events-none object-cover object-center"
             />

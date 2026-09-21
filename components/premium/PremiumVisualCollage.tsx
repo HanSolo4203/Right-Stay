@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import MarketingImage from "@/components/ui/MarketingImage";
 import { IMAGE_SIZES } from "@/lib/image-sizes";
 import { MARKETING_IMAGES } from "@/lib/marketing-images";
 
@@ -40,7 +40,7 @@ export default function PremiumVisualCollage({
 
       <div className="relative grid h-full grid-cols-2 grid-rows-2 gap-3 rounded-2xl overflow-hidden border border-white/10 shadow-lg">
         <div className={`relative ${COLLAGE_IMAGES[0].className} overflow-hidden`}>
-          <Image
+          <MarketingImage
             src={COLLAGE_IMAGES[0].src}
             alt={COLLAGE_IMAGES[0].alt}
             fill
@@ -52,7 +52,7 @@ export default function PremiumVisualCollage({
 
         {COLLAGE_IMAGES.slice(1).map((img) => (
           <div key={img.src} className={`relative ${img.className} overflow-hidden`}>
-            <Image
+            <MarketingImage
               src={img.src}
               alt={img.alt}
               fill

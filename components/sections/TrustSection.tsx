@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import MarketingImage from "@/components/ui/MarketingImage";
 import { IMAGE_SIZES } from "@/lib/image-sizes";
 import { MARKETING_IMAGES } from "@/lib/marketing-images";
 import { DollarSign, MessageSquare, Users, Shield } from "lucide-react";
@@ -55,7 +55,7 @@ export default function TrustSection() {
                 "linear-gradient(to right, transparent 0%, transparent 6%, rgba(0,0,0,0.18) 22%, rgba(0,0,0,0.55) 38%, rgba(0,0,0,0.88) 56%, black 72%)",
             }}
           >
-            <Image
+            <MarketingImage
               src={MARKETING_IMAGES.premiumAccommodationTile}
               alt="Premium accommodation interior"
               fill
@@ -67,7 +67,7 @@ export default function TrustSection() {
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#0b140f] from-0% via-[#0b140f]/70 via-[28%] to-transparent to-[58%]" />
 
           <div className="relative z-10 flex min-h-[280px] w-full max-w-[20rem] flex-col justify-between gap-6 px-6 py-8 sm:min-h-[320px] sm:max-w-md sm:gap-8 sm:px-10 sm:py-10 lg:min-h-[360px] lg:px-12 lg:py-12">
-            <Image
+            <MarketingImage
               src="/rsa-logo-white.png"
               alt="Right Stay Africa"
               width={552}
