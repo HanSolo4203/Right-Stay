@@ -19,7 +19,8 @@ const nextConfig = {
     // If you see 502/timeouts on large originals in production, set unoptimized: true
     // and enable Supabase Storage transforms (Pro) plus NEXT_PUBLIC_USE_SUPABASE_IMAGE_TRANSFORM=true.
     unoptimized: false,
-    formats: ['image/avif', 'image/webp'],
+    // WebP-only: AVIF encoding of large photos on the VPS can take several seconds per request.
+    formats: ['image/webp'],
     // Must include every `quality` passed to <Image /> (ListingImage + heroes).
     qualities: [68, 72, 75, 78, 80, 82, 85],
     minimumCacheTTL: 60 * 60 * 24 * 30,

@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import SiteHeader from '@/components/sections/SiteHeader';
 import HeroSection from '@/components/sections/HeroSection';
@@ -22,10 +23,7 @@ const CTASection = dynamic(() => import('@/components/sections/CTASection'));
 const Footer = dynamic(() => import('@/components/sections/Footer'));
 
 export default async function Home() {
-  const [initialLocations, initialProperties] = await Promise.all([
-    getCachedPropertyLocations(),
-    getCachedProperties(),
-  ]);
+  const initialLocations = await getCachedPropertyLocations();
 
   return (
     <>
@@ -33,6 +31,18 @@ export default async function Home() {
         <SiteHeader />
         <HeroSection initialLocations={initialLocations} />
       </section>
+      <Suspense fallback={<div className="min-h-[50vh]" />}>
+        <HomeBelowFold />
+      </Suspense>
+    </>
+  );
+}
+
+async function HomeBelowFold() {
+  const initialProperties = await getCachedProperties();
+
+  return (
+    <>
       <PremiumPageBackdrop />
       <PremiumBackgroundProvider className="premium-content-stack">
         <SecondHero />

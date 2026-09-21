@@ -119,6 +119,26 @@
   }
 }
 
+/* Soft crossfade from LQIP to the full hero photo */
+.hero-photo-lqip {
+  transform: scale(1.14);
+  filter: blur(24px);
+}
+
+.hero-photo {
+  transition: opacity 800ms ease;
+}
+
+.hero-photo:not(.is-loaded) {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-photo {
+    transition-duration: 1ms;
+  }
+}
+
 @keyframes philosophyGlow {
   0% {
     opacity: 0.35;

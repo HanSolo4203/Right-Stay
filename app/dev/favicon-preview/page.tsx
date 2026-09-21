@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 
-const SIZES = [16, 32, 48] as const;
+const SIZES = [16, 32, 48, 96] as const;
 
 export default function FaviconPreviewPage() {
   if (process.env.NODE_ENV !== 'development') {
@@ -26,7 +26,7 @@ export default function FaviconPreviewPage() {
         <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-8 text-center">
           <p className="mb-6 text-xs uppercase tracking-[0.2em] text-white/45">Large</p>
           <img
-            src="/apple-touch-icon.png?v=serif2"
+            src="/apple-touch-icon.png"
             alt="RSA favicon large"
             width={180}
             height={180}
@@ -41,7 +41,7 @@ export default function FaviconPreviewPage() {
               <div key={size} className="flex flex-col items-center gap-2">
                 <div className="flex h-16 items-center justify-center">
                   <img
-                    src={`/favicon-${size}x${size}.png?v=serif2`}
+                    src={`/favicon-${size}x${size}.png`}
                     alt={`RSA favicon ${size}px`}
                     width={size}
                     height={size}
@@ -58,7 +58,7 @@ export default function FaviconPreviewPage() {
         <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
           <p className="mb-5 text-xs uppercase tracking-[0.2em] text-white/45">Browser tab</p>
           <div className="inline-flex items-center gap-2 rounded-t-lg border border-b-0 border-white/10 bg-[#1f1f1f] px-3 py-2">
-            <img src="/favicon-16x16.png?v=serif2" alt="" width={16} height={16} className="rounded-[3px]" />
+            <img src="/favicon-16x16.png" alt="" width={16} height={16} className="rounded-[3px]" />
             <span className="text-sm text-white/85">Right Stay Africa</span>
             <span className="ml-2 text-white/35">×</span>
           </div>
@@ -71,7 +71,7 @@ export default function FaviconPreviewPage() {
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <img
-                  src="/favicon-32x32.png?v=serif2"
+                  src="/favicon-96x96.png"
                   alt="RSA favicon"
                   width={18}
                   height={18}

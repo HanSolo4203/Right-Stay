@@ -14,6 +14,7 @@
     "build:local": "bash scripts/build-clean.sh",
     "start": "bash scripts/start-prod.sh",
     "lint": "next lint",
+    "optimize:images": "node scripts/optimize-marketing-images.mjs",
     "migrate:supabase-data": "node scripts/migrate-supabase-data.mjs",
     "sync:ical": "node scripts/sync-ical.mjs",
     "sync:ical:all": "node scripts/sync-ical.mjs --all"

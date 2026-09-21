@@ -1,7 +1,7 @@
 /**
  * Static marketing / fallback images.
- * Sources are pre-sized JPEGs (max 2560w for heroes, 1600w for cards) so Next
- * can transcode to AVIF/WebP quickly without decoding huge originals.
+ * JPEG masters stay in /public/images. Full-bleed heroes load prebuilt WebP
+ * srcsets (see HERO_IMAGE_SOURCES) so the VPS never AVIF-encodes them on request.
  */
 export const MARKETING_IMAGES = {
   mainHero: '/images/hero-home.jpg',
@@ -20,6 +20,34 @@ export const MARKETING_IMAGES = {
   weKnowWhatYouWantTile: '/images/tile-we-know.jpg',
   testimonialRibbon: '/images/testimonial-ribbon-flow-brand.jpg',
 } as const;
+
+export type HeroImageSources = {
+  src: string;
+  srcSet: string;
+};
+
+function heroWebpSources(jpgSrc: string): HeroImageSources {
+  const base = jpgSrc.replace(/\.jpe?g$/i, '');
+  return {
+    src: `${base}-1280.webp`,
+    srcSet: `${base}-800.webp 800w, ${base}-1280.webp 1280w, ${base}-1920.webp 1920w`,
+  };
+}
+
+const HERO_SOURCE_PATHS = [
+  MARKETING_IMAGES.mainHero,
+  MARKETING_IMAGES.stayWithUsHero,
+  MARKETING_IMAGES.heroCapeTown,
+  MARKETING_IMAGES.propertyManagementHero,
+  MARKETING_IMAGES.contactHero,
+  MARKETING_IMAGES.safariLodge,
+  MARKETING_IMAGES.testimonialRibbon,
+  '/images/d953ad7f-2dd7-42f7-8f74-593d55181036_3840w_1.jpg',
+] as const;
+
+export const HERO_IMAGE_SOURCES: Record<string, HeroImageSources> = Object.fromEntries(
+  HERO_SOURCE_PATHS.map((src) => [src, heroWebpSources(src)])
+);
 
 export const DEFAULT_PROPERTY_IMAGE = MARKETING_IMAGES.coastalVilla;
 

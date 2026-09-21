@@ -6,14 +6,15 @@ export const metadata: Metadata = {
   title: "Right Stay Africa | Premium Accommodations & African Tours",
   description: "Your premier destination for exceptional short-term rentals across Africa. Discover luxury accommodations, curated tours, and professional property management services.",
   metadataBase: new URL("https://rightstayafrica.com"),
+  manifest: "/site.webmanifest",
   icons: {
     icon: [
-      { url: "/favicon.ico?v=serif2", sizes: "48x48" },
-      { url: "/favicon.svg?v=serif2", type: "image/svg+xml" },
-      { url: "/favicon-48x48.png?v=serif2", sizes: "48x48", type: "image/png" },
+      { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
+      { url: "/favicon-48x48.png", sizes: "48x48", type: "image/png" },
+      { url: "/favicon.svg", type: "image/svg+xml", sizes: "any" },
+      { url: "/favicon.ico", sizes: "48x48" },
     ],
-    apple: [{ url: "/apple-touch-icon.png?v=serif2", sizes: "180x180" }],
-    shortcut: "/favicon.ico?v=serif2",
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
   openGraph: {
     title: "Right Stay Africa | Premium Accommodations & African Tours",
