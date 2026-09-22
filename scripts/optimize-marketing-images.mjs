@@ -2,6 +2,8 @@
 /**
  * Pre-generate static WebP hero variants, LQIP blur data, and Google-sized favicons.
  * Run from repo root: node scripts/optimize-marketing-images.mjs
+ *
+ * Keep WIDTHS in sync with HERO_VARIANT_WIDTHS in lib/marketing-images.ts.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -12,7 +14,7 @@ const sharp = require('sharp');
 
 const ROOT = process.cwd();
 const PUBLIC = path.join(ROOT, 'public');
-const WIDTHS = [800, 1280, 1920];
+const WIDTHS = [800, 1280, 1920, 2560];
 
 const HERO_JPEGS = [
   'images/hero-home.jpg',
@@ -41,6 +43,18 @@ function publicUrl(rel) {
   return `/${rel.replaceAll('\\', '/')}`;
 }
 
+function variantWidths(masterWidth) {
+  const widths = WIDTHS.filter((width) => width < masterWidth);
+  if (masterWidth >= 640) widths.push(masterWidth);
+  return [...new Set(widths)].sort((a, b) => a - b);
+}
+
+function webpQuality(width) {
+  if (width <= 800) return 80;
+  if (width <= 1280) return 84;
+  return 85;
+}
+
 async function optimizeHeroes() {
   for (const rel of HERO_JPEGS) {
     const input = path.join(PUBLIC, rel);
@@ -51,19 +65,26 @@ async function optimizeHeroes() {
     const parsed = path.parse(input);
     const meta = await sharp(input).metadata();
     const origKb = Math.round(fs.statSync(input).size / 1024);
+    const masterWidth = meta.width || 1920;
     console.log(`\n${rel}  ${meta.width}x${meta.height}  ${origKb}KB`);
 
-    for (const width of WIDTHS) {
-      const outW = Math.min(width, meta.width || width);
+    const stale = fs
+      .readdirSync(parsed.dir)
+      .filter((name) => name.startsWith(`${parsed.name}-`) && name.endsWith('.webp'));
+    for (const name of stale) {
+      fs.unlinkSync(path.join(parsed.dir, name));
+    }
+
+    for (const width of variantWidths(masterWidth)) {
       const outPath = path.join(parsed.dir, `${parsed.name}-${width}.webp`);
-      const quality = width >= 1920 ? 76 : 72;
+      const quality = webpQuality(width);
       await sharp(input)
         .rotate()
-        .resize({ width: outW, withoutEnlargement: true })
-        .webp({ quality, effort: 5 })
+        .resize({ width, withoutEnlargement: true })
+        .webp({ quality, effort: 6, smartSubsample: false })
         .toFile(outPath);
       const kb = Math.round(fs.statSync(outPath).size / 1024);
-      console.log(`  -> ${path.basename(outPath)}  ${kb}KB`);
+      console.log(`  -> ${path.basename(outPath)}  q${quality}  ${kb}KB`);
     }
   }
 }

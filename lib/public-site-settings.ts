@@ -1,5 +1,6 @@
 import { cache } from 'react';
 import { supabaseServer } from '@/lib/supabase-server';
+import { isSiteFeatureEnabled } from '@/lib/site-feature-flags';
 import {
   formatPhoneTel,
   getSiteContactEmail,
@@ -43,7 +44,25 @@ export const isToursEnabled = cache(async (): Promise<boolean> => {
     return false;
   }
 
-  return Number(data.value) === 1;
+  return isSiteFeatureEnabled(data.value);
+});
+
+export const isGuideEnabled = cache(async (): Promise<boolean> => {
+  if (!supabaseServer) {
+    return false;
+  }
+
+  const { data, error } = await supabaseServer
+    .from('app_settings')
+    .select('value')
+    .eq('key', 'guide_enabled')
+    .maybeSingle();
+
+  if (error || !data || data.value === null || data.value === undefined) {
+    return false;
+  }
+
+  return isSiteFeatureEnabled(data.value);
 });
 
 export const getPublicSiteContact = cache(async (): Promise<PublicSiteContact> => {

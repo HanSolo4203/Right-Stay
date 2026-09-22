@@ -20,6 +20,15 @@ export function renderGuestBookingRequestEmail(
   const { details, siteUrl } = options;
   const guestName = escapeHtml(details.guestName);
   const detailsTable = buildBookingDetailsTable(details, 'guest');
+  const thingsToDoHref =
+    details.propertyId && siteUrl
+      ? `${siteUrl}/things-to-do?property=${encodeURIComponent(details.propertyId)}`
+      : '';
+  const thingsToDoLink = thingsToDoHref
+    ? `<p style="margin:16px 0 0;font-size:14px;line-height:1.65;color:${EMAIL_BRAND.textMuted};">
+      <a href="${escapeHtml(thingsToDoHref)}" style="color:${EMAIL_BRAND.green};text-decoration:none;font-weight:600;">Explore things to do near your stay</a>
+    </p>`
+    : '';
   const contactEmail = getSiteContactEmail();
   const contactLine = contactEmail
     ? `<span style="color:${EMAIL_BRAND.textMuted};"> with next steps. If you need to make changes, reply to this email or contact us at</span>
@@ -56,6 +65,7 @@ export function renderGuestBookingRequestEmail(
       Please keep this email for your records. Summary of your request:
     </p>
     ${detailsTable}
+    ${thingsToDoLink}
     ${nextStepsBlock}
   `;
 

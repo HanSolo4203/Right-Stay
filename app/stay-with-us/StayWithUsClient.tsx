@@ -32,12 +32,14 @@ type StayWithUsClientProps = {
   initialLocations: string[];
   initialProperties: CachedPropertyRecord[];
   toursEnabled?: boolean;
+  guideEnabled?: boolean;
 };
 
 function StayWithUsContent({
   initialLocations,
   initialProperties,
   toursEnabled = false,
+  guideEnabled = false,
 }: StayWithUsClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -230,20 +232,11 @@ function StayWithUsContent({
     <>
       <section className="isolate relative z-[1] min-h-[100svh] overflow-x-clip">
         <div className="absolute inset-0">
-          <HeroBackgroundImage
-            src={MARKETING_IMAGES.stayWithUsHero}
-            priority
-            style={{
-              maskImage:
-                'linear-gradient(to bottom, black 68%, rgba(0,0,0,0.82) 84%, rgba(0,0,0,0.35) 94%, transparent 100%)',
-              WebkitMaskImage:
-                'linear-gradient(to bottom, black 68%, rgba(0,0,0,0.82) 84%, rgba(0,0,0,0.35) 94%, transparent 100%)',
-            }}
-          />
+          <HeroBackgroundImage src={MARKETING_IMAGES.stayWithUsHero} priority />
           <div aria-hidden className="hero-copy-wash-left" />
         </div>
 
-        <Header toursEnabled={toursEnabled} />
+        <Header toursEnabled={toursEnabled} guideEnabled={guideEnabled} />
         <div className="relative z-10 mx-auto max-w-7xl px-6 md:px-8 py-24">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             <div

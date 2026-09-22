@@ -1,9 +1,12 @@
 import { Suspense } from 'react';
-import { isToursEnabled } from '@/lib/public-site-settings';
+import { isGuideEnabled, isToursEnabled } from '@/lib/public-site-settings';
 import BookingPageClient from './BookingPageClient';
 
 export default async function BookPropertyPage() {
-  const toursEnabled = await isToursEnabled();
+  const [toursEnabled, guideEnabled] = await Promise.all([
+    isToursEnabled(),
+    isGuideEnabled(),
+  ]);
 
   return (
     <Suspense
@@ -16,7 +19,7 @@ export default async function BookPropertyPage() {
         </div>
       }
     >
-      <BookingPageClient toursEnabled={toursEnabled} />
+      <BookingPageClient toursEnabled={toursEnabled} guideEnabled={guideEnabled} />
     </Suspense>
   );
 }

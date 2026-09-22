@@ -1,66 +1,59 @@
 import { NextRequest, NextResponse } from 'next/server';
+import {
+  geocodeAddress,
+  resolvePlaceId,
+  suggestAddresses,
+} from '@/lib/admin-geocode';
 
 export const dynamic = 'force-dynamic';
 
-const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
-
 export async function GET(request: NextRequest) {
-  const q = request.nextUrl.searchParams.get('q')?.trim();
-
-  if (!q || q.length < 3) {
-    return NextResponse.json(
-      { error: 'Enter at least 3 characters to search.' },
-      { status: 400 }
-    );
-  }
+  const q = request.nextUrl.searchParams.get('q')?.trim() || '';
+  const placeId = request.nextUrl.searchParams.get('placeId')?.trim() || '';
+  const sessionToken = request.nextUrl.searchParams.get('sessionToken')?.trim() || undefined;
+  const suggest = request.nextUrl.searchParams.get('suggest') === '1';
+  const includeProfile = request.nextUrl.searchParams.get('profile') === '1';
 
   try {
-    const params = new URLSearchParams({
-      q,
-      format: 'json',
-      limit: '1',
-      addressdetails: '1',
-    });
+    if (placeId) {
+      const resolved = await resolvePlaceId(placeId, sessionToken);
+      if (!resolved) {
+        return NextResponse.json(
+          { error: 'No results found for that address.' },
+          { status: 404 }
+        );
+      }
+      return NextResponse.json(resolved);
+    }
 
-    const response = await fetch(`${NOMINATIM_URL}?${params}`, {
-      headers: {
-        'User-Agent': 'RightStayAfrica/1.0 (property-admin-geocode)',
-        Accept: 'application/json',
-      },
-      next: { revalidate: 0 },
-    });
-
-    if (!response.ok) {
+    if (!q || q.length < (suggest ? 2 : 3)) {
       return NextResponse.json(
-        { error: 'Geocoding service unavailable. Try again shortly.' },
-        { status: 502 }
+        { error: `Enter at least ${suggest ? 2 : 3} characters to search.` },
+        { status: 400 }
       );
     }
 
-    const results = (await response.json()) as Array<{
-      lat: string;
-      lon: string;
-      display_name: string;
-    }>;
+    if (suggest) {
+      const result = await suggestAddresses(q, sessionToken);
+      return NextResponse.json(result);
+    }
 
-    if (!results?.length) {
+    const resolved = await geocodeAddress(q, { includeProfile });
+    if (!resolved) {
       return NextResponse.json(
         { error: 'No results found for that address.' },
         { status: 404 }
       );
     }
 
-    const hit = results[0];
-    return NextResponse.json({
-      lat: parseFloat(hit.lat),
-      lng: parseFloat(hit.lon),
-      displayName: hit.display_name,
-    });
+    return NextResponse.json(resolved);
   } catch (error) {
     console.error('Geocode error:', error);
-    return NextResponse.json(
-      { error: 'Geocoding request failed.' },
-      { status: 500 }
-    );
+    const message =
+      error instanceof Error && error.message === 'Geocoding service unavailable. Try again shortly.'
+        ? error.message
+        : 'Geocoding request failed.';
+    const status = message.includes('unavailable') ? 502 : 500;
+    return NextResponse.json({ error: message }, { status });
   }
 }

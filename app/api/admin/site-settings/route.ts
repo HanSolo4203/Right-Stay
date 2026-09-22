@@ -49,11 +49,12 @@ export async function POST(request: NextRequest) {
       'default_cleaning_fee',
       'default_welcome_pack_fee',
       'tours_enabled',
+      'guide_enabled',
     ];
     for (const key of numericSettings) {
       if (body[key] !== undefined && body[key] !== '') {
         const parsed =
-          key === 'tours_enabled'
+          key === 'tours_enabled' || key === 'guide_enabled'
             ? Number(body[key]) === 1
               ? 1
               : 0

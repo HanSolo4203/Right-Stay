@@ -102,6 +102,46 @@ export function TourPackageSettingsSkeleton() {
   );
 }
 
+export function GuideListRowsSkeleton({ rows = 4 }: { rows?: number }) {
+  return (
+    <div className="space-y-3" aria-busy="true" aria-label="Loading">
+      {Array.from({ length: rows }).map((_, i) => (
+        <div key={i} className="flex gap-3 rounded-lg border border-slate-200 px-4 py-3">
+          <Bone className="h-10 w-10 shrink-0 rounded-lg" />
+          <div className="flex-1 space-y-2">
+            <Bone className="h-5 w-2/5" />
+            <Bone className="h-4 w-1/3" />
+          </div>
+          <Bone className="h-7 w-12 shrink-0 rounded-full" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function GuideSettingsSkeleton() {
+  return (
+    <TabShell>
+      <div className="mb-6 space-y-2">
+        <Bone className="h-7 w-52" />
+        <Bone className="h-4 w-72 max-w-full" />
+      </div>
+      <div className="mb-6 flex gap-3">
+        <Bone className="h-9 w-24" />
+        <Bone className="h-9 w-20" />
+      </div>
+      <div className="mb-6 flex items-center justify-between">
+        <div className="space-y-2">
+          <Bone className="h-6 w-32" />
+          <Bone className="h-4 w-56 max-w-full" />
+        </div>
+        <Bone className="h-10 w-28" />
+      </div>
+      <GuideListRowsSkeleton />
+    </TabShell>
+  );
+}
+
 export function BookingManagementSkeleton() {
   return (
     <TabShell>

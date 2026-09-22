@@ -554,6 +554,503 @@ input[type="number"] {
   color: #337e2f;
 }
 
+/* Things To Do guide map — editorial parchment chrome */
+.guide-map-shell {
+  position: relative;
+  height: 100%;
+  min-height: 0;
+}
+
+.guide-map-frame {
+  position: relative;
+  height: 100%;
+  min-height: 0;
+  border-radius: 1.35rem;
+  border: 1px solid #e0d2b8;
+  box-shadow:
+    0 18px 40px -18px rgba(92, 64, 32, 0.28),
+    0 2px 0 rgba(255, 248, 235, 0.7) inset;
+}
+
+.guide-map-frame::after {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 248, 235, 0.55),
+    inset 0 0 56px rgba(92, 64, 32, 0.07);
+  z-index: 2;
+}
+
+.guide-map-canvas.maplibregl-map {
+  font-family: var(--font-manrope), Manrope, inherit;
+  background: #efe4cf;
+}
+
+.guide-map-canvas .maplibregl-canvas {
+  filter: saturate(1.06) contrast(1.02) sepia(0.08);
+}
+
+.guide-map-shell .maplibregl-ctrl-group {
+  border: none !important;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(92, 64, 32, 0.14);
+}
+
+.guide-map-shell .maplibregl-ctrl-group button {
+  width: 36px;
+  height: 36px;
+  background: #f8f1e3;
+  color: #5c4e3d;
+  border: 1px solid #e0d2b8 !important;
+}
+
+.guide-map-shell .maplibregl-ctrl-group button:hover {
+  background: #f1e6d0;
+  color: #337e2f;
+}
+
+.guide-map-shell .maplibregl-ctrl-attrib {
+  background: rgba(248, 241, 227, 0.92);
+  color: #8a7b68;
+  margin: 0 10px 10px 0;
+  border-radius: 8px;
+  padding: 3px 8px;
+  font-size: 10px;
+  box-shadow: 0 1px 4px rgba(92, 64, 32, 0.08);
+}
+
+.guide-map-shell .maplibregl-ctrl-attrib a {
+  color: #5c4e3d;
+}
+
+.guide-map-kicker {
+  pointer-events: none;
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(248, 241, 227, 0.92);
+  border: 1px solid rgba(212, 198, 176, 0.9);
+  box-shadow: 0 2px 10px rgba(92, 64, 32, 0.1);
+  color: #8a7b68;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-family: var(--font-manrope), Manrope, sans-serif;
+}
+
+.guide-map-kicker-mark {
+  color: #5c4e3d;
+  font-weight: 650;
+}
+
+.guide-map-kicker-sep {
+  color: #c4b49a;
+}
+
+.guide-map-compass {
+  pointer-events: none;
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  z-index: 3;
+  width: 52px;
+  height: 52px;
+}
+
+.guide-map-compass-rose {
+  width: 52px;
+  height: 52px;
+  filter: drop-shadow(0 2px 8px rgba(92, 64, 32, 0.16));
+}
+
+.guide-map-compass-n {
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #337e2f;
+  font-family: var(--font-manrope), Manrope, sans-serif;
+}
+
+.guide-map-caption {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  max-width: min(22rem, calc(100% - 5.5rem));
+  padding: 0.7rem 0.9rem;
+  border-radius: 1rem;
+  background: rgba(248, 241, 227, 0.96);
+  border: 1px solid rgba(212, 198, 176, 0.95);
+  box-shadow: 0 8px 24px rgba(92, 64, 32, 0.14);
+}
+
+.guide-map-caption-swatch {
+  width: 0.7rem;
+  height: 0.7rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.7);
+}
+
+.guide-map-caption-name {
+  margin: 0;
+  font-family: var(--font-manrope), Manrope, sans-serif;
+  font-size: 0.92rem;
+  font-weight: 650;
+  color: #3f3428;
+  line-height: 1.25;
+}
+
+.guide-map-caption-meta {
+  margin: 0.1rem 0 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #8a7b68;
+}
+
+.guide-map-marker,
+.guide-map-property-marker {
+  background: transparent;
+  border: none;
+  position: relative;
+}
+
+.guide-map-marker-pop {
+  animation: guide-map-marker-pop 0.5s cubic-bezier(0.34, 1.45, 0.64, 1) both;
+  animation-delay: var(--guide-marker-delay, 0ms);
+  transform-origin: bottom center;
+}
+
+.guide-map-marker-hit,
+.guide-map-property-hit {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+  transform-origin: bottom center;
+  transition: transform 0.28s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+.guide-map-marker-hit:hover,
+.guide-map-marker.is-hovered .guide-map-marker-hit {
+  transform: scale(1.12) translateY(-2px);
+}
+
+.guide-map-marker.is-selected .guide-map-marker-hit,
+.guide-map-marker.is-selected .guide-map-marker-hit:hover {
+  transform: scale(1.18) translateY(-3px);
+}
+
+.guide-map-marker-glow {
+  display: none;
+  position: absolute;
+  top: 1px;
+  width: 46px;
+  height: 46px;
+  border-radius: 999px;
+  background: var(--guide-marker-glow);
+  box-shadow: 0 0 0 5px var(--guide-marker-glow);
+  z-index: 0;
+}
+
+.guide-map-marker.is-featured .guide-map-marker-glow {
+  display: block;
+}
+
+.guide-map-marker-dot {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: var(--guide-marker-color);
+  border: 2.5px solid #fff;
+  box-shadow: 0 5px 14px rgba(60, 40, 18, 0.28);
+  transition: box-shadow 0.28s ease, transform 0.28s ease;
+}
+
+.guide-map-marker.is-hovered .guide-map-marker-dot,
+.guide-map-marker-hit:hover .guide-map-marker-dot {
+  box-shadow:
+    0 0 0 4px rgba(255, 248, 235, 0.88),
+    0 8px 16px rgba(60, 40, 18, 0.26);
+}
+
+.guide-map-marker.is-selected .guide-map-marker-dot {
+  box-shadow:
+    0 0 0 4px rgba(255, 248, 235, 0.96),
+    0 0 0 7px var(--guide-marker-color),
+    0 8px 18px rgba(60, 40, 18, 0.3);
+}
+
+.guide-map-marker.is-featured .guide-map-marker-dot {
+  width: 38px;
+  height: 38px;
+}
+
+.guide-map-marker-caret {
+  position: relative;
+  z-index: 1;
+  width: 0;
+  height: 0;
+  margin-top: -2px;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 8px solid var(--guide-marker-color);
+  filter: drop-shadow(0 3px 2px rgba(60, 40, 18, 0.18));
+}
+
+.guide-map-marker-label {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%) translateY(4px);
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+  max-width: 16rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0.28rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(248, 241, 227, 0.96);
+  border: 1px solid #e0d2b8;
+  color: #3f3428;
+  font-size: 0.7rem;
+  font-weight: 600;
+  font-family: var(--font-manrope), Manrope, sans-serif;
+  box-shadow: 0 4px 12px rgba(92, 64, 32, 0.12);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.guide-map-marker-hit:hover .guide-map-marker-label,
+.guide-map-marker.is-selected .guide-map-marker-label,
+.guide-map-property-hit:hover .guide-map-marker-label,
+.guide-map-marker-label--property {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.guide-map-property-hit:hover {
+  transform: scale(1.04);
+}
+
+.guide-map-property-marker.is-popup-enabled .guide-map-property-hit:hover .guide-map-marker-label,
+.guide-map-property-marker.is-popup-enabled .guide-map-property-hit:focus .guide-map-marker-label {
+  opacity: 0;
+}
+
+.guide-map-property-marker.is-active-stay .guide-map-property-pin {
+  box-shadow:
+    0 0 0 5px rgba(51, 126, 47, 0.28),
+    0 0 0 8px rgba(255, 248, 235, 0.92),
+    0 8px 18px rgba(26, 54, 24, 0.28);
+}
+
+.guide-map-property-pulse {
+  position: absolute;
+  bottom: 4px;
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  background: rgba(51, 126, 47, 0.16);
+  animation: guide-map-property-pulse 2.6s ease-out infinite;
+  z-index: 0;
+}
+
+.guide-map-property-pin {
+  position: relative;
+  z-index: 1;
+  width: 42px;
+  height: 42px;
+  border-radius: 50% 50% 50% 0;
+  background: #337e2f;
+  border: 3px solid #fff;
+  box-shadow:
+    0 0 0 5px rgba(51, 126, 47, 0.16),
+    0 8px 18px rgba(26, 54, 24, 0.28);
+  transform: rotate(-45deg);
+}
+
+.guide-map-property-house {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  transform: rotate(45deg);
+}
+
+@keyframes guide-map-marker-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.42);
+  }
+  72% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes guide-map-property-pulse {
+  0% {
+    transform: scale(0.55);
+    opacity: 0.65;
+  }
+  70% {
+    transform: scale(1.15);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.15);
+    opacity: 0;
+  }
+}
+
+/* Instant hover card — no fade/slide delay */
+.guide-map-popup,
+.guide-map-popup.maplibregl-popup {
+  pointer-events: none;
+  z-index: 5;
+  animation: none !important;
+  transition: none !important;
+}
+
+.guide-map-popup .maplibregl-popup-content {
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+  pointer-events: none;
+}
+
+.guide-map-popup .maplibregl-popup-tip {
+  border-top-color: #f8f1e3;
+  border-bottom-color: #f8f1e3;
+}
+
+.guide-map-popup-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  min-width: 13.5rem;
+  max-width: 19rem;
+  padding: 0.42rem 0.8rem 0.42rem 0.42rem;
+  border-radius: 0.9rem;
+  background: rgba(248, 241, 227, 0.97);
+  border: 1px solid #e0d2b8;
+  box-shadow: 0 10px 24px rgba(92, 64, 32, 0.16);
+}
+
+.guide-map-popup-photo {
+  width: 58px;
+  height: 58px;
+  flex-shrink: 0;
+  border-radius: 0.6rem;
+  object-fit: cover;
+  background: #e8dcc6;
+}
+
+.guide-map-popup-photo--fallback {
+  display: grid;
+  place-items: center;
+}
+
+.guide-map-popup-copy {
+  min-width: 0;
+  padding: 0.15rem 0;
+}
+
+.guide-map-popup-name {
+  margin: 0;
+  font-family: var(--font-manrope), Manrope, sans-serif;
+  font-size: 0.84rem;
+  font-weight: 650;
+  color: #3f3428;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.guide-map-popup-description {
+  margin: 0.22rem 0 0;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: #5c4e3d;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.guide-map-popup-category {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0.22rem 0 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  color: #8a7b68;
+}
+
+.guide-map-popup-swatch {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.7);
+}
+
+.guide-map-popup-stay {
+  margin: 0.22rem 0 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #337e2f;
+}
+
+.guide-filter-scroller {
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+}
+
+@media (max-width: 1023px) {
+  .guide-filter-scroller {
+    mask-image: linear-gradient(to right, #000 0%, #000 calc(100% - 1.75rem), transparent 100%);
+  }
+}
+
 .admin-property-map {
   position: relative;
 }
@@ -681,10 +1178,16 @@ input[type="date"].hide-native-calendar-icon::-webkit-date-and-time-value {
 /* Premium marketing surface — shared by fixed backdrop + hero fade (must stay in sync) */
 :root {
   --site-header-height: 4.5rem;
-  --site-search-header-height: 4.25rem;
+  --site-search-header-height: 8rem;
   --premium-surface-gradient: #121816;
   --premium-texture-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   --premium-hero-overlap: clamp(6rem, 14vh, 11rem);
+}
+
+@media (min-width: 768px) {
+  :root {
+    --site-search-header-height: 4.25rem;
+  }
 }
 
 /* Premium marketing sections — single continuous surface when wrapped in PremiumBackgroundProvider */
@@ -774,16 +1277,43 @@ input[type="date"].hide-native-calendar-icon::-webkit-date-and-time-value {
 }
 
 /*
- * Hero → premium blend: wash the photo into the same #121816 the backdrop starts with
- * so the section join has no colour or texture seam.
+ * Shared hero photo dissolve — keep the image through the copy, then drop it
+ * only in the last band so the section join sits at the bottom of the viewport.
+ */
+.hero-photo-fade {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 48%,
+    rgba(0, 0, 0, 0.9) 68%,
+    rgba(0, 0, 0, 0.55) 82%,
+    rgba(0, 0, 0, 0.14) 92%,
+    transparent 98%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    #000 48%,
+    rgba(0, 0, 0, 0.9) 68%,
+    rgba(0, 0, 0, 0.55) 82%,
+    rgba(0, 0, 0, 0.14) 92%,
+    transparent 98%
+  );
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+/*
+ * Hero → premium blend: a short bottom wash. Cover leftover photo, then go
+ * transparent so the fixed backdrop continues across the join.
  */
 .hero-premium-fade-wrap {
-  height: min(68vh, 42rem);
+  height: min(38vh, 24rem);
 }
 
 @media (min-width: 640px) {
   .hero-premium-fade-wrap {
-    height: min(62vh, 44rem);
+    height: min(34vh, 26rem);
   }
 }
 
@@ -797,9 +1327,10 @@ input[type="date"].hide-native-calendar-icon::-webkit-date-and-time-value {
   background: linear-gradient(
     to bottom,
     transparent 0%,
-    rgba(18, 24, 22, 0.28) 34%,
-    rgba(18, 24, 22, 0.58) 62%,
-    rgba(18, 24, 22, 0.22) 86%,
+    rgba(18, 24, 22, 0.22) 28%,
+    rgba(18, 24, 22, 0.62) 58%,
+    #121816 82%,
+    rgba(18, 24, 22, 0.4) 93%,
     transparent 100%
   );
 }
@@ -842,6 +1373,22 @@ input[type="date"].hide-native-calendar-icon::-webkit-date-and-time-value {
     rgba(0, 0, 0, 0.14) 48%,
     transparent 70%
   );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 58%,
+    rgba(0, 0, 0, 0.45) 82%,
+    transparent 94%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    #000 58%,
+    rgba(0, 0, 0, 0.45) 82%,
+    transparent 94%
+  );
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
 }
 
 .hero-copy-readable {
@@ -874,6 +1421,12 @@ input[type="date"].hide-native-calendar-icon::-webkit-date-and-time-value {
 /* Pull premium content into hero fade zone — removes the hard section box seam */
 .premium-content-stack {
   margin-top: calc(-1 * var(--premium-hero-overlap));
+}
+
+/* The overlapping first section must not paint-contain; that boxes a visible edge. */
+.premium-content-stack > :first-child {
+  content-visibility: visible;
+  contain: none;
 }
 
 .premium-page-backdrop__vignette {

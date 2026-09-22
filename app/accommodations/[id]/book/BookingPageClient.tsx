@@ -146,7 +146,13 @@ interface CalendarDataState {
   };
 }
 
-export default function BookingPageClient({ toursEnabled = false }: { toursEnabled?: boolean }) {
+export default function BookingPageClient({
+  toursEnabled = false,
+  guideEnabled = false,
+}: {
+  toursEnabled?: boolean;
+  guideEnabled?: boolean;
+}) {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -484,7 +490,7 @@ export default function BookingPageClient({ toursEnabled = false }: { toursEnabl
     return (
       <>
         <section className="isolate min-h-screen overflow-hidden relative bg-gray-50">
-          <Header toursEnabled={toursEnabled} />
+          <Header toursEnabled={toursEnabled} guideEnabled={guideEnabled} />
           <div className="flex items-center justify-center min-h-[400px]">
             <Loader2 className="h-12 w-12 animate-spin text-right-stay-500" />
           </div>
@@ -498,7 +504,7 @@ export default function BookingPageClient({ toursEnabled = false }: { toursEnabl
     return (
       <>
         <section className="isolate min-h-screen overflow-hidden relative bg-gray-50">
-          <Header toursEnabled={toursEnabled} />
+          <Header toursEnabled={toursEnabled} guideEnabled={guideEnabled} />
           <div className="relative z-10 mx-auto max-w-7xl px-6 md:px-8 py-24">
             <Link
               href={accommodationsReturnHref}
@@ -582,7 +588,7 @@ export default function BookingPageClient({ toursEnabled = false }: { toursEnabl
   return (
     <>
       <section className="isolate min-h-screen overflow-x-hidden relative bg-white">
-        <Header toursEnabled={toursEnabled} />
+        <Header toursEnabled={toursEnabled} guideEnabled={guideEnabled} />
 
         <div className="relative z-10 bg-white">
           {success && (

@@ -22,9 +22,9 @@ const nextConfig = {
     // WebP-only: AVIF encoding of large photos on the VPS can take several seconds per request.
     formats: ['image/webp'],
     // Must include every `quality` passed to <Image /> (ListingImage + heroes).
-    qualities: [68, 72, 75, 78, 80, 82, 85],
+    qualities: [68, 72, 75, 78, 80, 82, 84, 85, 90],
     minimumCacheTTL: 60 * 60 * 24 * 30,
-    // Drop 3840: 2x 1920 screens would otherwise download a 4k asset. 2560 is enough.
+    // Drop 3840: 2x 1920 screens pick 2560 from prebuilt hero srcsets instead of a 4k asset.
     deviceSizes: [640, 750, 828, 1080, 1200, 1600, 1920, 2560],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     // Increase timeout for image optimization (30 seconds)

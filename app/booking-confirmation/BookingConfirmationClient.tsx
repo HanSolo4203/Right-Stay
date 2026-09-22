@@ -36,10 +36,12 @@ const importantNotes = [
 
 type BookingConfirmationClientProps = {
   toursEnabled?: boolean;
+  guideEnabled?: boolean;
 };
 
 export default function BookingConfirmationClient({
   toursEnabled = false,
+  guideEnabled = false,
 }: BookingConfirmationClientProps) {
   const contactEmail = getPublicSiteContactEmail();
 
@@ -48,7 +50,7 @@ export default function BookingConfirmationClient({
       <PremiumPageBackdrop />
 
       <section className="isolate relative z-[1] min-h-[420px] sm:min-h-[480px] overflow-x-hidden">
-        <Header toursEnabled={toursEnabled} />
+        <Header toursEnabled={toursEnabled} guideEnabled={guideEnabled} />
 
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 md:px-8 pt-16 sm:pt-20 pb-10 sm:pb-12 flex flex-col items-center text-center">
           <p

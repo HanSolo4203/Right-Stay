@@ -10,16 +10,7 @@ export default function HostHero() {
   return (
     <>
       <div className="absolute inset-0">
-        <HeroBackgroundImage
-          src={MARKETING_IMAGES.propertyManagementHero}
-          priority
-          style={{
-            maskImage:
-              'linear-gradient(to bottom, black 48%, rgba(0,0,0,0.75) 68%, rgba(0,0,0,0.25) 86%, transparent 100%)',
-            WebkitMaskImage:
-              'linear-gradient(to bottom, black 48%, rgba(0,0,0,0.75) 68%, rgba(0,0,0,0.25) 86%, transparent 100%)',
-          }}
-        />
+        <HeroBackgroundImage src={MARKETING_IMAGES.propertyManagementHero} priority />
         <div aria-hidden className="hero-copy-wash-left" />
       </div>
 

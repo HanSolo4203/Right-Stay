@@ -18,15 +18,21 @@ import {
   DollarSign,
   Mail,
   PanelLeft,
+  Compass,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {
+  parseSiteFeatureFlags,
+  type SiteFeatureFlags,
+} from '@/lib/site-feature-flags';
+import {
   SiteSettingsSkeleton,
   PropertySettingsSkeleton,
   PricingDashboardSkeleton,
   TourPackageSettingsSkeleton,
+  GuideSettingsSkeleton,
   BookingManagementSkeleton,
   BookingRequestManagementSkeleton,
   ContactSubmissionManagementSkeleton,
@@ -34,7 +40,7 @@ import {
 } from '@/components/admin/AdminTabSkeletons';
 
 const dynamicTab = (
-  loader: () => Promise<{ default: ComponentType }>,
+  loader: () => Promise<{ default: ComponentType<any> }>,
   loading: () => ReactElement
 ) => dynamic(loader, { loading, ssr: false });
 
@@ -53,6 +59,10 @@ const PricingDashboard = dynamicTab(
 const TourPackageSettings = dynamicTab(
   () => import('@/components/admin/TourPackageSettings'),
   TourPackageSettingsSkeleton
+);
+const GuideSettings = dynamicTab(
+  () => import('@/components/admin/GuideSettings'),
+  GuideSettingsSkeleton
 );
 const BookingManagement = dynamicTab(
   () => import('@/components/admin/BookingManagement'),
@@ -76,6 +86,7 @@ type TabType =
   | 'properties'
   | 'pricing'
   | 'tours'
+  | 'guide'
   | 'bookings'
   | 'booking-requests'
   | 'contact-submissions'
@@ -87,6 +98,7 @@ const VALID_TABS: TabType[] = [
   'properties',
   'pricing',
   'tours',
+  'guide',
   'bookings',
   'booking-requests',
   'contact-submissions',
@@ -110,6 +122,10 @@ const TAB_META: Record<TabType, { title: string; description: string }> = {
   tours: {
     title: 'Tour Packages',
     description: 'Create and edit tour offerings',
+  },
+  guide: {
+    title: 'Things To Do',
+    description: 'Manage the Cape Town guide: categories and places',
   },
   bookings: {
     title: 'Bookings',
@@ -149,6 +165,7 @@ function AdminDashboard() {
   const loadingRef = useRef(true);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [toursEnabled, setToursEnabled] = useState(false);
+  const [guideEnabled, setGuideEnabled] = useState(false);
 
   const finishLoading = () => {
     loadingRef.current = false;
@@ -166,10 +183,10 @@ function AdminDashboard() {
         if (!response.ok) return;
 
         const data = await response.json();
-        const toursSetting = data.find(
-          (setting: { key: string; value?: number | null }) => setting.key === 'tours_enabled',
-        );
-        setToursEnabled(Number(toursSetting?.value) === 1);
+        if (!Array.isArray(data)) return;
+        const flags = parseSiteFeatureFlags(data);
+        setToursEnabled(flags.toursEnabled);
+        setGuideEnabled(flags.guideEnabled);
       } catch (error) {
         console.error('Error fetching tours setting:', error);
       }
@@ -177,6 +194,11 @@ function AdminDashboard() {
 
     fetchToursEnabled();
   }, []);
+
+  const handleFeatureFlagsChange = (flags: SiteFeatureFlags) => {
+    setToursEnabled(flags.toursEnabled);
+    setGuideEnabled(flags.guideEnabled);
+  };
 
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);
@@ -264,6 +286,7 @@ function AdminDashboard() {
     { id: 'pricing' as TabType, name: 'Dynamic Pricing', shortName: 'Pricing', icon: DollarSign },
     { id: 'tours' as TabType, name: 'Tour Packages', shortName: 'Tours', icon: Map },
     { id: 'bookings' as TabType, name: 'Bookings', shortName: 'Bookings', icon: Calendar },
+    { id: 'guide' as TabType, name: 'Things To Do', shortName: 'Guide', icon: Compass },
     {
       id: 'booking-requests' as TabType,
       name: 'Booking Requests',
@@ -279,6 +302,8 @@ function AdminDashboard() {
     { id: 'mapping' as TabType, name: 'Property Mapping', shortName: 'Mapping', icon: Link },
     { id: 'reviews' as TabType, name: 'Import Reviews', shortName: 'Reviews', icon: MessageSquare },
   ];
+  const primaryTabs = tabs.slice(0, 5);
+  const moreTabIds = tabs.slice(5).map((tab) => tab.id);
 
   const meta = TAB_META[activeTab];
 
@@ -291,28 +316,31 @@ function AdminDashboard() {
   }) => {
     const Icon = tab.icon;
     const isActive = activeTab === tab.id;
-    const isToursHidden = tab.id === 'tours' && !toursEnabled;
+    const isHiddenFromWebsite =
+      (tab.id === 'tours' && !toursEnabled) || (tab.id === 'guide' && !guideEnabled);
     return (
       <button
         type="button"
         onClick={() => handleTabChange(tab.id)}
         className={cn(
-          'flex items-center gap-3 w-full rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+          'flex w-full rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+          compact
+            ? 'flex-col items-center gap-1 px-2 py-2 text-[10px] leading-tight min-w-0 flex-1'
+            : 'items-center gap-3 text-left',
           isActive
             ? 'bg-right-stay-50 text-right-stay-700 border border-right-stay-200'
             : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent',
-          isToursHidden && !isActive && 'opacity-75',
-          compact && 'flex-col gap-1 px-2 py-2 text-[10px] leading-tight min-w-0 flex-1'
+          isHiddenFromWebsite && !isActive && 'opacity-75'
         )}
       >
         <Icon className={cn('shrink-0', compact ? 'w-5 h-5' : 'w-4 h-4')} strokeWidth={2} />
-        <span className={cn(compact ? 'truncate w-full text-center' : 'flex min-w-0 flex-1 items-center gap-2')}>
-          <span className={cn(compact ? 'truncate w-full text-center' : 'truncate')}>
+        <span className={cn(compact ? 'truncate w-full text-center' : 'min-w-0 flex-1')}>
+          <span className={cn('block', compact ? 'truncate w-full text-center' : 'leading-5')}>
             {compact ? tab.shortName : tab.name}
           </span>
-          {isToursHidden && !compact ? (
-            <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-amber-800">
-              Hidden from website
+          {isHiddenFromWebsite && !compact ? (
+            <span className="mt-0.5 block text-[10px] font-medium uppercase tracking-wide text-amber-700">
+              Hidden from site
             </span>
           ) : null}
         </span>
@@ -450,10 +478,13 @@ function AdminDashboard() {
         {/* Main */}
         <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            {activeTab === 'site' && <SiteSettings />}
+            {activeTab === 'site' && (
+              <SiteSettings onFeatureFlagsChange={handleFeatureFlagsChange} />
+            )}
             {activeTab === 'properties' && <PropertySettings />}
             {activeTab === 'pricing' && <PricingDashboard />}
             {activeTab === 'tours' && <TourPackageSettings />}
+            {activeTab === 'guide' && <GuideSettings />}
             {activeTab === 'bookings' && <BookingManagement />}
             {activeTab === 'booking-requests' && <BookingRequestManagement />}
             {activeTab === 'contact-submissions' && <ContactSubmissionManagement />}
@@ -488,7 +519,7 @@ function AdminDashboard() {
         aria-label="Primary"
       >
         <div className="flex items-stretch justify-between gap-0.5 px-1 py-1.5 max-w-lg mx-auto sm:max-w-none">
-          {tabs.slice(0, 5).map((tab) => (
+          {primaryTabs.map((tab) => (
             <NavButton key={tab.id} tab={tab} compact />
           ))}
           <button
@@ -496,7 +527,7 @@ function AdminDashboard() {
             onClick={() => setMobileNavOpen(true)}
             className={cn(
               'flex flex-col items-center justify-center gap-1 flex-1 min-w-0 rounded-lg px-2 py-2 text-[10px] font-medium transition-colors',
-              ['booking-requests', 'contact-submissions', 'mapping', 'reviews'].includes(activeTab)
+              moreTabIds.includes(activeTab)
                 ? 'text-right-stay-700 bg-right-stay-50'
                 : 'text-slate-600 hover:bg-slate-100'
             )}

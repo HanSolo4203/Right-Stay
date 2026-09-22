@@ -108,16 +108,7 @@ export default function HeroSection({ initialLocations = [] }: HeroSectionProps)
   return (
     <>
       <div className="absolute inset-0">
-        <HeroBackgroundImage
-          src={MARKETING_IMAGES.mainHero}
-          priority
-          style={{
-            maskImage:
-              'linear-gradient(to bottom, black 30%, rgba(0,0,0,0.78) 52%, rgba(0,0,0,0.32) 72%, rgba(0,0,0,0.08) 88%, transparent 100%)',
-            WebkitMaskImage:
-              'linear-gradient(to bottom, black 30%, rgba(0,0,0,0.78) 52%, rgba(0,0,0,0.32) 72%, rgba(0,0,0,0.08) 88%, transparent 100%)',
-          }}
-        />
+        <HeroBackgroundImage src={MARKETING_IMAGES.mainHero} priority />
       </div>
 
       <div className="z-10 relative">

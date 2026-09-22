@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import ScrollAnimationProvider from '@/components/providers/ScrollAnimationProvider';
 import SiteHeader from '@/components/sections/SiteHeader';
 import ContactHero from '@/components/sections/ContactHero';
 import ContactForm from '@/components/sections/ContactForm';
 import Footer from '@/components/sections/Footer';
+import PremiumBackgroundProvider from '@/components/premium/PremiumBackgroundProvider';
+import PremiumPageBackdrop from '@/components/premium/PremiumPageBackdrop';
 import { getPublicSiteContact } from '@/lib/public-site-settings';
 
 export const metadata: Metadata = {
@@ -17,15 +18,16 @@ export default async function ContactPage() {
 
   return (
     <>
-      <section className="isolate min-h-[70svh] sm:min-h-[600px] overflow-hidden relative bg-black">
+      <section className="isolate relative z-[1] min-h-svh overflow-x-clip">
         <SiteHeader />
         <ContactHero contact={contact} />
       </section>
-      <div className="bg-black">
-        <ScrollAnimationProvider>
+      <PremiumPageBackdrop />
+      <PremiumBackgroundProvider className="premium-content-stack">
+        <div className="pt-[var(--premium-hero-overlap)]">
           <ContactForm />
-        </ScrollAnimationProvider>
-      </div>
+        </div>
+      </PremiumBackgroundProvider>
       <Footer contact={contact} />
     </>
   );

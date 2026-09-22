@@ -13,6 +13,7 @@ import {
   type PropertyPhotoVariant,
 } from '@/lib/listing-image';
 import PropertyLocationPicker from './PropertyLocationPicker';
+import AddressSearchInput from './AddressSearchInput';
 import PropertyAmenitiesEditor from './PropertyAmenitiesEditor';
 import { extractAmenitiesFromAttributes } from '@/lib/property-amenities';
 
@@ -115,7 +116,6 @@ export default function PropertySettings() {
   const [syncingFromUplisting, setSyncingFromUplisting] = useState(false);
   const [togglingPublishId, setTogglingPublishId] = useState<string | null>(null);
   const [savingProperty, setSavingProperty] = useState(false);
-  const [geocodingLocation, setGeocodingLocation] = useState(false);
   const [mapPickerSession, setMapPickerSession] = useState(0);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -400,47 +400,21 @@ export default function PropertySettings() {
       setPricingErrors({});
   };
 
-  const handleGeocodeAddress = async () => {
-    const query = formData.location_address.trim();
-    if (query.length < 3) {
-      setMessage({
-        type: 'error',
-        text: 'Enter a property address (at least 3 characters) to find on map.',
-      });
-      return;
-    }
-
-    setGeocodingLocation(true);
-    try {
-      const response = await fetch(
-        `/api/admin/geocode?q=${encodeURIComponent(query)}`
-      );
-      const data = await response.json();
-
-      if (!response.ok) {
-        setMessage({
-          type: 'error',
-          text: data.error || 'Could not find that address.',
-        });
-        return;
-      }
-
+  const handleAddressResolved = useCallback(
+    ({ address, lat, lng }: { address: string; lat: string; lng: string }) => {
       setFormData((prev) => ({
         ...prev,
-        latitude: String(data.lat),
-        longitude: String(data.lng),
-        location_address: data.displayName || prev.location_address,
+        latitude: lat,
+        longitude: lng,
+        location_address: address || prev.location_address,
         location_display:
           prev.location_display.trim() ||
-          data.displayName?.split(',').slice(-2).join(',').trim() ||
+          address.split(',').slice(-2).join(',').trim() ||
           prev.location_display,
       }));
-    } catch {
-      setMessage({ type: 'error', text: 'Geocoding request failed.' });
-    } finally {
-      setGeocodingLocation(false);
-    }
-  };
+    },
+    []
+  );
 
   const handleCoordinatesChange = useCallback((lat: string, lng: string) => {
     setFormData((prev) => ({ ...prev, latitude: lat, longitude: lng }));
@@ -1432,27 +1406,15 @@ export default function PropertySettings() {
                   <label className="block text-sm font-medium text-slate-600 mb-2">
                     Property address
                   </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      name="location_address"
-                      value={formData.location_address}
-                      onChange={handleChange}
-                      className="flex-1 px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500 transition-colors"
-                      placeholder="Full street address or area"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleGeocodeAddress}
-                      disabled={geocodingLocation}
-                      className="shrink-0 px-4 py-2 bg-right-stay-500 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2"
-                    >
-                      {geocodingLocation ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : null}
-                      Find on map
-                    </button>
-                  </div>
+                  <AddressSearchInput
+                    value={formData.location_address}
+                    onChange={(address) =>
+                      setFormData((prev) => ({ ...prev, location_address: address }))
+                    }
+                    onResolved={handleAddressResolved}
+                    inputClassName="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-right-stay-500/25 focus:border-right-stay-500 transition-colors"
+                    placeholder="Search Google Maps for a street address or area"
+                  />
                 </div>
 
                 <PropertyLocationPicker

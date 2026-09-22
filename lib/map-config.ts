@@ -2,6 +2,9 @@
 export const DEFAULT_MAP_CENTER: [number, number] = [-33.9249, 18.4241];
 export const DEFAULT_MAP_ZOOM = 13;
 
+/** Closer neighborhood view when a guest is staying at a known property. */
+export const GUIDE_PROPERTY_MAP_ZOOM = 15;
+
 /** Booking map zoom — slightly pulled back for neighborhood context. */
 export const PROPERTY_BOOKING_MAP_ZOOM = 15.75;
 

@@ -450,6 +450,7 @@ export async function POST(request: Request) {
     try {
       await sendBookingRequestEmails({
         bookingReference,
+        propertyId,
         propertyName,
         apartmentNumber: apartment.apartment_number,
         guestName,

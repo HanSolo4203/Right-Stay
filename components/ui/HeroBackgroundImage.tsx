@@ -14,6 +14,7 @@ type HeroBackgroundImageProps = Omit<
   alt?: string;
   /** True for the LCP hero on the current page. */
   priority?: boolean;
+  sizes?: string;
 };
 
 /**
@@ -30,6 +31,7 @@ export default function HeroBackgroundImage({
   blurDataURL,
   style,
   onLoad,
+  sizes: sizesProp,
   ...props
 }: HeroBackgroundImageProps) {
   const srcKey = typeof src === 'string' ? src : '';
@@ -38,7 +40,7 @@ export default function HeroBackgroundImage({
   const focusClass = MARKETING_IMAGE_OBJECT_CLASS[srcKey];
   const [loaded, setLoaded] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
-  const sizes = priority ? IMAGE_SIZES.heroLcp : IMAGE_SIZES.hero;
+  const sizes = sizesProp ?? (priority ? IMAGE_SIZES.heroLcp : IMAGE_SIZES.hero);
 
   useLayoutEffect(() => {
     const img = imgRef.current;
@@ -50,7 +52,7 @@ export default function HeroBackgroundImage({
   const markLoaded = () => setLoaded(true);
 
   return (
-    <div className="absolute inset-0 overflow-hidden bg-[#121816]" style={style}>
+    <div className="hero-photo-fade absolute inset-0 overflow-hidden bg-[#121816]" style={style}>
       {priority && sources ? (
         <link
           rel="preload"
@@ -82,7 +84,7 @@ export default function HeroBackgroundImage({
           sizes={sizes}
           alt={alt}
           fetchPriority={priority ? 'high' : 'low'}
-          decoding="async"
+          decoding={priority ? 'sync' : 'async'}
           onLoad={(event) => {
             markLoaded();
             onLoad?.(event);
@@ -102,7 +104,7 @@ export default function HeroBackgroundImage({
           sizes={sizes}
           priority={priority}
           fetchPriority={priority ? 'high' : 'low'}
-          quality={quality ?? (priority ? 78 : 72)}
+          quality={quality ?? (priority ? 85 : 80)}
           placeholder={placeholder ?? (blur ? 'blur' : undefined)}
           blurDataURL={blur}
           onLoad={(event) => {

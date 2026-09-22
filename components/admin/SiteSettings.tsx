@@ -2,14 +2,21 @@
 
 import { useState, useEffect } from 'react';
 import { Save, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import {
+  parseSiteFeatureFlags,
+  type SiteFeatureFlags,
+  type SiteSettingRow,
+} from '@/lib/site-feature-flags';
 
-interface SiteSetting {
-  key: string;
-  value?: number | null;
-  text_value?: string | null;
-}
+export default function SiteSettings({
+  onFeatureFlagsChange,
+}: {
+  onFeatureFlagsChange?: (flags: SiteFeatureFlags) => void;
+} = {}) {
+  const emitFeatureFlags = (toursEnabled: boolean, guideEnabled: boolean) => {
+    onFeatureFlagsChange?.({ toursEnabled, guideEnabled });
+  };
 
-export default function SiteSettings() {
   const [settings, setSettings] = useState({
     site_name: '',
     site_email: '',
@@ -21,6 +28,7 @@ export default function SiteSettings() {
     default_welcome_pack_fee: '',
     ical_sync_schedule: '0 1 * * *',
     tours_enabled: false,
+    guide_enabled: false,
   });
   
   const [loading, setLoading] = useState(true);
@@ -37,26 +45,28 @@ export default function SiteSettings() {
       const response = await fetch('/api/admin/site-settings');
       if (response.ok) {
         const data = await response.json();
-        const settingsObj: any = {};
-        
-        data.forEach((setting: SiteSetting) => {
-          if (setting.key === 'tours_enabled') {
-            settingsObj.tours_enabled = Number(setting.value) === 1;
-          } else if (setting.value !== null && setting.value !== undefined) {
-            settingsObj[setting.key] = setting.value.toString();
+        const rows: SiteSettingRow[] = Array.isArray(data) ? data : [];
+        const flags = parseSiteFeatureFlags(rows);
+        const settingsObj: Record<string, string> = {};
+
+        rows.forEach((setting: SiteSettingRow) => {
+          if (setting.key === 'tours_enabled' || setting.key === 'guide_enabled') {
+            return;
+          }
+          if (setting.value !== null && setting.value !== undefined) {
+            settingsObj[setting.key] = String(setting.value);
           } else if (setting.text_value !== null && setting.text_value !== undefined) {
             settingsObj[setting.key] = setting.text_value;
           }
         });
-        
+
         setSettings(prevSettings => ({
           ...prevSettings,
           ...settingsObj,
-          tours_enabled:
-            typeof settingsObj.tours_enabled === 'boolean'
-              ? settingsObj.tours_enabled
-              : prevSettings.tours_enabled,
+          tours_enabled: flags.toursEnabled,
+          guide_enabled: flags.guideEnabled,
         }));
+        emitFeatureFlags(flags.toursEnabled, flags.guideEnabled);
         
         // Check if ical_sync_schedule is a custom value (not in predefined list)
         const predefinedSchedules = ['0 1 * * *', '0 */6 * * *', '0 * * * *', '*/30 * * * *', '*/10 * * * *'];
@@ -82,6 +92,7 @@ export default function SiteSettings() {
       const settingsToSubmit = {
         ...settings,
         tours_enabled: settings.tours_enabled ? 1 : 0,
+        guide_enabled: settings.guide_enabled ? 1 : 0,
       };
       if (settings.ical_sync_schedule === 'custom') {
         settingsToSubmit.ical_sync_schedule = customCronExpression || '0 1 * * *';
@@ -94,6 +105,7 @@ export default function SiteSettings() {
       });
 
       if (response.ok) {
+        emitFeatureFlags(settings.tours_enabled, settings.guide_enabled);
         setMessage({ type: 'success', text: 'Settings saved successfully!' });
         setTimeout(() => setMessage(null), 3000);
       } else {
@@ -114,10 +126,21 @@ export default function SiteSettings() {
   };
 
   const handleToursToggle = () => {
-    setSettings(prev => ({
+    const next = !settings.tours_enabled;
+    setSettings((prev) => ({
       ...prev,
-      tours_enabled: !prev.tours_enabled,
+      tours_enabled: next,
     }));
+    emitFeatureFlags(next, settings.guide_enabled);
+  };
+
+  const handleGuideToggle = () => {
+    const next = !settings.guide_enabled;
+    setSettings((prev) => ({
+      ...prev,
+      guide_enabled: next,
+    }));
+    emitFeatureFlags(settings.tours_enabled, next);
   };
 
   if (loading) {
@@ -304,6 +327,31 @@ export default function SiteSettings() {
               <span
                 className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
                   settings.tours_enabled ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+
+          <div className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-slate-900">Things To Do Guide</p>
+              <p className="mt-1 text-sm text-slate-500">
+                Show the Cape Town things-to-do map in the main nav
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleGuideToggle}
+              className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors ${
+                settings.guide_enabled ? 'bg-right-stay-500' : 'bg-slate-300'
+              }`}
+              role="switch"
+              aria-checked={settings.guide_enabled}
+              aria-label="Things To Do Guide"
+            >
+              <span
+                className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
+                  settings.guide_enabled ? 'translate-x-6' : 'translate-x-1'
                 }`}
               />
             </button>

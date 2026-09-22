@@ -8,6 +8,7 @@ import { Menu, X } from "lucide-react";
 const BASE_NAV_LINKS = [
   { href: "/stay-with-us", label: "Stay With Us" },
   { href: "/tours", label: "Tours", toursOnly: true },
+  { href: "/things-to-do", label: "Things To Do", guideOnly: true },
   { href: "/host-with-us", label: "Property Management" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
@@ -15,11 +16,14 @@ const BASE_NAV_LINKS = [
 
 type HeaderProps = {
   toursEnabled?: boolean;
+  guideEnabled?: boolean;
 };
 
-export default function Header({ toursEnabled = false }: HeaderProps) {
+export default function Header({ toursEnabled = false, guideEnabled = false }: HeaderProps) {
   const navLinks = BASE_NAV_LINKS.filter(
-    (link) => !("toursOnly" in link && link.toursOnly) || toursEnabled,
+    (link) =>
+      (!("toursOnly" in link && link.toursOnly) || toursEnabled) &&
+      (!("guideOnly" in link && link.guideOnly) || guideEnabled),
   );
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);

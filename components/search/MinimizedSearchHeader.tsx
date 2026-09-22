@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Menu, Search, X } from "lucide-react";
 import GlassAccommodationSearch from "@/components/search/GlassAccommodationSearch";
 import HeroBackgroundImage from "@/components/ui/HeroBackgroundImage";
+import { IMAGE_SIZES } from "@/lib/image-sizes";
 import { MARKETING_IMAGES } from "@/lib/marketing-images";
 import {
   type AccommodationSearchForm,
@@ -72,20 +73,20 @@ export default function MinimizedSearchHeader({
 
   const headerChrome = (
     <>
-      <header className="fixed inset-x-0 top-0 z-[100] isolate overflow-hidden border-b border-white/10">
-        <div className="absolute inset-0">
+      <header className="fixed inset-x-0 top-0 z-[100] isolate border-b border-white/10">
+        <div className="absolute inset-0 overflow-hidden">
           <HeroBackgroundImage
             src={MARKETING_IMAGES.heroCapeTown}
-            priority
+            sizes={IMAGE_SIZES.heroHeader}
           />
           <div className="absolute inset-0 bg-black/55" aria-hidden />
         </div>
 
         <div className="relative bg-black/80 md:bg-white/[0.03] md:backdrop-blur-xl">
-          <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6 md:px-8">
+          <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-2 px-4 py-2.5 sm:px-6 md:flex md:gap-4 md:px-8 md:py-3">
             <Link
               href="/"
-              className="shrink-0 text-base font-semibold tracking-tight text-white/95 sm:text-lg"
+              className="col-start-1 row-start-1 w-fit min-w-0 justify-self-start truncate text-base font-semibold tracking-tight text-white/95 sm:text-lg md:shrink-0"
               onClick={closeMobileMenu}
             >
               Right Stay Africa
@@ -94,7 +95,7 @@ export default function MinimizedSearchHeader({
             <button
               type="button"
               onClick={() => setSearchExpanded(true)}
-              className={`mx-auto flex min-w-0 flex-1 max-w-xl items-center rounded-full py-1 pl-1 pr-3 sm:pr-1 ${glassFrostPill}`}
+              className={`col-span-2 row-start-2 flex min-w-0 w-full items-center overflow-hidden rounded-full py-1 pl-1 pr-3 md:col-auto md:row-auto md:mx-auto md:max-w-xl md:flex-1 md:pr-1 ${glassFrostPill}`}
               aria-expanded={searchExpanded}
               aria-label="Edit search"
             >
@@ -110,9 +111,9 @@ export default function MinimizedSearchHeader({
                 <span className="h-6 w-px shrink-0 bg-white/25" aria-hidden />
                 <span className="truncate px-4 py-2.5 text-sm text-white/75">{guestsLabel}</span>
               </div>
-              <div className="flex min-w-0 flex-1 flex-col items-start px-3 py-2 text-left sm:hidden">
-                <span className="truncate text-sm font-medium text-white/95">{locationLabel}</span>
-                <span className="truncate text-xs text-white/65">
+              <div className="flex min-w-0 flex-1 flex-col items-start px-3 py-1.5 text-left sm:hidden">
+                <span className="w-full truncate text-sm font-medium text-white/95">{locationLabel}</span>
+                <span className="w-full truncate text-xs text-white/65">
                   {datesLabel} · {guestsLabel}
                 </span>
               </div>
@@ -132,7 +133,7 @@ export default function MinimizedSearchHeader({
 
             <button
               type="button"
-              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-md lg:hidden"
+              className="col-start-2 row-start-1 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-md lg:hidden"
               onClick={() => setMobileMenuOpen((open) => !open)}
               aria-expanded={mobileMenuOpen}
               aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
@@ -171,14 +172,14 @@ export default function MinimizedSearchHeader({
       <div aria-hidden="true" className="h-[var(--site-search-header-height)] shrink-0" />
 
       {searchExpanded && (
-        <div className="fixed inset-0 z-[120] flex items-start justify-center p-4 pt-20 sm:pt-24">
+        <div className="fixed inset-0 z-[120] flex items-start justify-center overflow-y-auto p-4 pt-[calc(var(--site-search-header-height)+0.75rem)] pb-[max(1rem,env(safe-area-inset-bottom))]">
           <button
             type="button"
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             aria-label="Close search"
             onClick={closeSearch}
           />
-          <div className="relative z-10 w-full max-w-2xl">
+          <div className="relative z-10 w-full min-w-0 max-w-2xl">
             <GlassAccommodationSearch
               formData={formData}
               onFormDataChange={onFormDataChange}

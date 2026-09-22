@@ -49,7 +49,14 @@ export default function AboutStoryCollage() {
               src={img.src}
               alt={img.alt}
               fill
-              sizes={img.className.includes("col-span-2") ? IMAGE_SIZES.half : "280px"}
+              quality={img.className.includes("row-span-2") ? 90 : 85}
+              sizes={
+                img.className.includes("row-span-2")
+                  ? IMAGE_SIZES.collageFeature
+                  : img.className.includes("col-span-2")
+                    ? IMAGE_SIZES.half
+                    : IMAGE_SIZES.card
+              }
               className={`object-cover ${img.imageClassName ?? "transition-transform duration-700 group-hover:scale-105"}`}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent" />

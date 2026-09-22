@@ -3,16 +3,14 @@
 import Image from 'next/image';
 import { Home, Compass, Shield, CheckCircle, TrendingUp } from 'lucide-react';
 import { IMAGE_SIZES } from '@/lib/image-sizes';
+import HeroBackgroundImage from '@/components/ui/HeroBackgroundImage';
 
 export default function FeaturesSection() {
   return (
     <section className="isolate overflow-hidden min-h-[1000px] md:h-screen relative">
-      <Image
+      <HeroBackgroundImage
         src="/images/d953ad7f-2dd7-42f7-8f74-593d55181036_3840w_1.jpg"
         alt="Abstract 3D render background"
-        fill
-        sizes={IMAGE_SIZES.hero}
-        quality={75}
         className="pointer-events-none object-cover"
         style={{
           maskImage: 'linear-gradient(to bottom, black 85%, transparent)',
@@ -72,7 +70,7 @@ export default function FeaturesSection() {
                 width={800}
                 height={600}
                 sizes={IMAGE_SIZES.gridThird}
-                quality={75}
+                quality={82}
                 className="h-56 w-full object-cover sm:h-64"
               />
               <div className="absolute inset-0 bg-[radial-gradient(60%_30%_at_50%_55%,rgba(163,230,53,0.25),transparent)]"></div>

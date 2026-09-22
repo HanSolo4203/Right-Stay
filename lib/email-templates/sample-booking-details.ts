@@ -3,6 +3,7 @@ import type { BookingEmailDetails } from './types';
 /** Fixture data for /dev/email-preview and local HTML exports. */
 export const SAMPLE_BOOKING_EMAIL_DETAILS: BookingEmailDetails = {
   bookingReference: 'RS-PREVIEW-001',
+  propertyId: 'preview-property',
   propertyName: 'Ocean View Apartment',
   apartmentNumber: '4B',
   guestName: 'Jane Doe',

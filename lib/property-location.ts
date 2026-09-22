@@ -88,6 +88,32 @@ export function hasValidMapCoordinates(
   return true;
 }
 
+const EARTH_RADIUS_KM = 6371;
+
+/** Straight-line (great-circle) distance in kilometres between two WGS84 points. */
+export function haversineDistanceKm(
+  lat1: number,
+  lng1: number,
+  lat2: number,
+  lng2: number
+): number {
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 2 * EARTH_RADIUS_KM * Math.asin(Math.min(1, Math.sqrt(a)));
+}
+
+/** Guest-facing distance, e.g. "1.2 km away". */
+export function formatDistanceAway(km: number): string {
+  if (!Number.isFinite(km) || km < 0) return '';
+  if (km < 0.1) return '0.1 km away';
+  if (km < 10) return `${km.toFixed(1)} km away`;
+  return `${Math.round(km)} km away`;
+}
+
 /** Fallback label when location_display is not set in admin. */
 export function inferLocationDisplayFromText(
   description?: string,

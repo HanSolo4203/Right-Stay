@@ -1,7 +1,10 @@
 import Header from '@/components/sections/Header';
-import { isToursEnabled } from '@/lib/public-site-settings';
+import { isGuideEnabled, isToursEnabled } from '@/lib/public-site-settings';
 
 export default async function SiteHeader() {
-  const toursEnabled = await isToursEnabled();
-  return <Header toursEnabled={toursEnabled} />;
+  const [toursEnabled, guideEnabled] = await Promise.all([
+    isToursEnabled(),
+    isGuideEnabled(),
+  ]);
+  return <Header toursEnabled={toursEnabled} guideEnabled={guideEnabled} />;
 }

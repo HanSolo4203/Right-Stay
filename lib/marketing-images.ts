@@ -1,7 +1,11 @@
+import { MARKETING_IMAGE_DIMENSIONS } from '@/lib/marketing-image-blur';
+
 /**
  * Static marketing / fallback images.
  * JPEG masters stay in /public/images. Full-bleed heroes load prebuilt WebP
  * srcsets (see HERO_IMAGE_SOURCES) so the VPS never AVIF-encodes them on request.
+ *
+ * Keep HERO_VARIANT_WIDTHS in sync with WIDTHS in scripts/optimize-marketing-images.mjs.
  */
 export const MARKETING_IMAGES = {
   mainHero: '/images/hero-home.jpg',
@@ -26,11 +30,23 @@ export type HeroImageSources = {
   srcSet: string;
 };
 
+/** Candidate widths; actual srcset is clipped to each JPEG master. */
+export const HERO_VARIANT_WIDTHS = [800, 1280, 1920, 2560] as const;
+
+function heroVariantWidths(masterWidth: number): number[] {
+  const widths: number[] = HERO_VARIANT_WIDTHS.filter((width) => width < masterWidth);
+  if (masterWidth >= 640) widths.push(masterWidth);
+  return [...new Set(widths)].sort((a, b) => a - b);
+}
+
 function heroWebpSources(jpgSrc: string): HeroImageSources {
   const base = jpgSrc.replace(/\.jpe?g$/i, '');
+  const masterWidth = MARKETING_IMAGE_DIMENSIONS[jpgSrc]?.width ?? 1920;
+  const widths = heroVariantWidths(masterWidth);
+  const fallback = [...widths].reverse().find((width) => width <= 1920) ?? widths[widths.length - 1];
   return {
-    src: `${base}-1280.webp`,
-    srcSet: `${base}-800.webp 800w, ${base}-1280.webp 1280w, ${base}-1920.webp 1920w`,
+    src: `${base}-${fallback}.webp`,
+    srcSet: widths.map((width) => `${base}-${width}.webp ${width}w`).join(', '),
   };
 }
 
