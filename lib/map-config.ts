@@ -5,6 +5,12 @@ export const DEFAULT_MAP_ZOOM = 13;
 /** Closer neighborhood view when a guest is staying at a known property. */
 export const GUIDE_PROPERTY_MAP_ZOOM = 15;
 
+/** City-overview tilt — high enough to read as 3D without laying the map on its side. */
+export const GUIDE_MAP_OVERVIEW_PITCH = 32;
+/** Neighborhood tilt — close to the booking map, slightly gentler for many pins. */
+export const GUIDE_MAP_PITCH = 36;
+export const GUIDE_MAP_BEARING = -20;
+
 /** Booking map zoom — slightly pulled back for neighborhood context. */
 export const PROPERTY_BOOKING_MAP_ZOOM = 15.75;
 
@@ -28,13 +34,11 @@ export const MAPLIBRE_BOOKING_STYLE_URL =
   process.env.NEXT_PUBLIC_MAPLIBRE_STYLE_URL ??
   'https://tiles.openfreemap.org/styles/liberty';
 
-/** Free Carto Voyager tiles — detailed basemap for admin pin placement. */
-export const MAP_TILE_URL =
-  'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+/** OpenStreetMap raster tiles. No API key; fine for the admin pin picker and light public maps. */
+export const MAP_TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 
-/** Light Carto tiles — minimal palette aligned with the public site. */
-export const MAP_BOOKING_TILE_URL =
-  'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+/** Same keyless basemap for the public Leaflet booking map. */
+export const MAP_BOOKING_TILE_URL = MAP_TILE_URL;
 
 export const MAP_TILE_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';

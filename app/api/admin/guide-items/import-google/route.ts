@@ -2,13 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { importGooglePlaceForItem } from '@/lib/import-google-place';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 60;
+export const runtime = 'nodejs';
+export const maxDuration = 120;
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const guideItemId = typeof body.guideItemId === 'string' ? body.guideItemId.trim() : '';
     const placeId = typeof body.placeId === 'string' ? body.placeId.trim() : '';
+    const mapsUrl = typeof body.mapsUrl === 'string' ? body.mapsUrl.trim() : '';
 
     if (!guideItemId) {
       return NextResponse.json({ error: 'guideItemId is required' }, { status: 400 });
@@ -16,6 +18,7 @@ export async function POST(request: NextRequest) {
 
     const result = await importGooglePlaceForItem(guideItemId, {
       placeId: placeId || null,
+      mapsUrl: mapsUrl || null,
       overwriteCopy: body.overwriteCopy !== false,
     });
 
@@ -32,7 +35,7 @@ export async function POST(request: NextRequest) {
     const status =
       message === 'Guide item not found'
         ? 404
-        : message === 'Could not find this place on Google.'
+        : message.startsWith('Could not find this place on Google')
           ? 404
           : message.includes('already linked')
             ? 409

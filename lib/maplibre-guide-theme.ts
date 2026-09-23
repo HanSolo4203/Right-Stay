@@ -89,7 +89,23 @@ export function applyGuideMapTheme(map: MapLibreMap): void {
 
     setPaint(map, 'building', 'fill-color', GUIDE_MAP.building);
     setPaint(map, 'building', 'fill-opacity', 0.62);
-    setLayout(map, 'building-3d', 'visibility', 'none');
+
+    if (layerExists(map, 'building-3d')) {
+      setLayout(map, 'building-3d', 'visibility', 'visible');
+      setPaint(map, 'building-3d', 'fill-extrusion-color', GUIDE_MAP.building);
+      setPaint(map, 'building-3d', 'fill-extrusion-opacity', 0.4);
+      setPaint(map, 'building-3d', 'fill-extrusion-vertical-gradient', false);
+      setPaint(map, 'building-3d', 'fill-extrusion-height', [
+        'min',
+        ['*', ['coalesce', ['get', 'render_height'], 6], 0.45],
+        28,
+      ]);
+      setPaint(map, 'building-3d', 'fill-extrusion-base', [
+        'coalesce',
+        ['get', 'render_min_height'],
+        0,
+      ]);
+    }
 
     for (const layer of map.getStyle()?.layers ?? []) {
       const id = layer.id;

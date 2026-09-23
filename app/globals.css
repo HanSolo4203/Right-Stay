@@ -849,9 +849,8 @@ input[type="number"] {
 }
 
 .guide-map-marker-hit:hover .guide-map-marker-label,
-.guide-map-marker.is-selected .guide-map-marker-label,
-.guide-map-property-hit:hover .guide-map-marker-label,
-.guide-map-marker-label--property {
+.guide-map-marker.is-hovered .guide-map-marker-label,
+.guide-map-property-hit:hover .guide-map-marker-label {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
@@ -1059,6 +1058,14 @@ input[type="number"] {
   position: absolute;
   inset: 0;
   background: #f1f5f9;
+}
+
+.admin-property-map .leaflet-marker-draggable {
+  cursor: grab;
+}
+
+.admin-property-map .leaflet-marker-dragging {
+  cursor: grabbing;
 }
 
 .admin-root .safe-area-pb {

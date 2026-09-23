@@ -61,7 +61,14 @@ export default function PropertyLocationPickerView({
       return;
     }
 
-    const marker = L.marker([lat, lng], { icon, draggable: true }).addTo(map);
+    const marker = L.marker([lat, lng], {
+      icon,
+      draggable: true,
+      autoPan: true,
+      zIndexOffset: 500,
+      title: 'Drag pin',
+      alt: 'Place location pin',
+    }).addTo(map);
     marker.on('dragend', () => {
       const pos = marker.getLatLng();
       onCoordinatesChangeRef.current(
@@ -94,7 +101,10 @@ export default function PropertyLocationPickerView({
     });
     mapRef.current = map;
 
-    L.tileLayer(MAP_TILE_URL, { attribution: MAP_TILE_ATTRIBUTION }).addTo(map);
+    L.tileLayer(MAP_TILE_URL, {
+      attribution: MAP_TILE_ATTRIBUTION,
+      maxZoom: 19,
+    }).addTo(map);
 
     map.on('click', (event) => {
       const { lat, lng } = event.latlng;

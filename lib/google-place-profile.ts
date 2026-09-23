@@ -22,6 +22,8 @@ const PLACE_FIELD_MASK = [
 ].join(',');
 
 export const MAX_GOOGLE_PLACE_PHOTOS = 8;
+const BROWSER_UA =
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36';
 
 type GoogleText = { text?: string };
 
@@ -78,6 +80,149 @@ function getGoogleMapsApiKey() {
 
 function normalizePlaceId(placeId: string) {
   return placeId.replace(/^places\//, '').trim();
+}
+
+function looksLikePlaceId(value: string) {
+  const id = normalizePlaceId(value);
+  return /^(ChIJ[\w-]{10,}|[A-Za-z0-9_-]{20,})$/.test(id) && !/^https?:/i.test(value);
+}
+
+export function isGoogleMapsShareUrl(value: string) {
+  try {
+    const trimmed = value.trim();
+    const url = new URL(/^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`);
+    const host = url.hostname.replace(/^www\./, '').toLowerCase();
+    if (host === 'share.google' || host === 'maps.app.goo.gl' || host === 'g.co') return true;
+    if (host === 'goo.gl' && url.pathname.startsWith('/maps')) return true;
+    if (host === 'maps.google.com' || host === 'google.com' || host === 'google.co.za') {
+      return (
+        url.pathname.startsWith('/maps') ||
+        url.pathname.startsWith('/share.google') ||
+        url.searchParams.has('kgmid') ||
+        url.searchParams.has('cid') ||
+        url.searchParams.has('placeid') ||
+        url.searchParams.has('query_place_id')
+      );
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+async function followRedirects(startUrl: string, maxHops = 8): Promise<string> {
+  let current = startUrl;
+  for (let hop = 0; hop < maxHops; hop += 1) {
+    const response = await fetch(current, {
+      method: 'GET',
+      redirect: 'manual',
+      cache: 'no-store',
+      headers: {
+        'User-Agent': BROWSER_UA,
+        Accept: 'text/html,application/xhtml+xml',
+      },
+    });
+    const location = response.headers.get('location');
+    if (!location || ![301, 302, 303, 307, 308].includes(response.status)) {
+      return response.url || current;
+    }
+    current = new URL(location, current).toString();
+  }
+  return current;
+}
+
+function extractPlaceHints(urlString: string): { placeId?: string; query?: string } {
+  let parsed: URL;
+  try {
+    parsed = new URL(urlString);
+  } catch {
+    return {};
+  }
+
+  const params = parsed.searchParams;
+  const fromParams =
+    params.get('query_place_id') ||
+    params.get('place_id') ||
+    params.get('placeid') ||
+    params.get('placeId') ||
+    '';
+  const fromPlaceIdQuery = params.get('q')?.match(/^place_id:(.+)$/)?.[1] || '';
+  const fromPath = urlString.match(/\b(ChIJ[\w-]{10,})\b/)?.[1] || '';
+  const placeId = fromParams || fromPlaceIdQuery || fromPath || undefined;
+
+  const rawQuery = params.get('q') || params.get('query') || '';
+  const queryFromParam =
+    rawQuery && !rawQuery.startsWith('place_id:') ? rawQuery.replace(/\+/g, ' ').trim() : '';
+  const placePath = parsed.pathname.match(/\/maps\/place\/([^/]+)/);
+  const queryFromPath = placePath
+    ? decodeURIComponent(placePath[1].replace(/\+/g, ' ')).trim()
+    : '';
+
+  return {
+    placeId,
+    query: queryFromParam || queryFromPath || undefined,
+  };
+}
+
+export async function resolveGooglePlaceFromMapsUrl(
+  mapsUrl: string
+): Promise<GooglePlaceProfile | null> {
+  const trimmed = mapsUrl.trim();
+  if (!trimmed) return null;
+
+  if (looksLikePlaceId(trimmed)) {
+    return fetchGooglePlaceProfile(trimmed);
+  }
+
+  if (!/^https?:\/\//i.test(trimmed) && !isGoogleMapsShareUrl(`https://${trimmed}`)) {
+    return null;
+  }
+
+  const startUrl = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+  if (!isGoogleMapsShareUrl(startUrl) && !looksLikePlaceId(startUrl)) {
+    const direct = extractPlaceHints(startUrl);
+    if (direct.placeId) return fetchGooglePlaceProfile(direct.placeId);
+    return null;
+  }
+
+  let resolved = startUrl;
+  try {
+    resolved = await followRedirects(startUrl);
+  } catch (error) {
+    console.warn('Failed to follow Google Maps share URL:', error);
+  }
+
+  const hints = {
+    ...extractPlaceHints(startUrl),
+    ...extractPlaceHints(resolved),
+  };
+
+  if (hints.placeId) {
+    const profile = await fetchGooglePlaceProfile(hints.placeId);
+    if (profile) return ensurePlacePhotos(profile);
+  }
+
+  if (hints.query) {
+    const profile = await searchGooglePlaceProfile(hints.query);
+    if (profile) return ensurePlacePhotos(profile);
+  }
+
+  return null;
+}
+
+async function ensurePlacePhotos(profile: GooglePlaceProfile): Promise<GooglePlaceProfile> {
+  if (profile.photos.length > 0) return profile;
+  const fallbackQuery = [profile.name, profile.address].filter(Boolean).join(' ');
+  if (!fallbackQuery) return profile;
+  try {
+    const searched = await searchGooglePlaceProfile(fallbackQuery);
+    if (searched?.photos.length) {
+      return { ...profile, photos: searched.photos };
+    }
+  } catch (error) {
+    console.warn('Google photo fallback search failed:', error);
+  }
+  return profile;
 }
 
 function clip(value: string, max: number) {
@@ -215,7 +360,8 @@ export async function fetchGooglePlaceProfile(placeId: string): Promise<GooglePl
     }
   );
 
-  return mapPlace(data);
+  const mapped = mapPlace(data);
+  return mapped ? ensurePlacePhotos(mapped) : null;
 }
 
 export async function searchGooglePlaceProfile(query: string): Promise<GooglePlaceProfile | null> {
@@ -263,29 +409,47 @@ export async function downloadGooglePlacePhoto(
     .map((part) => encodeURIComponent(part))
     .join('/');
   const mediaUrl = new URL(`https://places.googleapis.com/v1/${encodedName}/media`);
-  mediaUrl.searchParams.set('maxHeightPx', '1600');
-  mediaUrl.searchParams.set('maxWidthPx', '1600');
+  mediaUrl.searchParams.set('maxHeightPx', '1200');
+  mediaUrl.searchParams.set('maxWidthPx', '1200');
   mediaUrl.searchParams.set('skipHttpRedirect', 'true');
 
-  const media = await googleJson<{ photoUri?: string }>(mediaUrl.toString(), {
+  const mediaResponse = await fetch(mediaUrl.toString(), {
+    cache: 'no-store',
     headers: { 'X-Goog-Api-Key': key },
   });
-  if (!media.photoUri) return null;
 
-  const imageResponse = await fetch(media.photoUri, { cache: 'no-store' });
+  const contentType = mediaResponse.headers.get('content-type') || '';
+  let imageResponse = mediaResponse;
+
+  if (contentType.includes('application/json')) {
+    const media = (await mediaResponse.json()) as {
+      photoUri?: string;
+      error?: { message?: string };
+    };
+    if (!mediaResponse.ok) {
+      throw new Error(media.error?.message || 'Google place photo request failed.');
+    }
+    if (!media.photoUri) return null;
+    imageResponse = await fetch(media.photoUri, { cache: 'no-store' });
+  }
+
   if (!imageResponse.ok) {
     throw new Error('Google place photo download failed.');
   }
 
-  const contentType = imageResponse.headers.get('content-type') || 'image/jpeg';
+  const imageType = imageResponse.headers.get('content-type') || 'image/jpeg';
   const buffer = Buffer.from(await imageResponse.arrayBuffer());
   if (!buffer.length) return null;
 
-  const extension = contentType.includes('png')
+  const extension = imageType.includes('png')
     ? 'png'
-    : contentType.includes('webp')
+    : imageType.includes('webp')
       ? 'webp'
       : 'jpg';
 
-  return { buffer, contentType: contentType.startsWith('image/') ? contentType : 'image/jpeg', extension };
+  return {
+    buffer,
+    contentType: imageType.startsWith('image/') ? imageType : 'image/jpeg',
+    extension,
+  };
 }

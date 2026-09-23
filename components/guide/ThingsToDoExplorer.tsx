@@ -141,6 +141,7 @@ export default function ThingsToDoExplorer({
   const allSelected = selectedCategoryIds.length === 0;
 
   const openPlace = (placeId: string) => {
+    setHoveredItemId(null);
     setSelectedItemId(placeId);
     setDetailOpen(true);
     const card = cardRefs.current.get(placeId);

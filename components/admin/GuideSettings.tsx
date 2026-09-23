@@ -162,6 +162,10 @@ function formatTags(tags: string[] | null | undefined) {
   return (tags || []).join(', ');
 }
 
+function isGoogleMapsShareUrl(value: string) {
+  return /share\.google|maps\.app\.goo\.gl|google\.[^/]+\/maps|goo\.gl\/maps/i.test(value);
+}
+
 function applyGooglePlaceToForm(
   prev: typeof DEFAULT_PLACE_FORM,
   result: AddressSearchResult,
@@ -278,18 +282,24 @@ function PlaceThumb({
 function GuideItemPhotoManager({
   itemId,
   photos,
+  bookingUrl,
+  websiteUrl,
   onPhotosChange,
   onMessage,
   onPlaceImported,
 }: {
   itemId: string;
   photos: GuideItemPhoto[];
+  bookingUrl?: string;
+  websiteUrl?: string;
   onPhotosChange: (photos: GuideItemPhoto[]) => void;
   onMessage: (type: 'success' | 'error', text: string) => void;
   onPlaceImported?: (item: GuideItemAdmin) => void;
 }) {
   const [uploading, setUploading] = useState(false);
   const [importingGoogle, setImportingGoogle] = useState(false);
+  const [importingWebsite, setImportingWebsite] = useState(false);
+  const busy = uploading || importingGoogle || importingWebsite;
 
   const refreshPhotos = async () => {
     const response = await fetch(`/api/admin/guide-items/photos?guideItemId=${itemId}`);
@@ -349,7 +359,7 @@ function GuideItemPhotoManager({
       'image/gif': [],
     },
     multiple: true,
-    disabled: uploading || importingGoogle,
+    disabled: busy,
     maxSize: 15 * 1024 * 1024,
     onDrop: async (acceptedFiles) => {
       for (const file of acceptedFiles) {
@@ -398,7 +408,11 @@ function GuideItemPhotoManager({
       const response = await fetch('/api/admin/guide-items/import-google', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ guideItemId: itemId, overwriteCopy: true }),
+        body: JSON.stringify({
+          guideItemId: itemId,
+          mapsUrl: bookingUrl || undefined,
+          overwriteCopy: true,
+        }),
       });
       if (!response.ok) {
         throw new Error(await readErrorMessage(response, 'Failed to import from Google'));
@@ -424,16 +438,52 @@ function GuideItemPhotoManager({
     }
   };
 
+  const handleImportWebsitePhotos = async () => {
+    const pageUrl = websiteUrl?.trim() || '';
+    if (!pageUrl) {
+      onMessage('error', 'Add a Website URL first, then import photos.');
+      return;
+    }
+
+    setImportingWebsite(true);
+    try {
+      const response = await fetch('/api/admin/guide-items/import-website-photos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          guideItemId: itemId,
+          pageUrl,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error(await readErrorMessage(response, 'Failed to import photos'));
+      }
+      const data = await response.json();
+      await refreshPhotos();
+      const imported = Number(data.importedPhotos ?? 0);
+      onMessage(
+        'success',
+        `Imported ${imported} photo${imported === 1 ? '' : 's'} from the website.`
+      );
+    } catch (error) {
+      onMessage('error', error instanceof Error ? error.message : 'Failed to import photos.');
+    } finally {
+      setImportingWebsite(false);
+    }
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-3 gap-3">
         <label className="block text-sm font-medium text-slate-600">Photos</label>
         <div className="flex items-center gap-3">
-          <p className="text-xs text-slate-400">Primary photo is used on cards and map popups</p>
+          <p className="text-xs text-slate-400">
+            Primary photo is used on cards and map popups. Import uses the Booking URL if it is a Google Maps share link.
+          </p>
           <button
             type="button"
             onClick={() => void handleImportGoogle()}
-            disabled={uploading || importingGoogle}
+            disabled={busy}
             className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
           >
             {importingGoogle ? (
@@ -446,13 +496,15 @@ function GuideItemPhotoManager({
         </div>
       </div>
 
-      {(uploading || importingGoogle) && (
+      {busy && (
         <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg flex items-center gap-2">
           <Loader2 className="w-4 h-4 animate-spin text-right-stay-600" />
           <span className="text-sm text-right-stay-600">
-            {importingGoogle
-              ? 'Downloading Google profile photos…'
-              : 'Compressing and uploading photo...'}
+            {importingWebsite
+              ? 'Downloading photos from the website…'
+              : importingGoogle
+                ? 'Downloading Google profile photos…'
+                : 'Compressing and uploading photo...'}
           </span>
         </div>
       )}
@@ -463,7 +515,7 @@ function GuideItemPhotoManager({
           isDragActive
             ? 'border-blue-500 bg-blue-500/10'
             : 'border-slate-200 bg-slate-50 hover:border-blue-500/50 hover:bg-slate-50'
-        } ${uploading ? 'pointer-events-none opacity-60' : ''}`}
+        } ${busy ? 'pointer-events-none opacity-60' : ''}`}
       >
         <input {...getInputProps()} />
         <div className="text-center">
@@ -530,6 +582,27 @@ function GuideItemPhotoManager({
           </div>
         </div>
       )}
+
+      <div className="mt-4 flex items-center justify-between gap-3 border-t border-slate-200 pt-4">
+        <p className="text-xs text-slate-400">
+          {websiteUrl?.trim()
+            ? 'Pulls a few photos from the Website URL.'
+            : 'Add a Website URL to import photos from that page.'}
+        </p>
+        <button
+          type="button"
+          onClick={() => void handleImportWebsitePhotos()}
+          disabled={busy || !websiteUrl?.trim()}
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+        >
+          {importingWebsite ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Download className="h-4 w-4" />
+          )}
+          {importingWebsite ? 'Importing…' : 'Import photos'}
+        </button>
+      </div>
     </div>
   );
 }
@@ -750,9 +823,12 @@ export default function GuideSettings() {
       if (response.ok) {
         const saved: GuideItemAdmin = await response.json();
         const googlePlaceId = placeForm.google_place_id || saved.google_place_id;
+        const mapsUrl = placeForm.booking_url.trim();
         const shouldImportGoogle =
-          Boolean(googlePlaceId) &&
-          (!editingItem || editingItem.google_place_id !== googlePlaceId);
+          Boolean(googlePlaceId || isGoogleMapsShareUrl(mapsUrl)) &&
+          (!editingItem ||
+            editingItem.google_place_id !== googlePlaceId ||
+            editingItem.booking_url !== mapsUrl);
 
         if (shouldImportGoogle) {
           setImportingGoogle(true);
@@ -762,7 +838,8 @@ export default function GuideSettings() {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 guideItemId: saved.id,
-                placeId: googlePlaceId,
+                placeId: googlePlaceId || undefined,
+                mapsUrl: isGoogleMapsShareUrl(mapsUrl) ? mapsUrl : undefined,
                 overwriteCopy: false,
               }),
             });
@@ -1755,8 +1832,11 @@ export default function GuideSettings() {
                         setPlaceForm((prev) => ({ ...prev, website_url: e.target.value }))
                       }
                       className={INPUT_CLASS}
-                      placeholder="https://"
+                      placeholder="https://www.tripadvisor.com/..."
                     />
+                    <p className="mt-1 text-xs text-slate-400">
+                      Paste a page such as TripAdvisor, then use Import photos below.
+                    </p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-600 mb-2">
@@ -1769,8 +1849,11 @@ export default function GuideSettings() {
                         setPlaceForm((prev) => ({ ...prev, booking_url: e.target.value }))
                       }
                       className={INPUT_CLASS}
-                      placeholder="https://"
+                      placeholder="https://share.google/... or booking page"
                     />
+                    <p className="mt-1 text-xs text-slate-400">
+                      Google Maps share links are used to import photos
+                    </p>
                   </div>
                 </div>
 
@@ -1837,6 +1920,8 @@ export default function GuideSettings() {
                   <GuideItemPhotoManager
                     itemId={editingItem.id}
                     photos={placePhotos}
+                    bookingUrl={placeForm.booking_url}
+                    websiteUrl={placeForm.website_url}
                     onPhotosChange={handlePlacePhotosChange}
                     onMessage={showMessage}
                     onPlaceImported={(item) => {

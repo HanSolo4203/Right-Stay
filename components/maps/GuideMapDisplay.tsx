@@ -9,6 +9,10 @@ import maplibregl from 'maplibre-gl';
 import {
   DEFAULT_MAP_CENTER,
   DEFAULT_MAP_ZOOM,
+  GUIDE_MAP_BEARING,
+  GUIDE_MAP_OVERVIEW_PITCH,
+  GUIDE_MAP_PITCH,
+  GUIDE_PROPERTY_MAP_ZOOM,
   MAPLIBRE_BOOKING_STYLE_URL,
 } from '@/lib/map-config';
 import { applyGuideMapTheme, GUIDE_MAP } from '@/lib/maplibre-guide-theme';
@@ -260,8 +264,8 @@ export default function GuideMapDisplay({
     map.flyTo({
       center: lngLatOf(item.latitude, item.longitude),
       zoom: Math.max(map.getZoom(), SELECTED_PLACE_ZOOM),
-      bearing: 0,
-      pitch: 0,
+      bearing: GUIDE_MAP_BEARING,
+      pitch: GUIDE_MAP_PITCH,
       padding: GUIDE_MAP_PADDING,
       duration: FLY_TO_DURATION_MS,
       easing: (t) => 1 - (1 - t) ** 3,
@@ -283,17 +287,16 @@ export default function GuideMapDisplay({
         entry.element.style.zIndex = selected ? '24' : hovered ? '22' : entry.element.classList.contains('is-featured') ? '12' : '2';
       });
 
-      const popupId = hoveredId ?? selectedId;
-      if (!popupId) {
+      if (!hoveredId || hoveredId === selectedId) {
         hidePopup();
         return;
       }
-      const item = itemsByIdRef.current.get(popupId);
+      const item = itemsByIdRef.current.get(hoveredId);
       if (!item) {
         hidePopup();
         return;
       }
-      if (popupItemIdRef.current !== popupId) {
+      if (popupItemIdRef.current !== hoveredId) {
         showItemPopup(item);
       }
     },
@@ -306,7 +309,6 @@ export default function GuideMapDisplay({
 
     hit.addEventListener('mouseenter', () => {
       onHoverItemRef.current?.(item.id);
-      showItemPopup(item);
       applyHighlight(item.id, selectedItemIdRef.current ?? null);
     });
     hit.addEventListener('mouseleave', () => {
@@ -318,7 +320,7 @@ export default function GuideMapDisplay({
       onSelectItemRef.current?.(item.id);
       flyToItem(item, true);
     });
-  }, [applyHighlight, flyToItem, showItemPopup]);
+  }, [applyHighlight, flyToItem]);
 
   const createPlaceMarker = useCallback(
     (map: maplibregl.Map, item: GuideMapItem, index: number) => {
@@ -632,6 +634,7 @@ export default function GuideMapDisplay({
       ? lngLatOf(initialViewRef.current.center[0], initialViewRef.current.center[1])
       : GUIDE_OVERVIEW_CENTER;
     const startZoom = initialViewRef.current.zoom ?? DEFAULT_MAP_ZOOM;
+    const startPitched = startZoom >= GUIDE_PROPERTY_MAP_ZOOM;
 
     let map: maplibregl.Map;
     try {
@@ -640,14 +643,14 @@ export default function GuideMapDisplay({
         style: MAPLIBRE_BOOKING_STYLE_URL,
         center: startCenter,
         zoom: startZoom,
-        pitch: 0,
-        bearing: 0,
+        pitch: startPitched ? GUIDE_MAP_PITCH : GUIDE_MAP_OVERVIEW_PITCH,
+        bearing: GUIDE_MAP_BEARING,
         minZoom: 10.5,
         maxZoom: 17.5,
         scrollZoom: true,
-        dragRotate: false,
-        pitchWithRotate: false,
-        touchPitch: false,
+        dragRotate: true,
+        pitchWithRotate: true,
+        touchPitch: true,
         attributionControl: { compact: true },
       });
     } catch (error) {
